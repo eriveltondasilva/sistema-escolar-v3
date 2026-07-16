@@ -2,7 +2,7 @@
 import { Glob, build as bunBuild, type BuildOutput } from 'bun';
 import tailwind from 'bun-plugin-tailwind';
 
-import { rm } from 'node:fs/promises';
+import { copyFileSync, mkdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { argv, cwd, exit } from 'node:process';
 
@@ -65,8 +65,22 @@ async function buildServer() {
 // -------------------------------------
 
 async function main() {
-  await rm(DIST_DIR, { recursive: true, force: true });
-  console.log('🧹 Cleaned dist directory\n');
+  rmSync(DIST_DIR, { recursive: true, force: true });
+  console.log('\n🧹 Cleaned dist directory');
+
+  const distDir = mkdirSync(DIST_DIR, { recursive: true });
+  console.log('✨ Created dist directory\n');
+
+  if (!distDir) {
+    throw new Error('Failed to create dist directory');
+  }
+
+  copyFileSync(join(cwd(), 'appsscript.json'), join(DIST_DIR, 'appsscript.json'));
+  console.log('✨ Copied appsscript.json\n');
+
+  if (isMinified) {
+    console.log('🚀 Minifying...\n');
+  }
 
   await buildClient();
   await buildServer();
