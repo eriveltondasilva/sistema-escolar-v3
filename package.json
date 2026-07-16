@@ -1,0 +1,41 @@
+{
+  "name": "sistema-escolar",
+  "version": "1.0.0",
+  "author": "Erivelton Silva <eriveltondasilva13@gmail.com>",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "build": "bun run ./scripts/build.ts",
+    "push": "clasp push",
+    "deploy": "bun run build && bun run push",
+    "1###": "",
+    "fmt": "bunx prettier --check .",
+    "fmt:fix": "bunx prettier --write .",
+    "lint": "bunx eslint .",
+    "lint:fix": "bunx eslint . --fix",
+    "2###": "",
+    "types": "tsc --noEmit",
+    "check": "bun run types && bun run fmt && bun run lint",
+    "fix": "bun run types && bun run fmt:fix && bun run lint:fix"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/bun": "latest",
+    "@types/google-apps-script": "^2.0.11",
+    "bun-plugin-tailwind": "^0.1.2",
+    "eslint": "^10.7.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.7.0",
+    "htmlnano": "^3.4.0",
+    "posthtml": "^0.16.7",
+    "posthtml-component": "^2.3.0",
+    "prettier": "^3.9.5",
+    "prettier-plugin-tailwindcss": "^0.8.1",
+    "tailwindcss": "^4.3.3",
+    "typescript-eslint": "^8.64.0"
+  },
+  "peerDependencies": {
+    "typescript": "^7.0.2"
+  }
+}
