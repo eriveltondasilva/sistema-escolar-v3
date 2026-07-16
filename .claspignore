@@ -1,0 +1,11 @@
+#
+**/**
+
+#
+!appsscript.json
+!*.js
+!*.html
+
+#
+.git/**
+node_modules/**
