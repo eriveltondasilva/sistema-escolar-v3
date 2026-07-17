@@ -1,7 +1,6 @@
 {
   "experimentalTernaries": true,
   "trailingComma": "all",
-  "printWidth": 100,
   "useTabs": false,
   "semi": true,
   "singleQuote": true,
