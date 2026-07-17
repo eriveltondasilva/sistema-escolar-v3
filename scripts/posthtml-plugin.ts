@@ -1,18 +1,18 @@
 // scripts\posthtml-plugin.ts
-import type { BunPlugin } from 'bun';
-import type { PostHTMLComponents } from 'posthtml-component';
+import type { BunPlugin } from "bun";
+import type { PostHTMLComponents } from "posthtml-component";
 
-import { file as bunFile, write as bunWrite } from 'bun';
+import { file as bunFile, write as bunWrite } from "bun";
 
-import { join } from 'node:path';
-import { cwd } from 'node:process';
+import { join } from "node:path";
+import { cwd } from "node:process";
 
-import posthtml from 'posthtml';
-import components from 'posthtml-component';
+import posthtml from "posthtml";
+import components from "posthtml-component";
 
 const optionsComponents: PostHTMLComponents = {
-  root: join(cwd(), 'client'),
-  folders: ['components'],
+  root: join(cwd(), "client"),
+  folders: ["components"],
   strict: true,
 };
 
@@ -42,7 +42,7 @@ export function posthtmlPlugin(): BunPlugin {
   const scriptletsByFile = new Map<string, Map<string, string>>();
 
   return {
-    name: 'posthtml-gas',
+    name: "posthtml-gas",
     setup(build) {
       build.onLoad({ filter: /\.html$/ }, async ({ path }) => {
         let html = await bunFile(path).text();
@@ -57,18 +57,18 @@ export function posthtmlPlugin(): BunPlugin {
           components(optionsComponents),
         ]).process(html);
 
-        return { loader: 'html', contents: result.html };
+        return { loader: "html", contents: result.html };
       });
 
       build.onEnd(async (result) => {
         if (!result.success) return;
 
         for (const artifact of result.outputs) {
-          if (!artifact.path?.endsWith('.html')) continue;
+          if (!artifact.path?.endsWith(".html")) continue;
 
-          const fileName = artifact.path.split('/').pop();
-          const sourceEntry = [...scriptletsByFile.entries()].find(([sourcePath]) =>
-            sourcePath.endsWith(`/${fileName}`),
+          const fileName = artifact.path.split("/").pop();
+          const sourceEntry = [...scriptletsByFile.entries()].find(
+            ([sourcePath]) => sourcePath.endsWith(`/${fileName}`),
           );
 
           if (!sourceEntry) continue;
