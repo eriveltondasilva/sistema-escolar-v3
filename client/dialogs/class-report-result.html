@@ -11,8 +11,7 @@
     <div class="space-y-3">
       <x-success-header>
         <p class="font-semibold text-emerald-900">
-          <span x-text="successCount"></span> boletim(ns) gerado(s) com
-          sucesso
+          <span x-text="successCount"></span> boletim(ns) gerado(s) com sucesso
         </p>
         <p class="text-emerald-700">
           Turma: <span x-text="className"></span> (
@@ -43,7 +42,11 @@
       <template x-if="errors.length > 0">
         <div class="space-y-2 rounded-md border border-red-200 bg-red-50 p-3">
           <div class="flex items-center space-x-2 text-red-600">
-            <img src="../asserts/error-circle-icon.svg" alt="" aria-hidden="true" />
+            <img
+              src="../asserts/error-circle-icon.svg"
+              alt=""
+              aria-hidden="true"
+            />
             <h2 class="text-sm font-semibold text-red-900">
               <span x-text="errors.length"></span> erro(s) na geração:
             </h2>
@@ -90,8 +93,8 @@
     document.addEventListener("alpine:init", () => {
       Alpine.data("classReportDialog", (el) => JSON.parse(el.dataset.init));
     });
-  </script>
-</x-dialog-shell><!-- client/dialogs/class-report-result.html -->
+  </script> </x-dialog-shell
+><!-- client/dialogs/class-report-result.html -->
 <x-dialog-shell>
   <x-alpine-cdn></x-alpine-cdn>
 
@@ -104,8 +107,7 @@
     <div class="space-y-3">
       <x-success-header>
         <p class="font-semibold text-emerald-900">
-          <span x-text="successCount"></span> boletim(ns) gerado(s) com
-          sucesso
+          <span x-text="successCount"></span> boletim(ns) gerado(s) com sucesso
         </p>
         <p class="text-emerald-700">
           Turma: <span x-text="className"></span> (
@@ -136,7 +138,11 @@
       <template x-if="errors.length > 0">
         <div class="space-y-2 rounded-md border border-red-200 bg-red-50 p-3">
           <div class="flex items-center space-x-2 text-red-600">
-            <img src="../asserts/error-circle-icon.svg" alt="" aria-hidden="true" />
+            <img
+              src="../asserts/error-circle-icon.svg"
+              alt=""
+              aria-hidden="true"
+            />
             <h2 class="text-sm font-semibold text-red-900">
               <span x-text="errors.length"></span> erro(s) na geração:
             </h2>
