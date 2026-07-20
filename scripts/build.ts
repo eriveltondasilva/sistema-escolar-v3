@@ -1,4 +1,4 @@
-// scripts\build.ts
+// scripts/build.ts
 import { Glob, build as bunBuild, type BuildOutput } from "bun";
 import tailwind from "bun-plugin-tailwind";
 
@@ -39,6 +39,7 @@ async function buildClient() {
     target: "browser",
     compile: true,
     plugins: [tailwind, posthtmlPlugin()],
+    naming: "[name].[ext]",
     minify: isMinified,
   });
 
@@ -49,17 +50,18 @@ async function buildClient() {
 async function buildServer() {
   console.log("🚀 Building server bundle...");
 
+  const codeName = "code.js";
   const result = await bunBuild({
     entrypoints: [SERVER_ENTRY],
     outdir: DIST_DIR,
     target: "browser",
     format: "iife",
-    naming: "code.js",
+    naming: codeName,
     minify: isMinified,
   });
 
   assertBuildSuccess(result, "Server");
-  console.log("✨ Server build completed! → dist/Code.js\n");
+  console.log(`✨ Server build completed! → dist/${codeName}\n`);
 }
 
 // -------------------------------------
@@ -75,10 +77,8 @@ async function main() {
     throw new Error("Failed to create dist directory");
   }
 
-  copyFileSync(
-    join(cwd(), "appsscript.json"),
-    join(DIST_DIR, "appsscript.json"),
-  );
+  const appsScript = "appsscript.json";
+  copyFileSync(join(cwd(), appsScript), join(DIST_DIR, appsScript));
   console.log("✨ Copied appsscript.json\n");
 
   if (isMinified) {
