@@ -168,7 +168,7 @@
         style="display: none"
       ></div>
 
-      <div class="flex items-center justify-end space-x-2 pt-2">
+      <footer class="flex items-center justify-end space-x-2 pt-2">
         <button
           @click="google.script.host.close()"
           :disabled="isLoading"
@@ -185,7 +185,7 @@
             x-text="isLoading ? 'Salvando...' : (mode === 'edit' ? 'Salvar' : 'Cadastrar')"
           ></span>
         </button>
-      </div>
+      </footer>
     </div>
   </template>
 </div>

@@ -51,7 +51,7 @@
 
     <x-error-alert></x-error-alert>
 
-    <div class="flex items-center justify-end space-x-2 pt-2">
+    <footer class="flex items-center justify-end space-x-2 pt-2">
       <button
         type="button"
         @click="google.script.host.close()"
@@ -67,7 +67,7 @@
       >
         <span x-text="isLoading ? 'Criando...' : 'Criar'"></span>
       </button>
-    </div>
+    </footer>
   </form>
 
   <!-- -->

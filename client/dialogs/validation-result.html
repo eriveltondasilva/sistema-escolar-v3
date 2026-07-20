@@ -117,16 +117,11 @@
     </template>
 
     <!-- Rodapé fixo -->
-    <div class="shrink-0 border-t border-slate-200 bg-white p-4">
-      <button
-        onclick="google.script.host.close()"
-        class="w-full rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 focus:outline-none"
-      >
-        Fechar Janela
-      </button>
-    </div>
+    <footer class="shrink-0 border-t border-slate-200 bg-white p-4">
+      <x-close-button></x-close-button>
+    </footer>
   </main>
 
-  <!-- Bundle compilado a partir de validation-result.ts -->
+  <!-- Scripts -->
   <script src="./validation-result.js"></script>
 </x-dialog-shell>
