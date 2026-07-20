@@ -2,19 +2,22 @@
 <x-dialog-shell class="bg-white p-5 text-slate-900 antialiased">
   <x-alpine-cdn></x-alpine-cdn>
 
-  <div
+  <form
     data-init="<?= initData ?>"
     x-data="createSchoolYearForm($el)"
     x-cloak
+    @submit.prevent="submit()"
     class="space-y-4"
   >
     <div>
       <label
+        for="year"
         class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
       >
         Ano Letivo
       </label>
       <input
+        id="year"
         type="text"
         x-model="year"
         :disabled="isLoading"
@@ -46,15 +49,11 @@
       estiver errada, nada é criado.
     </p>
 
-    <div
-      x-show="error"
-      x-text="error"
-      class="rounded-md border border-red-100 bg-red-50 p-2.5 text-xs font-medium whitespace-pre-line text-red-600"
-      style="display: none"
-    ></div>
+    <x-error-alert></x-error-alert>
 
     <div class="flex items-center justify-end space-x-2 pt-2">
       <button
+        type="button"
         @click="google.script.host.close()"
         :disabled="isLoading"
         class="inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none disabled:opacity-50"
@@ -62,14 +61,14 @@
         Cancelar
       </button>
       <button
-        @click="submit()"
+        type="submit"
         :disabled="isLoading"
         class="inline-flex items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800 focus:outline-none disabled:cursor-not-allowed disabled:opacity-70"
       >
         <span x-text="isLoading ? 'Criando...' : 'Criar'"></span>
       </button>
     </div>
-  </div>
+  </form>
 
   <!-- -->
   <script src="./create-school-year-form.js"></script>

@@ -2,14 +2,16 @@
 <x-dialog-shell class="bg-white p-5 text-slate-900 antialiased">
   <x-alpine-cdn></x-alpine-cdn>
 
-  <div x-data="studentSearchDialog" x-cloak class="space-y-4">
+  <main x-data="studentSearchDialog" x-cloak class="space-y-4">
     <div>
       <label
+        for="query"
         class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
       >
         Nome ou Matrícula
       </label>
       <input
+        id="query"
         type="text"
         x-model="query"
         @input.debounce.300ms="search()"
@@ -135,17 +137,12 @@
       </div>
     </template>
 
-    <div
-      x-show="error"
-      x-text="error"
-      class="rounded-md border border-red-100 bg-red-50 p-2.5 text-xs font-medium text-red-600"
-      style="display: none"
-    ></div>
+    <x-error-alert></x-error-alert>
 
     <footer class="pt-2">
       <x-close-button></x-close-button>
     </footer>
-  </div>
+  </main>
 
   <!-- -->
   <script src="./student-search.js"></script>

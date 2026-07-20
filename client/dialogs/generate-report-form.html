@@ -2,19 +2,22 @@
 <x-dialog-shell class="bg-white p-5 text-slate-900 antialiased">
   <x-alpine-cdn></x-alpine-cdn>
 
-  <div
+  <form
     data-init="<?= initData ?>"
     x-data="reportFormDialog($el)"
     x-cloak
+    @submit.prevent="submit()"
     class="space-y-4"
   >
     <div>
       <label
+        for="schoolYear"
         class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
       >
         Ano Letivo
       </label>
       <select
+        id="schoolYear"
         x-model="schoolYear"
         :disabled="isLoading"
         @change="actionType === 'single' && fetchStudents()"
@@ -28,11 +31,13 @@
 
     <div>
       <label
+        for="className"
         class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
       >
         Turma
       </label>
       <select
+        id="className"
         x-model="className"
         :disabled="isLoading"
         @change="actionType === 'single' && fetchStudents()"
@@ -48,6 +53,7 @@
     <template x-if="actionType === 'single'">
       <div>
         <label
+          for="studentSearch"
           class="mb-1 flex items-center text-xs font-medium tracking-wider text-slate-500 uppercase"
         >
           Aluno (Nome ou Matrícula)
@@ -68,6 +74,7 @@
         <template x-if="availableStudents.length > 0">
           <div>
             <input
+              id="studentSearch"
               type="text"
               x-model="studentSearch"
               list="studentsList"
@@ -91,16 +98,11 @@
       </div>
     </template>
 
-    <div
-      x-show="error"
-      x-text="error"
-      x-transition
-      class="rounded-md border border-red-100 bg-red-50 p-2.5 text-xs font-medium text-red-600"
-      style="display: none"
-    ></div>
+    <x-error-alert x-transition></x-error-alert>
 
     <div class="flex items-center justify-end space-x-2 pt-2">
       <button
+        type="button"
         @click="google.script.host.close()"
         :disabled="isLoading"
         class="inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none disabled:opacity-50"
@@ -108,14 +110,14 @@
         Cancelar
       </button>
       <button
-        @click="submit()"
+        type="submit"
         :disabled="isLoading || (actionType === 'single' && (isFetchingStudents || noStudents))"
         class="inline-flex items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800 focus:outline-none disabled:cursor-not-allowed disabled:opacity-70"
       >
         <span x-text="isLoading ? 'Processando...' : 'Confirmar'"></span>
       </button>
     </div>
-  </div>
+  </form>
 
   <!-- -->
   <script src="./generate-report-form.js"></script>

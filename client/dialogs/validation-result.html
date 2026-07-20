@@ -2,7 +2,7 @@
 <x-dialog-shell class="h-full bg-slate-50 font-sans text-slate-900 antialiased">
   <x-alpine-cdn></x-alpine-cdn>
 
-  <div
+  <main
     data-init="<?= initData ?>"
     x-data="diagnosticPanel($el)"
     x-cloak
@@ -16,7 +16,7 @@
         <div
           class="mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600"
         >
-          <img src="../asserts/check-simple-icon.svg" />
+          <img src="../asserts/check-simple-icon.svg" alt="" aria-hidden="true" />
         </div>
         <h2 class="text-xl font-bold text-slate-800">Tudo Certo!</h2>
         <p class="max-w-xs text-sm text-slate-500">
@@ -70,12 +70,16 @@
                 <img
                   class="text-red-600"
                   src="../asserts/error-circle-icon.svg"
+                  alt=""
+                  aria-hidden="true"
                 />
               </template>
               <template x-if="issue.type === 'warning'">
                 <img
                   class="text-amber-500"
                   src="../asserts/warning-triangle-icon.svg"
+                  alt=""
+                  aria-hidden="true"
                 />
               </template>
 
@@ -93,9 +97,11 @@
                     class="group mt-2 inline-flex items-center text-xs font-semibold focus:underline focus:outline-none"
                   >
                     Corrigir arquivo
-                    <image
+                    <img
                       class="ml-1 h-3 w-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
                       src="../asserts/external-link-icon.svg"
+                      alt=""
+                      aria-hidden="true"
                     />
                   </a>
                 </template>
@@ -115,7 +121,7 @@
         Fechar Janela
       </button>
     </div>
-  </div>
+  </main>
 
   <!-- Bundle compilado a partir de validation-result.ts -->
   <script src="./validation-result.js"></script>
