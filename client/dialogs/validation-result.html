@@ -1,0 +1,122 @@
+<!-- client/dialogs/validation-result.html -->
+<x-dialog-shell class="h-full bg-slate-50 font-sans text-slate-900 antialiased">
+  <x-alpine-cdn></x-alpine-cdn>
+
+  <div
+    data-init="<?= initData ?>"
+    x-data="diagnosticPanel($el)"
+    x-cloak
+    class="flex h-125 flex-col"
+  >
+    <!-- Estado: sem problemas -->
+    <template x-if="issues.length === 0">
+      <div
+        class="flex flex-1 flex-col items-center justify-center space-y-4 p-6 text-center"
+      >
+        <div
+          class="mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600"
+        >
+          <img src="../asserts/check-simple-icon.svg" />
+        </div>
+        <h2 class="text-xl font-bold text-slate-800">Tudo Certo!</h2>
+        <p class="max-w-xs text-sm text-slate-500">
+          A estrutura de pastas, planilhas, disciplinas e o cadastro de alunos
+          foram validados sem nenhum problema.
+        </p>
+      </div>
+    </template>
+
+    <!-- Estado: com problemas -->
+    <template x-if="issues.length > 0">
+      <div class="flex h-full flex-col">
+        <!-- Filtros -->
+        <div class="shrink-0 border-b border-slate-200 bg-white p-4">
+          <h2 class="mb-3 text-lg font-semibold tracking-tight">
+            Resultados da Verificação
+          </h2>
+          <div class="flex space-x-2 rounded-lg bg-slate-100 p-1">
+            <button
+              @click="filter = 'all'"
+              :class="filter === 'all' ? 'bg-white shadow text-slate-900' : 'text-slate-600 hover:text-slate-900'"
+              class="flex-1 rounded-md py-1.5 text-xs font-medium transition-all focus:ring-2 focus:ring-slate-400 focus:outline-none focus:ring-inset"
+            >
+              Todos (<span x-text="issues.length"></span>)
+            </button>
+            <button
+              @click="filter = 'error'"
+              :class="filter === 'error' ? 'bg-white shadow text-red-700' : 'text-slate-600 hover:text-slate-900'"
+              class="flex-1 rounded-md py-1.5 text-xs font-medium transition-all focus:ring-2 focus:ring-slate-400 focus:outline-none focus:ring-inset"
+            >
+              Erros (<span x-text="errorCount"></span>)
+            </button>
+            <button
+              @click="filter = 'warning'"
+              :class="filter === 'warning' ? 'bg-white shadow text-amber-700' : 'text-slate-600 hover:text-slate-900'"
+              class="flex-1 rounded-md py-1.5 text-xs font-medium transition-all focus:ring-2 focus:ring-slate-400 focus:outline-none focus:ring-inset"
+            >
+              Avisos (<span x-text="warningCount"></span>)
+            </button>
+          </div>
+        </div>
+
+        <!-- Lista de issues -->
+        <div class="flex-1 space-y-3 overflow-y-auto p-4">
+          <template x-for="(issue, index) in filteredIssues" :key="index">
+            <div
+              :class="issue.type === 'error' ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'"
+              class="flex items-start space-x-3 rounded-md border p-3 transition-colors"
+            >
+              <template x-if="issue.type === 'error'">
+                <img
+                  class="text-red-600"
+                  src="../asserts/error-circle-icon.svg"
+                />
+              </template>
+              <template x-if="issue.type === 'warning'">
+                <img
+                  class="text-amber-500"
+                  src="../asserts/warning-triangle-icon.svg"
+                />
+              </template>
+
+              <div class="min-w-0 flex-1">
+                <p
+                  :class="issue.type === 'error' ? 'text-red-900' : 'text-amber-900'"
+                  class="text-sm leading-snug text-wrap wrap-break-word"
+                  x-text="issue.text"
+                ></p>
+                <template x-if="issue.url">
+                  <a
+                    :href="issue.url"
+                    target="_blank"
+                    :class="issue.type === 'error' ? 'text-red-700 hover:text-red-800' : 'text-amber-700 hover:text-amber-800'"
+                    class="group mt-2 inline-flex items-center text-xs font-semibold focus:underline focus:outline-none"
+                  >
+                    Corrigir arquivo
+                    <image
+                      class="ml-1 h-3 w-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                      src="../asserts/external-link-icon.svg"
+                    />
+                  </a>
+                </template>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </template>
+
+    <!-- Rodapé fixo -->
+    <div class="shrink-0 border-t border-slate-200 bg-white p-4">
+      <button
+        onclick="google.script.host.close()"
+        class="w-full rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 focus:outline-none"
+      >
+        Fechar Janela
+      </button>
+    </div>
+  </div>
+
+  <!-- Bundle compilado a partir de validation-result.ts -->
+  <script src="./validation-result.js"></script>
+</x-dialog-shell>

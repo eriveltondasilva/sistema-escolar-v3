@@ -1,0 +1,76 @@
+<!-- client/dialogs/create-school-year-form.html -->
+<x-dialog-shell class="bg-white p-5 text-slate-900 antialiased">
+  <x-alpine-cdn></x-alpine-cdn>
+
+  <div
+    data-init="<?= initData ?>"
+    x-data="createSchoolYearForm($el)"
+    x-cloak
+    class="space-y-4"
+  >
+    <div>
+      <label
+        class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
+      >
+        Ano Letivo
+      </label>
+      <input
+        type="text"
+        x-model="year"
+        :disabled="isLoading"
+        placeholder="Ex: 2026"
+        maxlength="4"
+        class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
+      />
+    </div>
+
+    <template x-for="className in classNames" :key="className">
+      <div>
+        <label
+          class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
+          x-text="`${className} — matrículas (uma por linha)`"
+        ></label>
+        <textarea
+          x-model="matriculationsByClass[className]"
+          :disabled="isLoading"
+          rows="4"
+          placeholder="0001&#10;0002&#10;0003"
+          class="w-full resize-y rounded-md border border-slate-200 bg-white px-3 py-2 font-mono text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
+        ></textarea>
+      </div>
+    </template>
+
+    <p class="text-xs text-slate-500">
+      A turma é criada com os alunos já matriculados, em ordem alfabética. Todas
+      as matrículas são validadas antes de qualquer alteração — se alguma
+      estiver errada, nada é criado.
+    </p>
+
+    <div
+      x-show="error"
+      x-text="error"
+      class="rounded-md border border-red-100 bg-red-50 p-2.5 text-xs font-medium whitespace-pre-line text-red-600"
+      style="display: none"
+    ></div>
+
+    <div class="flex items-center justify-end space-x-2 pt-2">
+      <button
+        @click="google.script.host.close()"
+        :disabled="isLoading"
+        class="inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none disabled:opacity-50"
+      >
+        Cancelar
+      </button>
+      <button
+        @click="submit()"
+        :disabled="isLoading"
+        class="inline-flex items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800 focus:outline-none disabled:cursor-not-allowed disabled:opacity-70"
+      >
+        <span x-text="isLoading ? 'Criando...' : 'Criar'"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- -->
+  <script src="./create-school-year-form.js"></script>
+</x-dialog-shell>

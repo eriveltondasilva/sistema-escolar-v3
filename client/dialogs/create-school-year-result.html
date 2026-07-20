@@ -1,0 +1,63 @@
+<!-- client/dialogs/create-school-year-result.html -->
+<x-dialog-shell>
+  <x-alpine-cdn></x-alpine-cdn>
+
+  <main
+    data-init="<?= initData ?>"
+    x-data="createSchoolYearResultDialog($el)"
+    x-cloak
+    class="flex h-full flex-col justify-between bg-slate-50 p-5 font-sans text-slate-800 antialiased"
+  >
+    <div class="space-y-4">
+      <!-- Cabeçalho de sucesso -->
+      <header
+        class="flex items-start space-x-3 rounded-md border border-emerald-200 bg-emerald-50 p-3 text-emerald-600"
+      >
+        <img src="../asserts/success-check-icon.svg" />
+        <div class="text-sm">
+          <p class="font-semibold text-emerald-900">
+            Ano letivo criado com sucesso!
+          </p>
+          <p class="text-emerald-700" x-text="schoolYearLabel"></p>
+        </div>
+      </header>
+
+      <!-- Turmas criadas -->
+      <div class="rounded-md border border-slate-200 bg-white p-3 shadow-sm">
+        <p
+          class="mb-2 text-xs font-medium tracking-wider text-slate-500 uppercase"
+          x-text="`${createdClasses.length} turma(s) criada(s)`"
+        ></p>
+        <div class="flex flex-wrap gap-1.5">
+          <template x-for="cls in createdClasses" :key="cls">
+            <span
+              class="inline-flex items-center rounded-md bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700"
+              x-text="cls"
+            ></span>
+          </template>
+        </div>
+      </div>
+
+      <!-- Ação -->
+      <a
+        :href="folderUrl"
+        target="_blank"
+        class="inline-flex w-full items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+      >
+        Abrir pasta no Drive
+      </a>
+    </div>
+
+    <footer class="mt-5 border-t border-slate-200 pt-4">
+      <x-close-button></x-close-button>
+    </footer>
+  </main>
+
+  <script>
+    document.addEventListener("alpine:init", () => {
+      Alpine.data("createSchoolYearResultDialog", (el) =>
+        JSON.parse(el.dataset.init),
+      );
+    });
+  </script>
+</x-dialog-shell>

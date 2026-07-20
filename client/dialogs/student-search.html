@@ -1,0 +1,152 @@
+<!-- client/dialogs/student-search.html -->
+<x-dialog-shell class="bg-white p-5 text-slate-900 antialiased">
+  <x-alpine-cdn></x-alpine-cdn>
+
+  <div x-data="studentSearchDialog" x-cloak class="space-y-4">
+    <div>
+      <label
+        class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
+      >
+        Nome ou Matrícula
+      </label>
+      <input
+        type="text"
+        x-model="query"
+        @input.debounce.300ms="search()"
+        placeholder="Comece a digitar..."
+        class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none"
+      />
+    </div>
+
+    <template x-if="isSearching">
+      <p class="text-xs text-slate-500">Buscando...</p>
+    </template>
+
+    <template
+      x-if="!isSearching && query.trim() && results.length === 0 && !selectedStudent"
+    >
+      <p
+        class="rounded-md border border-amber-200 bg-amber-50 p-2.5 text-xs font-medium text-amber-700"
+      >
+        Nenhum aluno encontrado.
+      </p>
+    </template>
+
+    <template x-if="!selectedStudent && results.length > 0">
+      <ul
+        class="max-h-48 divide-y divide-slate-100 overflow-y-auto rounded-md border"
+      >
+        <template x-for="result in results" :key="result.studentId">
+          <li
+            @click="selectStudent(result.studentId)"
+            class="cursor-pointer px-3 py-2 text-sm transition-colors hover:bg-slate-50"
+          >
+            <span x-text="result.name"></span>
+            <span
+              class="text-slate-400"
+              x-text="'— ' + result.studentId"
+            ></span>
+          </li>
+        </template>
+      </ul>
+    </template>
+
+    <!-- Detalhes do aluno selecionado -->
+    <template x-if="selectedStudent">
+      <div class="space-y-3">
+        <button
+          type="button"
+          @click="clearSelection()"
+          class="text-xs font-semibold text-slate-500 hover:text-slate-800 focus:outline-none"
+        >
+          &larr; Voltar à busca
+        </button>
+
+        <div
+          class="space-y-1 rounded-md border border-slate-200 bg-white p-4 text-sm shadow-sm"
+        >
+          <p>
+            <span class="font-medium text-slate-500">Matrícula:</span>
+            <span
+              class="font-mono font-medium text-slate-900"
+              x-text="selectedStudent.student.studentId"
+            ></span>
+          </p>
+          <p>
+            <span class="font-medium text-slate-500">Nome:</span>
+            <span
+              class="font-medium text-slate-900"
+              x-text="selectedStudent.student.name"
+            ></span>
+          </p>
+          <p>
+            <span class="font-medium text-slate-500">Endereço:</span>
+            <span x-text="selectedStudent.student.address || '--'"></span>
+          </p>
+          <p>
+            <span class="font-medium text-slate-500">Nascimento:</span>
+            <span x-text="selectedStudent.student.birthDate || '--'"></span>
+          </p>
+          <p>
+            <span class="font-medium text-slate-500">Responsáveis:</span>
+            <span x-text="selectedStudent.guardianNamesFormatted"></span>
+          </p>
+        </div>
+
+        <div>
+          <p
+            class="mb-1 text-xs font-medium tracking-wider text-slate-500 uppercase"
+          >
+            Boletins anteriores
+          </p>
+
+          <template x-if="selectedStudent.pdfHistory.length === 0">
+            <p class="text-xs text-slate-500">Nenhum boletim encontrado.</p>
+          </template>
+
+          <ul class="space-y-1">
+            <template
+              x-for="entry in selectedStudent.pdfHistory"
+              :key="entry.pdfUrl"
+            >
+              <li>
+                <a
+                  :href="entry.pdfUrl"
+                  target="_blank"
+                  class="inline-flex items-center text-xs font-semibold text-blue-700 hover:text-blue-800 focus:underline focus:outline-none"
+                >
+                  <span x-text="entry.yearLabel"></span>
+                  <span class="mx-1 text-slate-300">·</span>
+                  <span x-text="entry.className"></span>
+                </a>
+              </li>
+            </template>
+          </ul>
+        </div>
+
+        <button
+          type="button"
+          @click="editStudent()"
+          :disabled="isOpeningEdit"
+          class="inline-flex w-full items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800 focus:outline-none disabled:cursor-not-allowed disabled:opacity-70"
+        >
+          <span x-text="isOpeningEdit ? 'Abrindo...' : 'Editar aluno'"></span>
+        </button>
+      </div>
+    </template>
+
+    <div
+      x-show="error"
+      x-text="error"
+      class="rounded-md border border-red-100 bg-red-50 p-2.5 text-xs font-medium text-red-600"
+      style="display: none"
+    ></div>
+
+    <footer class="pt-2">
+      <x-close-button></x-close-button>
+    </footer>
+  </div>
+
+  <!-- -->
+  <script src="./student-search.js"></script>
+</x-dialog-shell>
