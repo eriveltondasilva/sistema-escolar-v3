@@ -1,0 +1,300 @@
+<!-- client/components/student-form.html -->
+<div
+  data-mode="create"
+  data-student-id=""
+  x-data="studentFormComponent($el)"
+  x-cloak
+  class="space-y-4"
+>
+  <!-- Estado: sucesso do cadastro (só existe no modo "create") -->
+  <template x-if="view === 'success'">
+    <div class="space-y-4 text-center">
+      <div
+        class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 text-emerald-600"
+      >
+        <img src="../asserts/success-check-icon.svg" />
+      </div>
+      <h2 class="text-lg font-semibold text-slate-900">
+        Aluno cadastrado com sucesso!
+      </h2>
+      <p class="text-sm text-slate-600">
+        Matrícula:
+        <span class="font-mono font-semibold" x-text="studentId"></span>
+      </p>
+      <button
+        @click="google.script.host.close()"
+        class="w-full rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800 focus:outline-none"
+      >
+        Fechar
+      </button>
+    </div>
+  </template>
+
+  <!-- Estado: formulário -->
+  <template x-if="view === 'form'">
+    <div class="space-y-4">
+      <template x-if="mode === 'edit'">
+        <div>
+          <label
+            class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
+          >
+            Matrícula
+          </label>
+          <p
+            class="rounded-md border border-slate-200 bg-slate-100 px-3 py-2 font-mono text-sm text-slate-600"
+            x-text="studentId"
+          ></p>
+        </div>
+      </template>
+
+      <div>
+        <label
+          class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
+        >
+          Nome completo
+        </label>
+        <input
+          type="text"
+          x-model="form.name"
+          :disabled="isLoading || isLoadingInitialData"
+          class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
+        />
+      </div>
+
+      <div>
+        <label
+          class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
+        >
+          Endereço
+        </label>
+        <input
+          type="text"
+          x-model="form.address"
+          :disabled="isLoading || isLoadingInitialData"
+          class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
+        />
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label
+            class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
+          >
+            Nacionalidade
+          </label>
+          <input
+            type="text"
+            x-model="form.nationality"
+            :disabled="isLoading || isLoadingInitialData"
+            class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
+          />
+        </div>
+        <div>
+          <label
+            class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
+          >
+            Sexo
+          </label>
+          <select
+            x-model="form.sex"
+            :disabled="isLoading || isLoadingInitialData"
+            class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
+          >
+            <option value="">Selecione</option>
+            <option value="F">Feminino</option>
+            <option value="M">Masculino</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label
+          class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
+        >
+          Data de nascimento
+        </label>
+        <input
+          type="date"
+          x-model="form.birthDate"
+          :disabled="isLoading || isLoadingInitialData"
+          class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
+        />
+      </div>
+
+      <div>
+        <label
+          class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
+        >
+          Responsáveis
+        </label>
+        <div class="space-y-2">
+          <template
+            x-for="(guardian, index) in form.guardianNames"
+            :key="index"
+          >
+            <div class="flex items-center space-x-2">
+              <input
+                type="text"
+                x-model="form.guardianNames[index]"
+                :disabled="isLoading || isLoadingInitialData"
+                placeholder="Nome do responsável"
+                class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
+              />
+              <button
+                type="button"
+                @click="removeGuardian(index)"
+                :disabled="isLoading || isLoadingInitialData || form.guardianNames.length <= 1"
+                class="shrink-0 rounded-md border border-slate-200 bg-white px-2.5 py-2 text-slate-500 transition-colors hover:bg-slate-50 hover:text-red-600 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <img src="../asserts/close-icon.svg" />
+              </button>
+            </div>
+          </template>
+        </div>
+        <button
+          type="button"
+          @click="addGuardian()"
+          :disabled="isLoading || isLoadingInitialData"
+          class="mt-2 text-xs font-semibold text-slate-600 hover:text-slate-900 focus:outline-none disabled:opacity-50"
+        >
+          + Adicionar responsável
+        </button>
+      </div>
+
+      <div
+        x-show="error"
+        x-text="error"
+        class="rounded-md border border-red-100 bg-red-50 p-2.5 text-xs font-medium text-red-600"
+        style="display: none"
+      ></div>
+
+      <div class="flex items-center justify-end space-x-2 pt-2">
+        <button
+          @click="google.script.host.close()"
+          :disabled="isLoading"
+          class="inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none disabled:opacity-50"
+        >
+          Cancelar
+        </button>
+        <button
+          @click="submit()"
+          :disabled="isLoading || isLoadingInitialData"
+          class="inline-flex items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800 focus:outline-none disabled:cursor-not-allowed disabled:opacity-70"
+        >
+          <span
+            x-text="isLoading ? 'Salvando...' : (mode === 'edit' ? 'Salvar' : 'Cadastrar')"
+          ></span>
+        </button>
+      </div>
+    </div>
+  </template>
+</div>
+
+<script>
+  function studentFormComponent(el) {
+    const mode = el.dataset.mode || "create";
+    const studentId = el.dataset.studentId || "";
+
+    return {
+      mode,
+      studentId,
+      view: "form", // "success" só é usado no modo create
+      isLoading: false,
+      isLoadingInitialData: false,
+      error: "",
+      form: {
+        name: "",
+        address: "",
+        nationality: "",
+        sex: "",
+        birthDate: "",
+        guardianNames: [""],
+      },
+
+      init() {
+        if (this.mode === "edit" && this.studentId) {
+          this.isLoadingInitialData = true;
+
+          // getStudentForEditForm(studentId): StudentFormPayload
+          // — ver server/lib/registration-actions.ts
+          google.script.run
+            .withSuccessHandler((student) => {
+              this.form.name = student.name;
+              this.form.address = student.address;
+              this.form.nationality = student.nationality;
+              this.form.sex = student.sex;
+              this.form.birthDate = student.birthDate;
+              this.form.guardianNames =
+                student.guardianNames.length > 0 ? student.guardianNames : [""];
+              this.isLoadingInitialData = false;
+            })
+            .withFailureHandler((err) => {
+              this.error = "Erro ao carregar aluno: " + err.message;
+              this.isLoadingInitialData = false;
+            })
+            .getStudentForEditForm(this.studentId);
+        }
+      },
+
+      addGuardian() {
+        this.form.guardianNames.push("");
+      },
+
+      removeGuardian(index) {
+        if (this.form.guardianNames.length <= 1) return;
+        this.form.guardianNames.splice(index, 1);
+      },
+
+      submit() {
+        this.error = "";
+
+        if (!this.form.name.trim()) {
+          this.error = "Nome é obrigatório.";
+          return;
+        }
+
+        const guardianNames = this.form.guardianNames
+          .map((name) => name.trim())
+          .filter((name) => name.length > 0);
+
+        if (guardianNames.length === 0) {
+          this.error = "Informe ao menos um responsável.";
+          return;
+        }
+
+        this.isLoading = true;
+        const payload = { ...this.form, guardianNames };
+
+        if (this.mode === "edit") {
+          // submitStudentEdit(studentId, payload): void
+          // — ver server/lib/registration-actions.ts
+          google.script.run
+            .withSuccessHandler(() => google.script.host.close())
+            .withFailureHandler((err) => {
+              this.error = err.message;
+              this.isLoading = false;
+            })
+            .submitStudentEdit(this.studentId, payload);
+        } else {
+          // submitStudentRegistration(payload): string (matrícula gerada)
+          // — ver server/lib/registration-actions.ts
+          google.script.run
+            .withSuccessHandler((newStudentId) => {
+              this.isLoading = false;
+              this.studentId = newStudentId;
+              this.view = "success";
+            })
+            .withFailureHandler((err) => {
+              this.error = err.message;
+              this.isLoading = false;
+            })
+            .submitStudentRegistration(payload);
+        }
+      },
+    };
+  }
+
+  document.addEventListener("alpine:init", () => {
+    Alpine.data("studentFormComponent", studentFormComponent);
+  });
+</script>
