@@ -1,2 +1,6 @@
 /* client/styles.css */
 @import "tailwindcss";
+
+[x-cloak] {
+  display: none !important;
+}
