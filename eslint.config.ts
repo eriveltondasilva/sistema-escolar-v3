@@ -1,5 +1,6 @@
 import js from "@eslint/js";
 import prettier from "eslint-config-prettier";
+import importX from "eslint-plugin-import-x";
 import { defineConfig } from "eslint/config";
 import globals from "globals";
 import tseslint from "typescript-eslint";
@@ -26,29 +27,59 @@ const gasGlobals = {
 } as const;
 
 export default defineConfig([
+  // Eslint configs recomendadas para JavaScript.
   {
     files: ["**/*.{js,mjs,cjs,ts,mts,cts}"],
     plugins: { js },
     extends: ["js/recommended"],
   },
+
+  // Eslint configs recomendadas para TypeScript.
   tseslint.configs.recommended,
+
+  //
+  {
+    files: ["**/*.ts"],
+    plugins: { "import-x": importX },
+    rules: {
+      "import-x/order": [
+        "error",
+        {
+          groups: [
+            "builtin",
+            "external",
+            "internal",
+            "parent",
+            "sibling",
+            "index",
+          ],
+          "newlines-between": "always",
+          alphabetize: {
+            order: "asc",
+            caseInsensitive: true,
+          },
+        },
+      ],
+      "import-x/exports-last": "error",
+    },
+  },
 
   // Client: código que roda no navegador (dentro dos dialogs do GAS).
   {
-    files: ["client/**/*.{ts,tsx}"],
+    files: ["client/**/*.ts"],
     languageOptions: { globals: globals.browser },
+  },
+
+  // Server: roda no runtime V8 do Apps Script, com seus próprios globais.
+  {
+    files: ["server/**/*.ts", "server-new/**/*.ts"],
+    languageOptions: { globals: gasGlobals },
   },
 
   // Scripts de build: rodam via Bun/Node no seu terminal, não no runtime do GAS.
   {
     files: ["scripts/**/*.ts"],
     languageOptions: { globals: globals.bunBuiltin },
-  },
-
-  // Server: roda no runtime V8 do Apps Script, com seus próprios globais.
-  {
-    files: ["server/**/*.ts"],
-    languageOptions: { globals: gasGlobals },
   },
 
   prettier,
