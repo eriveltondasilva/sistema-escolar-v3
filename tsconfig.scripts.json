@@ -1,15 +1,9 @@
 {
-    "extends": "./tsconfig.base.json",
-    "compilerOptions": {
-        "composite": true,
-        "lib": [
-            "ESNext"
-        ],
-        "types": [
-            "bun"
-        ]
-    },
-    "include": [
-        "scripts/**/*.ts"
-    ]
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "lib": ["ESNext"],
+    "types": ["bun"]
+  },
+  "include": ["scripts/**/*.ts"]
 }

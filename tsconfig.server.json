@@ -1,17 +1,9 @@
 {
-    "extends": "./tsconfig.base.json",
-    "compilerOptions": {
-        "composite": true,
-        "lib": [
-            "ESNext"
-        ],
-        "types": [
-            "bun",
-            "google-apps-script"
-        ]
-    },
-    "include": [
-        "server/**/*.ts",
-        "server-new/**/*.ts"
-    ]
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "lib": ["ESNext"],
+    "types": ["bun", "google-apps-script"]
+  },
+  "include": ["server/**/*.ts", "server-new/**/*.ts"]
 }
