@@ -1,3 +1,4 @@
+// server/main.ts
 /**
  * Ponto de entrada do bundle.
  *
@@ -13,10 +14,7 @@
  * em `google.script.run` no client precisa ser adicionada aqui também.
  */
 
-// Menu principal da planilha (onOpen) — não pertence a nenhum domínio.
 import { onOpen } from "./menu.js";
-
-// Domínio "Boletim": geração individual e em lote.
 import {
   executeClassReportsGeneration,
   executeStudentReportGeneration,
@@ -26,39 +24,33 @@ import {
   generateClassReports,
   generateStudentReport,
 } from "./report/menu-actions.js";
-
-// Domínio "Aluno": busca, cadastro e edição do cadastro de alunos.
 import {
   getStudentDetailsForSearch,
   getStudentForEditForm,
   getStudentSearchResults,
-  openStudentEditDialog,
   submitStudentEdit,
   submitStudentRegistration,
 } from "./roster/dialog-actions.js";
 import {
+  openStudentEditDialog,
   openStudentRegistrationDialog,
   openStudentSearchDialog,
 } from "./roster/menu-actions.js";
-
-// Domínio "Ano Letivo": criação da estrutura (pasta + planilhas) com matrícula em massa.
 import { submitSchoolYearCreation } from "./school-year/dialog-actions.js";
 import { openCreateSchoolYearFormDialog } from "./school-year/menu-actions.js";
-
-// Domínio "Diagnóstico": verificação agregada de config, pastas, planilhas e cadastro.
 import { checkSystem } from "./system-check/checker.js";
-
-// Domínio "Web App": endpoint público de validação de boletim via QR code.
-import { doGet } from "./web-app/doGet.js";
+import { doGet } from "./web-app/do-get.js";
 
 Object.assign(globalThis, {
   // --- Menu (onOpen) ---
+  // Menu principal da planilha (onOpen) — não pertence a nenhum domínio.
   onOpen,
 
   // --- Web App público (sem autenticação, acessado via QR do boletim) ---
   doGet,
 
   // --- Boletim: menu ---
+  // Domínio "Boletim": geração individual e em lote.
   generateStudentReport, // abre o dialog de seleção (ano/turma/aluno)
   generateClassReports, // abre o dialog de seleção (ano/turma, turma toda)
 
@@ -68,6 +60,7 @@ Object.assign(globalThis, {
   executeStudentReportGeneration, // gera o boletim de um único aluno
 
   // --- Diagnóstico: menu ---
+  // Domínio "Diagnóstico": verificação agregada de config, pastas, planilhas e cadastro.
   checkSystem, // roda a verificação completa e mostra o relatório
 
   // --- Aluno: menu ---

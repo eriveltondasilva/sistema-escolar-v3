@@ -1,18 +1,22 @@
+// server/types.ts
 export type IssueType = "warning" | "error";
 export type AssessmentType = "grade" | "concept";
 
 export interface AppConfig {
-  schoolYearsFolderId: string;
-  pdfsFolderId: string;
-  tempFolderId: string;
-  //
-  gradeReportId: string;
-  conceptReportId: string;
-  //
-  gradeSpreadsheetId: string;
-  conceptSpreadsheetId: string;
-  //
-  enrollmentSpreadsheetId: string;
+  readonly schoolYearsFolderId: string;
+  readonly pdfsFolderId: string;
+  readonly tempFolderId: string;
+  readonly gradeReportId: string;
+  readonly conceptReportId: string;
+  readonly gradeSpreadsheetId: string;
+  readonly conceptSpreadsheetId: string;
+  readonly enrollmentSpreadsheetId: string;
+}
+
+export interface ReportLinkParams {
+  studentId: string;
+  year: string;
+  className: string;
 }
 
 export interface Issue {

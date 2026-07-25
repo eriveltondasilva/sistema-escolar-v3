@@ -1,3 +1,4 @@
+// server/action-response.ts
 /**
  * Resultado padronizado para operações disparadas pelo menu, onde o
  * destino final é um `ui.alert` (categoria A — ver cabeçalho de Config.ts).
