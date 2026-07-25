@@ -48,10 +48,9 @@ export default defineConfig([
           groups: [
             "builtin",
             "external",
-            "internal",
-            "parent",
-            "sibling",
+            ["internal", "parent", "sibling"],
             "index",
+            "type",
           ],
           "newlines-between": "always",
           alphabetize: {
@@ -61,6 +60,7 @@ export default defineConfig([
         },
       ],
       "import-x/exports-last": "error",
+      "import-x/consistent-type-specifier-style": ["error", "prefer-top-level"],
     },
   },
 
