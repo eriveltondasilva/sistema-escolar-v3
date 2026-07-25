@@ -16,10 +16,10 @@
     "push": "clasp push",
     "deploy": "bun run build && bun run push",
     "1###": "",
-    "fmt": "bunx prettier --check .",
-    "fmt:fix": "bunx prettier --write .",
-    "lint": "bunx eslint .",
-    "lint:fix": "bunx eslint . --fix",
+    "fmt": "bunx --bun prettier --check .",
+    "fmt:fix": "bunx --bun prettier --write .",
+    "lint": "bunx --bun eslint .",
+    "lint:fix": "bunx --bun eslint . --fix",
     "2###": "",
     "types": "tsc --noEmit",
     "check": "bun run types && bun run fmt && bun run lint",
@@ -44,6 +44,6 @@
     "typescript-eslint": "^8.65.0"
   },
   "peerDependencies": {
-    "typescript": "^7.0.2"
+    "typescript": "^6.0.3"
   }
 }
