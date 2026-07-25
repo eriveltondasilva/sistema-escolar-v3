@@ -1,15 +1,15 @@
 // scripts/posthtml-plugin.ts
-import type { BunPlugin } from "bun";
-import type { Options as PosthtmlOptions } from "posthtml";
-import type { PostHTMLComponents } from "posthtml-component";
 
 import { file as bunFile } from "bun";
-
 import { join } from "node:path";
 import { cwd } from "node:process";
 
 import posthtml from "posthtml";
 import components from "posthtml-component";
+
+import type { BunPlugin } from "bun";
+import type { Options as PosthtmlOptions } from "posthtml";
+import type { PostHTMLComponents } from "posthtml-component";
 
 const componentsOptions: PostHTMLComponents = {
   root: join(cwd(), "client"),
@@ -18,11 +18,11 @@ const componentsOptions: PostHTMLComponents = {
 };
 
 const posthtmlOptions: PosthtmlOptions = {
-  // @ts-expect-error
+  // @ts-expect-error: false positive
   directives: [{ name: /\?[=!]?/, start: "<", end: ">" }],
 };
 
-// @ts-expect-error
+// @ts-expect-error: false positive
 const componentsPlugin = components(componentsOptions);
 
 // -------------------------------------

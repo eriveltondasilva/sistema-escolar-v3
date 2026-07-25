@@ -1,12 +1,14 @@
 // scripts/build.ts
-import { Glob, build as bunBuild, type BuildOutput } from "bun";
-import tailwind from "bun-plugin-tailwind";
-
+import { Glob, build as bunBuild } from "bun";
 import { copyFileSync, existsSync, mkdirSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { argv, cwd, exit } from "node:process";
 
+import tailwind from "bun-plugin-tailwind";
+
 import { posthtmlPlugin } from "./posthtml-plugin";
+
+import type { BuildOutput } from "bun";
 
 const DIALOGS_DIR = join(cwd(), "client", "dialogs");
 const SERVER_ENTRY = join(cwd(), "server", "main.ts");
