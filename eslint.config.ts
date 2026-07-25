@@ -1,7 +1,7 @@
 import js from "@eslint/js";
+import { defineConfig, globalIgnores } from "eslint/config";
 import prettier from "eslint-config-prettier";
 import importX from "eslint-plugin-import-x";
-import { defineConfig } from "eslint/config";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
@@ -27,6 +27,7 @@ const gasGlobals = {
 } as const;
 
 export default defineConfig([
+  globalIgnores(["node_modules", "dist", "!old-server"]),
   // Eslint configs recomendadas para JavaScript.
   {
     files: ["**/*.{js,mjs,cjs,ts,mts,cts}"],
@@ -59,7 +60,6 @@ export default defineConfig([
           },
         },
       ],
-      "import-x/exports-last": "error",
       "import-x/consistent-type-specifier-style": ["error", "prefer-top-level"],
     },
   },
