@@ -1,3 +1,5 @@
+// server/web-app/types.ts
+
 /** Payload de error.html. */
 export interface ErrorInitData {
   errorMessage: string;
