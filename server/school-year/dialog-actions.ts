@@ -1,0 +1,73 @@
+// server/school-year/dialog-actions.ts
+import { SCHOOL_YEAR_LABEL_PREFIX, loadConfig } from "../config.ts";
+import { DIALOG_NAMES } from "../dialog-names.ts";
+import { createSchoolYearStructure } from "./creation.ts";
+import { validateClassMatriculations } from "./matriculation.ts";
+import { loadStudentsMap } from "../report/data-access.ts";
+import { renderView } from "../utils/render-view.ts";
+import { withScriptLock } from "../utils/script-lock.ts";
+
+import type { ClassMatriculationInput } from "./types.ts";
+
+/**
+ * Handler chamado pelo dialog HTML via google.script.run (categoria B —
+ * usa throw, consumido por withFailureHandler no client). Só orquestra:
+ * valida tudo antes de escrever qualquer coisa ("tudo ou nada"), delega a
+ * escrita para creation.ts, e renderiza o resultado.
+ */
+export function submitSchoolYearCreation(
+  yearInput: string,
+  matriculationsByClass: ClassMatriculationInput[],
+): void {
+  if (!/^\d{4}$/.test(yearInput)) {
+    throw new Error(
+      `"${yearInput}" não é um ano válido. Digite 4 dígitos, ex: 2026.`,
+    );
+  }
+
+  withScriptLock((ui) => {
+    const config = loadConfig();
+    const schoolYearLabel = `${SCHOOL_YEAR_LABEL_PREFIX}${yearInput}`;
+
+    const rootFolder = DriveApp.getFolderById(config.schoolYearsFolderId);
+    if (rootFolder.getFoldersByName(schoolYearLabel).hasNext()) {
+      throw new Error(
+        `O ano letivo "${schoolYearLabel}" já existe. Nenhuma alteração foi feita.`,
+      );
+    }
+
+    const registrationSheet = SpreadsheetApp.openById(
+      config.enrollmentSpreadsheetId,
+    );
+    const registeredStudentsMap = loadStudentsMap(registrationSheet);
+
+    const validationIssues = validateClassMatriculations(
+      matriculationsByClass,
+      registeredStudentsMap,
+    );
+    const errorMessages = validationIssues
+      .filter((issue) => issue.type === "error")
+      .map((issue) => issue.text);
+
+    if (errorMessages.length > 0) {
+      throw new Error(
+        `Corrija os erros abaixo antes de criar o ano letivo. Nenhuma alteração foi feita.\n\n${errorMessages.join("\n")}`,
+      );
+    }
+
+    const result = createSchoolYearStructure({
+      config,
+      rootFolder,
+      schoolYearLabel,
+      yearInput,
+      matriculationsByClass,
+      registeredStudentsMap,
+    });
+
+    const htmlOutput = renderView(DIALOG_NAMES.createSchoolYearResult, result)
+      .setWidth(400)
+      .setHeight(340);
+
+    ui.showModalDialog(htmlOutput, "Ano Letivo Criado");
+  }, "Já existe uma criação de ano letivo em andamento. Tente novamente em alguns instantes.");
+}
