@@ -1,7 +1,6 @@
 // server/roster/data-access.ts
 import { DEFAULT_LOCALE, ENROLLMENT_SHEET_NAMES } from "../config.ts";
 import { GUARDIAN_COLUMNS, STUDENT_COLUMNS } from "../report/constants.ts";
-import { loadGuardiansMap, loadStudentsMap } from "../report/data-access.ts";
 import { formatDate } from "../utils/formatters.ts";
 
 import type {
@@ -10,25 +9,11 @@ import type {
   StudentSearchResult,
 } from "./types.ts";
 
-// Reexportadas para o resto do domínio "roster" — a leitura em si é a
-// mesma usada pelo boletim, não deve haver uma segunda implementação.
-export { loadGuardiansMap, loadStudentsMap };
-
 const STUDENT_ID_PADDING = 4;
 
 /** Status padrão atribuído a todo aluno recém-cadastrado. */
 const DEFAULT_STUDENT_STATUS = "Ativo";
 
-/**
- * Gera a próxima matrícula sequencial (ex: "0001", "0002", ..., "0010").
- * O padding de 4 dígitos é só formatação — se ultrapassar 9999, o valor
- * continua crescendo normalmente ("10000"), só deixa de ter zeros à
- * esquerda.
- *
- * @throws Deve ser chamada dentro de um withScriptLock (ver dialog-actions.ts)
- * para evitar duas matrículas iguais em cadastros simultâneos — esta
- * função sozinha não garante isso.
- */
 export function generateNextStudentId(
   registrationSheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
 ): string {
@@ -63,11 +48,6 @@ function toIsoDateString(date: unknown): string {
   return `${year}-${month}-${day}`;
 }
 
-/**
- * Busca alunos por nome (substring, sem diferenciar maiúsculas) ou
- * matrícula (igualdade exata). Usada pelo autocomplete da tela de busca —
- * devolve só {studentId, name}, não os dados completos.
- */
 export function searchStudents(
   registrationSheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
   query: string,
@@ -95,12 +75,6 @@ export function searchStudents(
     });
 }
 
-/**
- * Busca de responsáveis de um único aluno, devolvendo a lista CRUA (não
- * formatada/concatenada) — diferente de loadGuardiansMap (report/data-access.ts),
- * que existe para alimentar o boletim (onde o nome formatado é o que
- * interessa). Aqui o formulário precisa da lista editável, um nome por campo.
- */
 function loadRawGuardianNames(
   registrationSheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
   studentId: string,
@@ -124,11 +98,6 @@ function loadRawGuardianNames(
     .filter((name) => name.length > 0);
 }
 
-/**
- * Carrega os dados completos de um aluno para o formulário de edição
- * (dados pessoais com data em formato ISO + lista crua de responsáveis).
- * Devolve null se a matrícula não existir.
- */
 export function getStudentForEdit(
   registrationSheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
   studentId: string,
@@ -172,20 +141,6 @@ export function getStudentForEdit(
   };
 }
 
-/**
- * Cria um novo aluno: gera a matrícula, grava a linha em "Alunos" e, só
- * depois (se isso falhar, o aluno fica sem responsável — recuperável;
- * a ordem inversa criaria responsável "órfão", pior de detectar), grava
- * as linhas em "Responsáveis".
- *
- * A data de matrícula (enrollment_date) é sempre a data de hoje, definida
- * aqui pelo servidor — o formulário não a envia. O status inicial é
- * sempre "Ativo", também decidido aqui; ver updateStudentRecord para a
- * edição posterior do status.
- *
- * @throws Deve ser chamada dentro de um withScriptLock — a geração de
- * matrícula não é segura para escritas concorrentes sem lock.
- */
 export function createStudentRecord(
   registrationSheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
   input: CreateStudentPayload,
@@ -218,18 +173,6 @@ export function createStudentRecord(
   return studentId;
 }
 
-/**
- * Atualiza os dados de um aluno já existente. A matrícula e a data de
- * matrícula (enrollment_date) NUNCA são alteráveis por aqui de propósito:
- * a matrícula é referenciada por notas, "Resumo" de cada turma e a URL do
- * QR code do boletim — editá-la quebraria essas referências
- * silenciosamente; a data de matrícula registra quando o aluno entrou,
- * então também não faz sentido reescrevê-la numa edição posterior. O
- * status, por outro lado, é o único dos dois campos administrativos que
- * o formulário de edição pode alterar (ex.: marcar aluno como inativo).
- *
- * @throws Se a matrícula não for encontrada.
- */
 export function updateStudentRecord(
   registrationSheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
   studentId: string,
@@ -273,13 +216,6 @@ export function updateStudentRecord(
   replaceGuardians(registrationSheet, studentId, input.guardianNames);
 }
 
-/**
- * Substitui todos os responsáveis de uma matrícula: apaga as linhas
- * existentes e insere a lista completa vinda do formulário. Mais simples
- * e menos propenso a erro do que calcular um diff de quais foram
- * adicionados/removidos/renomeados — a aba não é grande o bastante para
- * isso ser um problema de performance.
- */
 export function replaceGuardians(
   registrationSheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
   studentId: string,

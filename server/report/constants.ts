@@ -104,12 +104,6 @@ export const GRADE_PLACEHOLDER_FIELDS: PlaceholderField[] = [
   { suffix: "sf", field: "status", format: formatStatus },
 ];
 
-/**
- * Boletim de conceito: não tem recuperação nem médias (rs/ms/mf) — cada
- * bimestre e a situação final (sf) recebem um conceito (I/B/O/E) em vez de
- * nota numérica, por isso usam `formatValue` (sem casas decimais) em vez
- * de `formatGrade`/`formatStatus`.
- */
 export const CONCEPT_PLACEHOLDER_FIELDS: PlaceholderField[] = [
   { suffix: "c1", field: "grade1Q", format: formatValue },
   { suffix: "f1", field: "absences1Q", format: formatValue },

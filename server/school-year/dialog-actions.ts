@@ -9,12 +9,6 @@ import { withScriptLock } from "../utils/script-lock.ts";
 
 import type { ClassMatriculationInput } from "./types.ts";
 
-/**
- * Handler chamado pelo dialog HTML via google.script.run (categoria B —
- * usa throw, consumido por withFailureHandler no client). Só orquestra:
- * valida tudo antes de escrever qualquer coisa ("tudo ou nada"), delega a
- * escrita para creation.ts, e renderiza o resultado.
- */
 export function submitSchoolYearCreation(
   yearInput: string,
   matriculationsByClass: ClassMatriculationInput[],
@@ -51,7 +45,8 @@ export function submitSchoolYearCreation(
 
     if (errorMessages.length > 0) {
       throw new Error(
-        `Corrija os erros abaixo antes de criar o ano letivo. Nenhuma alteração foi feita.\n\n${errorMessages.join("\n")}`,
+        "Corrija os erros abaixo antes de criar o ano letivo. " +
+          `Nenhuma alteração foi feita.\n\n${errorMessages.join("\n")}`,
       );
     }
 

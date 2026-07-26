@@ -1,9 +1,4 @@
 // server/report/data-access.ts
-/**
- * Leitura de dados das planilhas (Alunos, Responsáveis, notas por
- * disciplina). Compartilhado entre checker.ts e report/*.ts — nenhuma das
- * duas camadas deve duplicar essa leitura.
- */
 import { ENROLLMENT_SHEET_NAMES } from "../config.ts";
 import {
   FIRST_DATA_ROW,
@@ -30,10 +25,7 @@ export function findSubjectSheet(
   classSpreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
   subject: Subject,
 ): GoogleAppsScript.Spreadsheet.Sheet | null {
-  return (
-    classSpreadsheet.getSheetByName(subject.code) ??
-    classSpreadsheet.getSheetByName(subject.name)
-  );
+  return classSpreadsheet.getSheetByName(subject.code);
 }
 
 /** Confere quais disciplinas esperadas existem como aba na planilha de turma. */

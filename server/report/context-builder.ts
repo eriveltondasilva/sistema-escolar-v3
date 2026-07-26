@@ -21,12 +21,6 @@ import type {
   ReportContext,
 } from "./types.ts";
 
-/**
- * Monta o contexto que `generateReportForStudent` precisa, carregando uma
- * única vez por turma o cadastro de alunos, responsáveis e as notas de
- * todas as disciplinas — usado quando se vai gerar para todos os alunos
- * da turma de uma vez.
- */
 export function buildReportContext({
   config,
   classSpreadsheet,
@@ -52,13 +46,6 @@ export function buildReportContext({
   };
 }
 
-/**
- * Versão mais leve de `buildReportContext` para gerar o boletim de UM único
- * aluno: em vez de carregar o cadastro inteiro da escola (Alunos,
- * Responsáveis) e todas as linhas de cada disciplina da turma — útil quando
- * se está gerando para todos os alunos de uma vez —, busca diretamente pela
- * matrícula em cada planilha, lendo só a linha necessária.
- */
 export function buildSingleStudentReportContext({
   config,
   classSpreadsheet,
@@ -91,7 +78,9 @@ export function buildSingleStudentReportContext({
 
 /** Resolve o tipo de avaliação (nota/conceito) configurado para a turma. */
 function getAssessmentType(className: string): AssessmentType {
-  const classInfo = VALID_CLASSES.find((c) => c.className === className);
+  const classInfo = VALID_CLASSES.find(
+    (validClass) => validClass.className === className,
+  );
 
   if (!classInfo) {
     throw new Error(

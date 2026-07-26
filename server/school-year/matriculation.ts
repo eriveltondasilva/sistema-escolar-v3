@@ -5,21 +5,6 @@ import { SUMMARY_FIRST_DATA_ROW } from "../report/constants.ts";
 import type { Issue, StudentData } from "../types.ts";
 import type { ClassMatriculationInput } from "./types.ts";
 
-/**
- * Validação e escrita das matrículas em massa na criação do ano letivo.
- * Separado de `creation.ts` (que cuida de pasta/planilha) porque aqui a
- * unidade de trabalho é "lista de matrículas por turma", não "estrutura de
- * arquivos" — dois níveis de abstração diferentes que não deveriam morar
- * no mesmo arquivo.
- */
-
-/**
- * Valida as matrículas coladas por turma, ANTES de qualquer escrita:
- * matrícula duplicada dentro da própria lista colada, e matrícula que não
- * existe no Cadastro de Alunos. Mesmo formato Issue[] já usado por
- * validateClassStudents/checkSystem (system-check) — não inventa um novo
- * jeito de reportar erro.
- */
 export function validateClassMatriculations(
   matriculations: ClassMatriculationInput[],
   registeredStudentsMap: Map<string, StudentData>,

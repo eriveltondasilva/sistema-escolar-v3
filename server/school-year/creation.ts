@@ -6,15 +6,6 @@ import { VALID_CLASSES } from "../report/constants.ts";
 import type { AppConfig, StudentData } from "../types.ts";
 import type { ClassMatriculationInput, CreateSchoolYearData } from "./types.ts";
 
-/**
- * Criação física da estrutura de um ano letivo (pasta + planilhas de
- * turma a partir do modelo, já matriculadas). Isolado de
- * `dialog-actions.ts` de propósito: aquele arquivo lida com o contrato
- * google.script.run (throw/return), este lida com Drive/Sheets — não
- * deveriam ficar misturados no mesmo handler.
- */
-
-/** Substitui os placeholders de cabeçalho ({{school_class}}, {{school_year}}) de uma planilha de turma recém-copiada. */
 export function fillClassHeaderPlaceholders(
   classSpreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
   className: string,
@@ -41,19 +32,6 @@ interface CreateSchoolYearStructureParams {
   registeredStudentsMap: Map<string, StudentData>;
 }
 
-/**
- * Cria a pasta do ano letivo, copia a planilha-modelo de cada turma (o
- * modelo varia por assessmentType — nota ou conceito, ver
- * getClassTemplateFile), preenche o cabeçalho e insere as matrículas já
- * validadas em "Resumo". Em caso de falha em qualquer turma, desfaz tudo
- * (trash da pasta) — "tudo ou nada", consistente com o restante do fluxo.
- *
- * Pressupõe que `matriculationsByClass` já foi validado (ver
- * `validateClassMatriculations` em matriculation.ts) — esta função não
- * valida, só escreve.
- *
- * @throws {Error} Se qualquer turma falhar ao ser criada.
- */
 export function createSchoolYearStructure({
   config,
   rootFolder,

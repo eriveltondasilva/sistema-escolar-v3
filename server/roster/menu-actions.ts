@@ -13,13 +13,6 @@ export function openStudentRegistrationDialog(): void {
   ui.showModalDialog(htmlOutput, "Cadastrar Aluno");
 }
 
-/**
- * Abre a dialog de edição para uma matrícula específica. Chamada via
- * google.script.run a partir da tela de busca — mesmo padrão já usado
- * por executeClassReportsGenerationInternal_ em report/dialog-actions.ts
- * (server abre uma nova modal, o client fecha a dialog atual no
- * withSuccessHandler).
- */
 export function openStudentEditDialog(studentId: string): void {
   const trimmedId = String(studentId ?? "").trim();
   if (!trimmedId) throw new Error("Matrícula não pode ser vazia.");

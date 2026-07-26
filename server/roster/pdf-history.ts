@@ -7,12 +7,6 @@ export interface StudentPdfHistoryEntry {
   pdfUrl: string;
 }
 
-/**
- * Enumera os boletins de anos anteriores de um aluno, varrendo
- * pdfsFolderId/<ano>/<turma>/ em busca de arquivos "<matrícula>_*.pdf".
- * Diferente de findReportPdfId (web-app.ts), que já sabe o ano+turma de
- * antemão — aqui isso é desconhecido, por isso a varredura mais ampla.
- */
 export function findStudentPdfHistory(
   config: AppConfig,
   studentId: string,

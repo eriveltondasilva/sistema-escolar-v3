@@ -85,13 +85,6 @@ export function getReportTemplateFile(
   return file;
 }
 
-/**
- * Modelo de planilha de turma (usado na criação do ano letivo, ver
- * school-year/creation.ts) — não confundir com getClassSpreadsheetFile,
- * que abre a planilha JÁ CRIADA de uma turma existente. Assim como o
- * boletim, o modelo varia por assessmentType (nota/conceito), pois as
- * colunas de lançamento diferem entre os dois.
- */
 export function getClassTemplateFile(
   config: AppConfig,
   assessmentType: AssessmentType,
@@ -103,8 +96,7 @@ export function getClassTemplateFile(
 
   const file = DriveApp.getFileById(templateId);
 
-  // Ver comentário em getClassSpreadsheetFile sobre o bug de tipos do MimeType.
-  if (file.getMimeType() !== "application/vnd.google-apps.spreadsheet") {
+  if (file.getMimeType() !== MimeType.GOOGLE_SHEETS) {
     throw new Error(
       `O modelo de planilha de turma (ID: ${templateId}) não é uma planilha do Google Sheets.`,
     );

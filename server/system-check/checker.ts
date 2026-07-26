@@ -1,4 +1,5 @@
 // server/system-check/checker.ts
+import { collectOrIssue } from "#server/utils/error.ts";
 import { ENROLLMENT_SHEET_NAMES, loadConfig } from "../config.ts";
 import {
   getClassSpreadsheetFile,
@@ -101,9 +102,7 @@ export function checkSystem(): void {
     let rootUrl: string | undefined;
     try {
       rootUrl = DriveApp.getFolderById(config.schoolYearsFolderId).getUrl();
-    } catch {
-      // pasta raiz também inválida — omite o link, o issue abaixo já basta
-    }
+    } catch {}
     issues.push({
       type: "error",
       text: 'Nenhuma pasta de ano letivo encontrada dentro de "Anos Letivos".',
@@ -160,36 +159,6 @@ export function checkSystem(): void {
   }
 
   showValidationDialog(issues);
-}
-
-/**
- * Executa `fn` e, em caso de erro, empurra um Issue ao array e retorna null.
- * O retorno null permite que o caller decida se deve interromper o fluxo
- * (ex: `if (!result) continue` dentro de loops de validação).
- *
- * @param issues Array de issues a ser populado em caso de erro.
- * @param label Prefixo para a mensagem (ex: "Cadastro de Alunos"). null omite o prefixo.
- * @param fn Função a ser executada com segurança.
- * @param url URL opcional para incluir no Issue em caso de erro.
- */
-export function collectOrIssue<T>(
-  issues: Issue[],
-  label: string | null,
-  fn: () => T,
-  url?: string,
-): T | null {
-  try {
-    return fn();
-  } catch (e) {
-    const message = e instanceof Error ? e.message : String(e);
-    const issue: Issue = {
-      type: "error",
-      text: label ? `${label}: ${message}` : message,
-    };
-    if (url) issue.url = url;
-    issues.push(issue);
-    return null;
-  }
 }
 
 /** Renderiza o dialog HTML com os resultados. */

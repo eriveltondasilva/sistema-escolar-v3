@@ -7,18 +7,6 @@ import { getWebAppId } from "../utils/script-properties.ts";
 import type { AssessmentType } from "../types.ts";
 import type { GenerateReportForStudentParams, SubjectGrades } from "./types.ts";
 
-/**
- * Substitui um termo (placeholder) pelo valor dentro do corpo do documento.
- *
- * O `Body.replaceText` usa a biblioteca RE2 do Google, que também interpreta
- * "$" no texto de substituição como referência a grupo de captura (ex: "$1").
- * Como o valor pode vir de dados digitados na planilha (nome, endereço etc.),
- * escapamos "$" para garantir que ele sempre apareça como texto literal.
- *
- * Vive aqui (não em utils.ts) porque é específica de manipulação de
- * documento do Apps Script, não um formatador genérico — e é usada
- * exclusivamente por este módulo.
- */
 export function replacePlaceholder(
   body: GoogleAppsScript.Document.Body,
   key: string,
@@ -28,14 +16,6 @@ export function replacePlaceholder(
   body.replaceText("{{" + key + "}}", safeValue);
 }
 
-/**
- * Insere o QR Code no documento.
- * Deve ser chamada logo após a substituição das variáveis de texto.
- *
- * Falhas na geração do QR (API indisponível, bloqueio de rede) são
- * tratadas como não-fatais: o placeholder é removido e um aviso é
- * registrado no console, mas a geração do boletim continua normalmente.
- */
 export function insertQRCode(
   body: GoogleAppsScript.Document.Body,
   studentId: string,
@@ -161,10 +141,6 @@ export function fillSubjectPlaceholders(
   const statusField = placeholderFields.find((f) => f.suffix === "sf");
 
   for (const { suffix, field, format } of placeholderFields) {
-    // "sf" (situação final) é tratado à parte logo abaixo, pois precisa
-    // colorir exatamente a célula desta disciplina — ver
-    // replaceStatusPlaceholder. Seu `format` (formatStatus para nota,
-    // formatValue para conceito) é repassado para lá, não usado aqui.
     if (suffix === "sf") continue;
 
     replacePlaceholder(
@@ -184,21 +160,6 @@ export function fillSubjectPlaceholders(
   }
 }
 
-/**
- * Substitui o placeholder "{{cod_sf}}" e colore o texto resultante.
- *
- * Não pode reutilizar `replacePlaceholder` + `body.findText(valor)`: depois
- * do replace, o texto "APR"/"REP"/"I"/"B"/"O"/"E" perde qualquer referência
- * à disciplina, e `findText` localizaria sempre a primeira ocorrência no
- * documento inteiro — colorindo a disciplina errada quando duas disciplinas
- * têm o mesmo status. Por isso localizamos o placeholder ANTES de
- * substituí-lo, mantendo a referência exata ao elemento de texto onde a
- * troca ocorreu.
- *
- * A colorização (verde/vermelho) só se aplica ao boletim de nota, onde
- * `rawValue` é "aprovado"/"reprovado". No boletim de conceito, `rawValue`
- * é um conceito (I/B/O/E) e nenhuma cor é aplicada.
- */
 function replaceStatusPlaceholder(
   body: GoogleAppsScript.Document.Body,
   subjectCode: string,

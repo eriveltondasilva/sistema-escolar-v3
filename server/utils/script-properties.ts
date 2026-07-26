@@ -3,12 +3,6 @@
 /** Chaves válidas de Script Properties usadas no projeto. */
 type ScriptPropertyKey = "WEB_APP_ID" | "REPORT_LINK_SECRET";
 
-/**
- * Lê uma propriedade obrigatória do script (Extensões > Apps Script >
- * Configurações do Projeto > Propriedades do script). Lança erro
- * descritivo — incluindo a chave e a instrução de onde configurar —
- * se a propriedade não existir.
- */
 function getScriptProp(key: ScriptPropertyKey): string {
   const props = PropertiesService.getScriptProperties();
   const value = props.getProperty(key);

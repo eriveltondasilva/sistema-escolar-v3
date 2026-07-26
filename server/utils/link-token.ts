@@ -3,14 +3,6 @@ import { getReportLinkSecret } from "./script-properties.ts";
 
 import type { ReportLinkParams } from "../types.ts";
 
-/**
- * Gera o token de um link de boletim, a partir da secret configurada
- * em Script Properties (chave "REPORT_LINK_SECRET"). Nada é
- * armazenado por aluno: o mesmo token é recalculado sempre que
- * necessário, a partir dos mesmos parâmetros + secret.
- *
- * Trocar a secret invalida todos os links já emitidos de uma vez.
- */
 export function generateReportLinkToken({
   className,
   studentId,
@@ -28,7 +20,6 @@ export function generateReportLinkToken({
   return Utilities.base64EncodeWebSafe(digest);
 }
 
-/** Verifica se `token` corresponde aos parâmetros informados. */
 export function verifyReportLinkToken(
   params: ReportLinkParams,
   token: string,

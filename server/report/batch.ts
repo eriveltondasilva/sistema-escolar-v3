@@ -1,19 +1,4 @@
 // server/report/batch.ts
-/**
- * Orquestração de geração de boletins para uma turma inteira: laço com
- * limite de tempo (`MAX_RUNTIME_MS`) e agregação de sucessos/erros.
- *
- * Fica separado de `report-generation.ts` de propósito: aquele módulo
- * responde "como gerar o boletim de UM aluno" (contexto, template, QR,
- * PDF); este responde "como rodar isso para MUITOS alunos com controle de
- * tempo de execução e coleta de erros" — um nível de abstração acima, que
- * não deveria inflar ainda mais o módulo de geração unitária.
- *
- * Não lança para erros individuais de aluno: cada falha vira uma entrada
- * em `errors`, e o processamento continua com o próximo aluno. Lança
- * apenas para condições que inviabilizam a turma inteira (nenhuma
- * disciplina reconhecida, nenhum aluno na aba "Resumo").
- */
 import { MAX_RUNTIME_MS } from "../config.ts";
 import { buildReportContext } from "./context-builder.ts";
 import {
@@ -43,10 +28,6 @@ export function generateReportsForClass(
     throw new Error("Nenhuma disciplina reconhecida nessa turma.");
   }
 
-  // Usa "Resumo" como fonte oficial de matrículas — a mesma usada por
-  // isStudentInClass e validateClassStudents — em vez de qualquer aba de
-  // disciplina, evitando divergência entre os fluxos de geração individual
-  // e em lote quando "Resumo" e as abas de disciplina estão dessincronizadas.
   const students = getClassStudentsFromResumo(classSpreadsheet);
   if (students.length === 0) {
     throw new Error('Turma sem alunos cadastrados na aba "Resumo".');

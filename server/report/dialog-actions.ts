@@ -14,15 +14,15 @@ import {
 import { generateReportForStudent } from "./generator.ts";
 import { withScriptLock } from "../utils/script-lock.ts";
 
-/**
- * Retorna a lista de objetos contendo ID e Nome dos alunos mapeados da aba
- * Resumo. Endpoint consumido pelo Alpine.js para alimentar o datalist de
- * autocompletar.
- */
+interface ClassStudent {
+  studentId: string;
+  name: string;
+}
+
 export function getStudentsDataForClass(
   schoolYearLabel: string,
   className: string,
-): Array<{ studentId: string; name: string }> {
+): ClassStudent[] {
   const config = loadConfig();
   const yearFolder = getSchoolYearFolder(config, schoolYearLabel);
   const classFile = getClassSpreadsheetFile(
