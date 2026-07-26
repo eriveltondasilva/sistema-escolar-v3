@@ -1,5 +1,5 @@
 // server/utils/formatters.ts
-import { DEFAULT_LOCALE, DEFAULT_TIMEZONE } from "#server/config.ts";
+import { DEFAULT_LOCALE, DEFAULT_TIMEZONE } from "../config.ts";
 
 /** Formata os nomes dos responsáveis concatenando-os corretamente. */
 export function formatGuardianNames(names: string[]): string {
@@ -26,10 +26,11 @@ export function formatGrade(value: unknown): string {
   }).format(number);
 }
 
-export function formatStatus(status: string): string {
-  if (status === "") return "--";
+export function formatStatus(status: unknown): string {
+  const trimmedValue = String(status ?? "").trim();
+  if (trimmedValue === "") return "--";
 
-  return status.slice(0, 3).toUpperCase();
+  return trimmedValue.slice(0, 3).toUpperCase();
 }
 
 /** Formata um valor simples, inserindo "--" caso esteja vazio. */

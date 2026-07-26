@@ -1,23 +1,16 @@
-import { SCRIPT_LOCK_TIMEOUT_MS } from "#server/config.ts";
-
-export function promptForValue(
-  ui: GoogleAppsScript.Base.Ui,
-  title: string,
-  message: string,
-): string | null {
-  const response = ui.prompt(title, message, ui.ButtonSet.OK_CANCEL);
-
-  if (response.getSelectedButton() !== ui.Button.OK) return null;
-  return response.getResponseText().trim();
-}
+// server/utils/script-lock.ts
+import { SCRIPT_LOCK_TIMEOUT_MS } from "../config.ts";
 
 /**
- * Executa `action` sob um lock de script, evitando que duas execuções do
- * mesmo fluxo corram em paralelo (ex: dois usuários gerando boletins da
- * mesma turma ao mesmo tempo).
+ * Adquire o lock do script antes de rodar `fn`, garantindo que duas
+ * execuções concorrentes (ex.: dois cliques rápidos no botão do dialog)
+ * não gerem boletins ao mesmo tempo. Libera o lock mesmo se `fn` lançar.
+ *
+ * Se o lock não for adquirido dentro de `SCRIPT_LOCK_TIMEOUT_MS`, mostra
+ * `busyMessage` via `ui.alert` e retorna sem executar `fn`.
  */
 export function withScriptLock(
-  action: (ui: GoogleAppsScript.Base.Ui) => void,
+  fn: (ui: GoogleAppsScript.Base.Ui) => void,
   busyMessage: string,
 ): void {
   const ui = SpreadsheetApp.getUi();
@@ -29,7 +22,7 @@ export function withScriptLock(
   }
 
   try {
-    action(ui);
+    fn(ui);
   } finally {
     lock.releaseLock();
   }

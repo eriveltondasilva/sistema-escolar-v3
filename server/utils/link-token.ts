@@ -1,14 +1,7 @@
 // server/utils/link-token.ts
-import type { Result } from "./result.ts";
+import { getReportLinkSecret } from "./script-properties.ts";
 
-import { fromTry, isErr, ok } from "./result.ts";
-import { getScriptProp } from "./script-properties.ts";
-
-interface ReportLinkParams {
-  studentId: string;
-  year: string;
-  className: string;
-}
+import type { ReportLinkParams } from "../types.ts";
 
 /**
  * Gera o token de um link de boletim, a partir da secret configurada
@@ -18,34 +11,27 @@ interface ReportLinkParams {
  *
  * Trocar a secret invalida todos os links já emitidos de uma vez.
  */
-export function generateReportLinkToken(
-  params: ReportLinkParams,
-): Result<string> {
-  const secretResult = getScriptProp("REPORT_LINK_SECRET");
-  if (isErr(secretResult)) return secretResult;
-
-  const secret = secretResult.value;
-  const payload = `${params.studentId}|${params.year}|${params.className}|${secret}`;
+export function generateReportLinkToken({
+  className,
+  studentId,
+  year,
+}: ReportLinkParams): string {
+  const secret = getReportLinkSecret();
+  const payload = `${studentId}|${year}|${className}|${secret}`;
 
   // Utilities.* são chamadas nativas do GAS.
-  const digestResult = fromTry(() =>
-    Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, payload),
+  const digest = Utilities.computeDigest(
+    Utilities.DigestAlgorithm.SHA_256,
+    payload,
   );
-  if (isErr(digestResult)) return digestResult;
 
-  const digest = digestResult.value;
-  const token = Utilities.base64EncodeWebSafe(digest);
-
-  return ok(token);
+  return Utilities.base64EncodeWebSafe(digest);
 }
 
 /** Verifica se `token` corresponde aos parâmetros informados. */
 export function verifyReportLinkToken(
   params: ReportLinkParams,
   token: string,
-): Result<boolean> {
-  const reportLinkToken = generateReportLinkToken(params);
-  if (isErr(reportLinkToken)) return reportLinkToken;
-
-  return ok(reportLinkToken.value === token);
+): boolean {
+  return generateReportLinkToken(params) === token;
 }
