@@ -17,14 +17,14 @@ export interface StudentFormPayload extends StudentData {
 /**
  * Payload enviado pelo client ao criar um aluno.
  * - studentId: gerado pelo servidor (ver generateNextStudentId).
- * - enrollment_date: preenchida automaticamente pelo servidor com a data
+ * - enrollmentDate: preenchida automaticamente pelo servidor com a data
  *   da criação — o client nunca informa isso.
  * - status: sempre "Ativo" na criação, decidido pelo servidor; o client
  *   não escolhe o status inicial (só edita depois, via submitStudentEdit).
  */
 export type CreateStudentPayload = Omit<
   StudentFormPayload,
-  "studentId" | "enrollment_date" | "status"
+  "studentId" | "enrollmentDate" | "status"
 >;
 
 /** Resultado de uma busca de aluno (nome ou matrícula) — usado no autocomplete da tela de busca. */

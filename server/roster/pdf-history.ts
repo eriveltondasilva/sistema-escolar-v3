@@ -1,4 +1,6 @@
 // server/roster/pdf-history.ts
+import { findStudentPdfInFolder } from "#server/drive/drive-lookup.ts";
+
 import type { AppConfig } from "#server/types.ts";
 
 export interface StudentPdfHistoryEntry {
@@ -23,20 +25,13 @@ export function findStudentPdfHistory(
 
     while (classFolders.hasNext()) {
       const classFolder = classFolders.next();
-      const prefix = `${studentId}_`;
-      const searchQuery = `title contains '${prefix}' and mimeType = 'application/pdf' and trashed = false`;
-      const files = classFolder.searchFiles(searchQuery);
-
-      while (files.hasNext()) {
-        const file = files.next();
-        if (!file.getName().startsWith(prefix)) continue;
-
+      const file = findStudentPdfInFolder(classFolder, studentId);
+      if (file)
         results.push({
           yearLabel,
           className: classFolder.getName(),
           pdfUrl: file.getUrl(),
         });
-      }
     }
   }
 

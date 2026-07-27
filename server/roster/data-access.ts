@@ -1,5 +1,7 @@
 // server/roster/data-access.ts
+import { loadSingleStudentGuardiansMap } from "#server/report/data-access.ts";
 import { DEFAULT_LOCALE, ENROLLMENT_SHEET_NAMES } from "../config.ts";
+import { diffStudentFields, logStudentChanges } from "./change-log.ts";
 import { GUARDIAN_COLUMNS, STUDENT_COLUMNS } from "../report/constants.ts";
 import { formatDate } from "../utils/formatters.ts";
 
@@ -75,29 +77,6 @@ export function searchStudents(
     });
 }
 
-function loadRawGuardianNames(
-  registrationSheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
-  studentId: string,
-): string[] {
-  const guardiansSheet = registrationSheet.getSheetByName(
-    ENROLLMENT_SHEET_NAMES.GUARDIANS,
-  );
-  if (!guardiansSheet) return [];
-
-  const lastRow = guardiansSheet.getLastRow();
-  if (lastRow < 2) return [];
-
-  const rows = guardiansSheet.getRange(2, 1, lastRow - 1, 2).getValues();
-
-  return rows
-    .filter(
-      (row) =>
-        String(row[GUARDIAN_COLUMNS.studentId] ?? "").trim() === studentId,
-    )
-    .map((row) => String(row[GUARDIAN_COLUMNS.name] ?? "").trim())
-    .filter((name) => name.length > 0);
-}
-
 export function getStudentForEdit(
   registrationSheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
   studentId: string,
@@ -134,10 +113,13 @@ export function getStudentForEdit(
     address: String(row[STUDENT_COLUMNS.address] ?? ""),
     nationality: String(row[STUDENT_COLUMNS.nationality] ?? ""),
     birthDate: toIsoDateString(row[STUDENT_COLUMNS.birthDate]),
-    enrollment_date: formatDate(row[STUDENT_COLUMNS.enrollmentDate]),
+    enrollmentDate: formatDate(row[STUDENT_COLUMNS.enrollmentDate]),
     sex: String(row[STUDENT_COLUMNS.sex] ?? ""),
     status: String(row[STUDENT_COLUMNS.status] ?? ""),
-    guardianNames: loadRawGuardianNames(registrationSheet, studentId),
+    guardianNames:
+      loadSingleStudentGuardiansMap(registrationSheet, studentId).get(
+        studentId,
+      ) ?? [],
   };
 }
 
@@ -163,7 +145,7 @@ export function createStudentRecord(
     input.address,
     input.nationality,
     birthDate,
-    new Date(), // enrollment_date: sempre a data de criação, gerada aqui.
+    new Date(), // enrollmentDate: sempre a data de criação, gerada aqui.
     input.sex,
     DEFAULT_STUDENT_STATUS,
   ]);
@@ -201,6 +183,20 @@ export function updateStudentRecord(
     throw new Error(`Matrícula ${studentId} não encontrada.`);
   }
 
+  // Lê o estado atual ANTES de sobrescrever, para o diff do log.
+  const currentRow = studentsSheet
+    .getRange(match.getRow(), 1, 1, studentsSheet.getLastColumn())
+    .getValues()[0]!;
+
+  const oldData = {
+    name: String(currentRow[STUDENT_COLUMNS.name] ?? "").trim(),
+    address: String(currentRow[STUDENT_COLUMNS.address] ?? ""),
+    nationality: String(currentRow[STUDENT_COLUMNS.nationality] ?? ""),
+    birthDate: toIsoDateString(currentRow[STUDENT_COLUMNS.birthDate]),
+    sex: String(currentRow[STUDENT_COLUMNS.sex] ?? ""),
+    status: String(currentRow[STUDENT_COLUMNS.status] ?? ""),
+  };
+
   const birthDate = input.birthDate ? new Date(input.birthDate) : "";
 
   studentsSheet
@@ -214,6 +210,16 @@ export function updateStudentRecord(
     .setValue(input.status);
 
   replaceGuardians(registrationSheet, studentId, input.guardianNames);
+
+  const changes = diffStudentFields(oldData, {
+    name: input.name,
+    address: input.address,
+    nationality: input.nationality,
+    birthDate: input.birthDate,
+    sex: input.sex,
+    status: input.status,
+  });
+  logStudentChanges(registrationSheet, studentId, changes);
 }
 
 export function replaceGuardians(
@@ -230,30 +236,37 @@ export function replaceGuardians(
     );
   }
 
+  const validNames = guardianNames
+    .map((name) => name.trim())
+    .filter((name) => name.length > 0);
+
   const lastRow = guardiansSheet.getLastRow();
+  const existingRows: number[] = [];
 
   if (lastRow >= 2) {
     const existingIds = guardiansSheet
       .getRange(2, GUARDIAN_COLUMNS.studentId + 1, lastRow - 1, 1)
       .getValues();
 
-    // De baixo para cima, para não bagunçar os índices de linha ao apagar.
-    for (let i = existingIds.length - 1; i >= 0; i--) {
-      const rowId = String(existingIds[i]?.[0] ?? "").trim();
-      if (rowId === studentId) {
-        guardiansSheet.deleteRow(2 + i);
-      }
-    }
+    existingIds.forEach((row, i) => {
+      const rowId = String(row[0] ?? "").trim();
+      if (rowId === studentId) existingRows.push(2 + i);
+    });
   }
 
-  const validNames = guardianNames
-    .map((name) => name.trim())
-    .filter((name) => name.length > 0);
+  // 1. Insere os novos responsáveis primeiro (no final da aba). Se isso
+  // falhar (quota, timeout), as linhas antigas abaixo continuam intactas
+  // e o aluno não fica sem nenhum responsável cadastrado.
+  if (validNames.length > 0) {
+    const newRows = validNames.map((name) => [studentId, name]);
+    guardiansSheet
+      .getRange(guardiansSheet.getLastRow() + 1, 1, newRows.length, 2)
+      .setValues(newRows);
+  }
 
-  if (validNames.length === 0) return;
-
-  const newRows = validNames.map((name) => [studentId, name]);
-  guardiansSheet
-    .getRange(guardiansSheet.getLastRow() + 1, 1, newRows.length, 2)
-    .setValues(newRows);
+  // 2. Só depois do sucesso acima, remove as linhas antigas.
+  // De baixo para cima, para não bagunçar os índices ao apagar.
+  for (let i = existingRows.length - 1; i >= 0; i--) {
+    guardiansSheet.deleteRow(existingRows[i]!);
+  }
 }

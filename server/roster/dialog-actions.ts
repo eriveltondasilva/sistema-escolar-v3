@@ -77,10 +77,10 @@ function validateStudentPayload(payload: {
   if (!payload.name?.trim()) {
     throw new Error("Nome é obrigatório.");
   }
-  if (
-    !Array.isArray(payload.guardianNames) ||
-    payload.guardianNames.length === 0
-  ) {
+
+  const hasGuardians =
+    !Array.isArray(payload.guardianNames) || payload.guardianNames.length === 0;
+  if (hasGuardians) {
     throw new Error("Informe ao menos um responsável.");
   }
 }
@@ -110,7 +110,7 @@ export function submitStudentRegistration(
 
 export function submitStudentEdit(
   studentId: string,
-  payload: Omit<StudentFormPayload, "studentId" | "enrollment_date">,
+  payload: Omit<StudentFormPayload, "studentId" | "enrollmentDate">,
 ): void {
   const trimmedId = String(studentId ?? "").trim();
   if (!trimmedId) throw new Error("Matrícula não pode ser vazia.");
