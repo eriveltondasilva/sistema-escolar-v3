@@ -16,6 +16,7 @@ export const ENROLLMENT_SHEET_NAMES = {
   STUDENTS: "Alunos",
   GUARDIANS: "Responsáveis",
   SUMMARY: "Resumo",
+  LOG: "Log",
 } as const;
 
 const SYSTEM_CONFIG_SHEET_NAME = "Configuração";

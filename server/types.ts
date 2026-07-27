@@ -42,7 +42,7 @@ export interface StudentData {
   address: string;
   nationality: string;
   birthDate: string;
-  enrollment_date: string;
+  enrollmentDate: string;
   sex: string;
   status: string;
 }
