@@ -1,4 +1,5 @@
 // server/web-app/pdf-lookup.ts
+import { findStudentPdfInFolder } from "#server/drive/drive-lookup.ts";
 import { loadConfig } from "../config.ts";
 
 import type { ReportLinkParams } from "../types.ts";
@@ -28,17 +29,7 @@ export function findReportPdfId({
     );
   }
 
-  const prefix = `${studentId}_`;
-  const searchQuery = `title contains '${prefix}' and mimeType = 'application/pdf' and trashed = false`;
   const classFolder = classFolderIterator.next();
-  const files = classFolder.searchFiles(searchQuery);
 
-  while (files.hasNext()) {
-    const file = files.next();
-    if (!file.getName().startsWith(prefix)) continue;
-
-    return file.getId();
-  }
-
-  return null;
+  return findStudentPdfInFolder(classFolder, studentId)?.getId() ?? null;
 }

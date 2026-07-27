@@ -1,6 +1,6 @@
 // server/system-check/checker.ts
-import { collectOrIssue } from "#server/utils/error.ts";
 import { ENROLLMENT_SHEET_NAMES, loadConfig } from "../config.ts";
+import { DIALOG_NAMES } from "../dialog-names.ts";
 import {
   getClassSpreadsheetFile,
   getReportTemplateFile,
@@ -17,8 +17,11 @@ import {
   findDuplicateStudentIds,
   validateClassStudents,
 } from "../system-check/validate-roster.ts";
+import { collectOrIssue } from "../utils/error.ts";
+import { renderView } from "../utils/render-view.ts";
 
 import type { Issue, StudentData } from "../types.ts";
+import type { ValidationResultInitData } from "./types.ts";
 
 /** Verifica todas as configurações, estrutura de pastas e dados. */
 export function checkSystem(): void {
@@ -37,7 +40,9 @@ export function checkSystem(): void {
 
   // Um template por assessmentType único usado nas turmas (evita validar
   // "grade" duas vezes se todas as turmas forem do mesmo tipo).
-  const assessmentTypes = new Set(VALID_CLASSES.map((c) => c.assessmentType));
+  const assessmentTypes = new Set(
+    VALID_CLASSES.map((validClass) => validClass.assessmentType),
+  );
   for (const assessmentType of assessmentTypes) {
     collectOrIssue(
       issues,
@@ -102,7 +107,11 @@ export function checkSystem(): void {
     let rootUrl: string | undefined;
     try {
       rootUrl = DriveApp.getFolderById(config.schoolYearsFolderId).getUrl();
-    } catch {}
+    } catch {
+      console.warn(
+        `Nenhuma pasta de ano letivo encontrada dentro de "Anos Letivos".`,
+      );
+    }
     issues.push({
       type: "error",
       text: 'Nenhuma pasta de ano letivo encontrada dentro de "Anos Letivos".',
@@ -164,10 +173,13 @@ export function checkSystem(): void {
 /** Renderiza o dialog HTML com os resultados. */
 export function showValidationDialog(issues: Issue[]): void {
   const ui = SpreadsheetApp.getUi();
-  const template = HtmlService.createTemplateFromFile("ValidationResultDialog");
+  const htmlOutput = renderView<ValidationResultInitData>(
+    DIALOG_NAMES.validationResult,
+    {
+      issues,
+    },
+  );
+  htmlOutput.setWidth(560).setHeight(530);
 
-  template.issues = issues;
-
-  const htmlOutput = template.evaluate().setWidth(560).setHeight(530);
   ui.showModalDialog(htmlOutput, "Diagnóstico do Sistema");
 }
