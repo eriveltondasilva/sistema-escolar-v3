@@ -1,5 +1,5 @@
 // server/roster/types.ts
-import type { StudentData } from "#server/types.ts";
+import type { StudentData } from "../types.ts";
 
 /**
  * Dados de um aluno para o formulário de cadastro/edição — estende

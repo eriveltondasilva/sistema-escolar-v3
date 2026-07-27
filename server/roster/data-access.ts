@@ -1,8 +1,8 @@
 // server/roster/data-access.ts
-import { loadSingleStudentGuardiansMap } from "#server/report/data-access.ts";
 import { DEFAULT_LOCALE, ENROLLMENT_SHEET_NAMES } from "../config.ts";
 import { diffStudentFields, logStudentChanges } from "./change-log.ts";
 import { GUARDIAN_COLUMNS, STUDENT_COLUMNS } from "../report/constants.ts";
+import { loadSingleStudentGuardiansMap } from "../report/data-access.ts";
 import { formatDate } from "../utils/formatters.ts";
 
 import type {

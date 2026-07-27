@@ -1,6 +1,6 @@
 // server/roster/change-log.ts (novo arquivo)
-import { getErrorMsg } from "#server/utils/error.ts";
 import { ENROLLMENT_SHEET_NAMES } from "../config.ts";
+import { getErrorMsg } from "../utils/error.ts";
 
 export interface FieldChange {
   field: string;

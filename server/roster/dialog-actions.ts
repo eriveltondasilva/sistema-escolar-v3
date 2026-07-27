@@ -1,7 +1,5 @@
 // server/roster/dialog-actions.ts
-import { loadConfig } from "#server/config.ts";
-import { formatGuardianNames } from "#server/utils/formatters.ts";
-import { withScriptLock } from "#server/utils/script-lock.ts";
+import { loadConfig } from "../config.ts";
 import {
   createStudentRecord,
   getStudentForEdit,
@@ -9,6 +7,8 @@ import {
   updateStudentRecord,
 } from "./data-access.ts";
 import { findStudentPdfHistory } from "./pdf-history.ts";
+import { formatGuardianNames } from "../utils/formatters.ts";
+import { withScriptLock } from "../utils/script-lock.ts";
 
 import type {
   CreateStudentPayload,

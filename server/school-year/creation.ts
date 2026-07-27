@@ -1,8 +1,8 @@
 // server/school-year/creation.ts
-import { getErrorMsg } from "#server/utils/error.ts";
 import { insertMatriculationsIntoResumo } from "./matriculation.ts";
 import { getClassTemplateFile } from "../drive/drive-lookup.ts";
 import { VALID_CLASSES } from "../report/constants.ts";
+import { getErrorMsg } from "../utils/error.ts";
 
 import type { AppConfig, StudentData } from "../types.ts";
 import type { ClassMatriculationInput, CreateSchoolYearData } from "./types.ts";

@@ -1,4 +1,4 @@
-import type { Issue } from "#server/types.ts";
+import type { Issue } from "../types.ts";
 
 // server/utils/error.ts
 export function getErrorMsg(error: unknown): string {

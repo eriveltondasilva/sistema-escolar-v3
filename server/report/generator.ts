@@ -1,9 +1,10 @@
 // server/report/generator.ts
-import { getErrorMsg } from "#server/utils/error.ts";
-import { formatDate, formatSex } from "../utils/formatters.ts";
-import { getWebAppId } from "../utils/script-properties.ts";
 import { getPlaceholderFields, VALID_CLASSES } from "./constants.ts";
 import { getGradesForStudent, getPersonalData } from "./data-access.ts";
+import { getErrorMsg } from "../utils/error.ts";
+import { formatDate, formatSex } from "../utils/formatters.ts";
+import { generateReportLinkToken } from "../utils/link-token.ts";
+import { getWebAppId } from "../utils/script-properties.ts";
 
 import type { AssessmentType } from "../types.ts";
 import type { GenerateReportForStudentParams, SubjectGrades } from "./types.ts";
@@ -28,8 +29,22 @@ export function insertQRCode(
 
   try {
     const webAppId = getWebAppId();
-    const validationUrl = `https://script.google.com/macros/s/${webAppId}/exec?studentId=${studentId}&year=${year}&className=${encodeURIComponent(className)}`;
-    const qrApiUrl = `https://quickchart.io/qr?text=${encodeURIComponent(validationUrl)}&size=80`;
+    const token = generateReportLinkToken({
+      studentId,
+      className,
+      year: String(year),
+    });
+
+    const validationUrl =
+      `https://script.google.com/macros/s/${webAppId}/exec` +
+      `?studentId=${encodeURIComponent(studentId)}` +
+      `&year=${encodeURIComponent(String(year))}` +
+      `&className=${encodeURIComponent(className)}` +
+      `&token=${encodeURIComponent(token)}`;
+    const qrApiUrl =
+      "https://quickchart.io/qr" +
+      `?text=${encodeURIComponent(validationUrl)}` +
+      "&size=80";
 
     const imageBlob = UrlFetchApp.fetch(qrApiUrl).getBlob();
     const textElement = element.getElement();

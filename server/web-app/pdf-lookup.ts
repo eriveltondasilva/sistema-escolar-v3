@@ -1,6 +1,6 @@
 // server/web-app/pdf-lookup.ts
-import { findStudentPdfInFolder } from "#server/drive/drive-lookup.ts";
 import { loadConfig } from "../config.ts";
+import { findStudentPdfInFolder } from "../drive/drive-lookup.ts";
 
 import type { ReportLinkParams } from "../types.ts";
 

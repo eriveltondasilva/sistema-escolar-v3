@@ -1,10 +1,10 @@
 // server/report/menu-actions.ts
-import { DIALOG_NAMES } from "#server/dialog-names.ts";
-import { getErrorMsg } from "#server/utils/error.ts";
-import { renderView } from "#server/utils/render-view.ts";
 import { loadConfig } from "../config.ts";
+import { DIALOG_NAMES } from "../dialog-names.ts";
 import { VALID_CLASSES } from "./constants.ts";
 import { listSchoolYears } from "../drive/drive-lookup.ts";
+import { getErrorMsg } from "../utils/error.ts";
+import { renderView } from "../utils/render-view.ts";
 
 import type { GenerateReportFormInitData } from "./types.ts";
 

@@ -1,7 +1,7 @@
 // server/roster/pdf-history.ts
-import { findStudentPdfInFolder } from "#server/drive/drive-lookup.ts";
+import { findStudentPdfInFolder } from "../drive/drive-lookup.ts";
 
-import type { AppConfig } from "#server/types.ts";
+import type { AppConfig } from "../types.ts";
 
 export interface StudentPdfHistoryEntry {
   yearLabel: string;

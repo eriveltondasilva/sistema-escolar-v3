@@ -1,12 +1,12 @@
 // server/report/batch.ts
 import { MAX_RUNTIME_MS } from "../config.ts";
-import { getErrorMsg } from "../utils/error.ts";
 import { buildReportContext } from "./context-builder.ts";
 import {
   checkClassSubjects,
   getClassStudentsFromResumo,
 } from "./data-access.ts";
 import { generateReportForStudent } from "./generator.ts";
+import { getErrorMsg } from "../utils/error.ts";
 
 import type { AppConfig } from "../types.ts";
 

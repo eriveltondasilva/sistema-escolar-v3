@@ -1,11 +1,6 @@
 // server/report/dialog-actions.ts
-import { DIALOG_NAMES } from "#server/dialog-names.ts";
-import {
-  getClassSpreadsheetFile,
-  getSchoolYearFolder,
-} from "#server/drive/drive-lookup.ts";
-import { renderView } from "#server/utils/render-view.ts";
 import { loadConfig, MAX_ERRORS_SHOWN } from "../config.ts";
+import { DIALOG_NAMES } from "../dialog-names.ts";
 import { generateReportsForClass } from "./batch.ts";
 import { buildSingleStudentReportContext } from "./context-builder.ts";
 import {
@@ -14,6 +9,11 @@ import {
   isStudentInClass,
 } from "./data-access.ts";
 import { generateReportForStudent } from "./generator.ts";
+import {
+  getClassSpreadsheetFile,
+  getSchoolYearFolder,
+} from "../drive/drive-lookup.ts";
+import { renderView } from "../utils/render-view.ts";
 import { withScriptLock } from "../utils/script-lock.ts";
 
 import type {
