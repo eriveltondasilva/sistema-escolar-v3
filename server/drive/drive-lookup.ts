@@ -124,3 +124,19 @@ export function getOrCreateClassPdfFolder(
       classFolders.next()
     : yearFolder.createFolder(className);
 }
+
+export function findStudentPdfInFolder(
+  folder: GoogleAppsScript.Drive.Folder,
+  studentId: string,
+): GoogleAppsScript.Drive.File | null {
+  const prefix = `${studentId}_`;
+  const searchQuery = `title contains '${prefix}' and mimeType = 'application/pdf' and trashed = false`;
+  const files = folder.searchFiles(searchQuery);
+
+  while (files.hasNext()) {
+    const file = files.next();
+    if (file.getName().startsWith(prefix)) return file;
+  }
+
+  return null;
+}
