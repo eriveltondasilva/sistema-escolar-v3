@@ -1,8 +1,9 @@
 // server/report/generator.ts
-import { getPlaceholderFields, VALID_CLASSES } from "./constants.ts";
-import { getGradesForStudent, getPersonalData } from "./data-access.ts";
+import { getErrorMsg } from "#server/utils/error.ts";
 import { formatDate, formatSex } from "../utils/formatters.ts";
 import { getWebAppId } from "../utils/script-properties.ts";
+import { getPlaceholderFields, VALID_CLASSES } from "./constants.ts";
+import { getGradesForStudent, getPersonalData } from "./data-access.ts";
 
 import type { AssessmentType } from "../types.ts";
 import type { GenerateReportForStudentParams, SubjectGrades } from "./types.ts";
@@ -34,11 +35,12 @@ export function insertQRCode(
     const textElement = element.getElement();
     const parent = textElement.getParent().asParagraph();
     const childIndex = parent.getChildIndex(textElement);
+
     parent.insertInlineImage(childIndex, imageBlob);
-  } catch (e) {
-    const message = e instanceof Error ? e.message : String(e);
+  } catch (error) {
+    const errorMessage = getErrorMsg(error);
     console.warn(
-      `insertQRCode: falha ao gerar QR para matrícula ${studentId} — ${message}`,
+      `insertQRCode: falha ao gerar QR para matrícula ${studentId} — ${errorMessage}`,
     );
   } finally {
     element.getElement().removeFromParent();
@@ -57,7 +59,9 @@ export function generateReportForStudent({
 
   const fileName = `${studentId}_${personalData.name.replace(/\s+/g, "_").toLowerCase()}`;
   const docCopy = context.templateFile.makeCopy(fileName, context.tempFolder);
-  const classInfo = VALID_CLASSES.find((c) => c.className === className);
+  const classInfo = VALID_CLASSES.find(
+    (validClass) => validClass.className === className,
+  );
   const date = new Date();
 
   try {

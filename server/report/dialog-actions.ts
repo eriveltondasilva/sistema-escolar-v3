@@ -1,8 +1,10 @@
 // server/report/dialog-actions.ts
+import { DIALOG_NAMES } from "#server/dialog-names.ts";
 import {
   getClassSpreadsheetFile,
   getSchoolYearFolder,
 } from "#server/drive/drive-lookup.ts";
+import { renderView } from "#server/utils/render-view.ts";
 import { loadConfig, MAX_ERRORS_SHOWN } from "../config.ts";
 import { generateReportsForClass } from "./batch.ts";
 import { buildSingleStudentReportContext } from "./context-builder.ts";
@@ -13,6 +15,11 @@ import {
 } from "./data-access.ts";
 import { generateReportForStudent } from "./generator.ts";
 import { withScriptLock } from "../utils/script-lock.ts";
+
+import type {
+  ClassReportResultInitData,
+  ReportSuccessInitData,
+} from "./types.ts";
 
 interface ClassStudent {
   studentId: string;
@@ -31,13 +38,9 @@ export function getStudentsDataForClass(
     className,
   );
   const classSpreadsheet = SpreadsheetApp.openById(classFile.getId());
-
   const students = getClassStudentsFromResumo(classSpreadsheet);
 
-  return students.map((s) => ({
-    studentId: s.studentId,
-    name: s.name,
-  }));
+  return students.map(({ studentId, name }) => ({ studentId, name }));
 }
 
 export function executeClassReportsGeneration(
@@ -91,20 +94,21 @@ function executeClassReportsGenerationInternal_(
   const errorsToShow = result.errors.slice(0, MAX_ERRORS_SHOWN);
   const truncatedCount = result.errors.length - errorsToShow.length;
 
-  const template = HtmlService.createTemplateFromFile(
-    "ClassReportResultDialog",
-  );
-  template.successCount = result.successCount;
-  template.className = className;
-  template.schoolYearLabel = schoolYearLabel;
-  template.errors = errorsToShow;
-  template.truncatedCount = truncatedCount;
-  template.pdfFolderUrl = result.pdfFolderUrl;
-  template.interrupted = result.interrupted;
-  template.interruptedMessage = result.interruptedMessage;
-
   const height = result.errors.length > 0 ? 600 : 240;
-  const htmlOutput = template.evaluate().setWidth(440).setHeight(height);
+  const htmlOutput = renderView<ClassReportResultInitData>(
+    DIALOG_NAMES.classReportResult,
+    {
+      className,
+      schoolYearLabel,
+      truncatedCount,
+      errors: errorsToShow,
+      successCount: result.successCount,
+      pdfFolderUrl: result.pdfFolderUrl,
+      interrupted: result.interrupted,
+      interruptedMessage: result.interruptedMessage,
+    },
+  );
+  htmlOutput.setWidth(440).setHeight(height);
 
   ui.showModalDialog(htmlOutput, "Boletins Gerados");
 }
@@ -143,7 +147,6 @@ function executeStudentReportGenerationInternal_(
     foundSubjects,
     studentId,
   });
-
   const pdfUrl = generateReportForStudent({
     studentId,
     className,
@@ -151,13 +154,17 @@ function executeStudentReportGenerationInternal_(
     context,
   });
 
-  const template = HtmlService.createTemplateFromFile("ReportSuccessDialog");
-  template.studentId = studentId;
-  template.className = className;
-  template.schoolYearLabel = schoolYearLabel;
-  template.pdfUrl = pdfUrl;
-  template.pdfFolderUrl = context.pdfFolder.getUrl();
+  const htmlOutput = renderView<ReportSuccessInitData>(
+    DIALOG_NAMES.reportSuccess,
+    {
+      studentId,
+      className,
+      schoolYearLabel,
+      pdfUrl,
+      pdfFolderUrl: context.pdfFolder.getUrl(),
+    },
+  );
+  htmlOutput.setWidth(400).setHeight(360);
 
-  const htmlOutput = template.evaluate().setWidth(400).setHeight(360);
   ui.showModalDialog(htmlOutput, "Boletim Gerado");
 }

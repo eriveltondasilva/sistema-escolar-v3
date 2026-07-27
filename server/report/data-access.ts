@@ -93,7 +93,7 @@ function mapStudentRow(row: ReadonlyArray<unknown>): StudentData {
     address: String(row[STUDENT_COLUMNS.address] ?? ""),
     nationality: String(row[STUDENT_COLUMNS.nationality] ?? ""),
     birthDate: formatDate(row[STUDENT_COLUMNS.birthDate]),
-    enrollment_date: formatDate(row[STUDENT_COLUMNS.enrollmentDate]),
+    enrollmentDate: formatDate(row[STUDENT_COLUMNS.enrollmentDate]),
     sex: String(row[STUDENT_COLUMNS.sex] ?? ""),
     status: String(row[STUDENT_COLUMNS.status] ?? ""),
   };
@@ -221,26 +221,18 @@ export function loadSingleStudentGuardiansMap(
     .matchEntireCell(true)
     .findAll();
 
-  if (matches.length === 0) return map;
-
-  const matchedRows = matches.map((cell) => cell.getRow());
-  const firstRow = Math.min(...matchedRows);
-  const lastMatchedRow = Math.max(...matchedRows);
-
-  const nameColumnValues = guardiansSheet
-    .getRange(
-      firstRow,
-      GUARDIAN_COLUMNS.name + 1,
-      lastMatchedRow - firstRow + 1,
-      1,
+  const names = matches
+    .map((cell) =>
+      String(
+        guardiansSheet
+          .getRange(cell.getRow(), GUARDIAN_COLUMNS.name + 1)
+          .getValue() ?? "",
+      ).trim(),
     )
-    .getValues();
-
-  const names = matchedRows
-    .map((row) => String(nameColumnValues[row - firstRow]?.[0] ?? "").trim())
     .filter((name) => name.length > 0);
 
   if (names.length > 0) map.set(studentId, names);
+
   return map;
 }
 

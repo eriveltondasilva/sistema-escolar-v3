@@ -1,5 +1,6 @@
 // server/report/batch.ts
 import { MAX_RUNTIME_MS } from "../config.ts";
+import { getErrorMsg } from "../utils/error.ts";
 import { buildReportContext } from "./context-builder.ts";
 import {
   checkClassSubjects,
@@ -62,9 +63,9 @@ export function generateReportsForClass(
         context,
       });
       successCount++;
-    } catch (e) {
-      const message = e instanceof Error ? e.message : String(e);
-      errors.push(`Linha ${row} (matrícula ${studentId}): ${message}`);
+    } catch (error) {
+      const errorMessage = getErrorMsg(error);
+      errors.push(`Linha ${row} (matrícula ${studentId}): ${errorMessage}`);
     }
   }
 

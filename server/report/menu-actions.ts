@@ -1,13 +1,17 @@
 // server/report/menu-actions.ts
+import { DIALOG_NAMES } from "#server/dialog-names.ts";
+import { getErrorMsg } from "#server/utils/error.ts";
+import { renderView } from "#server/utils/render-view.ts";
 import { loadConfig } from "../config.ts";
 import { VALID_CLASSES } from "./constants.ts";
 import { listSchoolYears } from "../drive/drive-lookup.ts";
+
+import type { GenerateReportFormInitData } from "./types.ts";
 
 type SelectYearClassActionType = "single" | "class";
 
 /**
  * Abre o diálogo unificado de seleção de Ano Letivo e Turma.
- * @param actionType 'single' para aluno individual, 'class' para a turma toda.
  */
 export function openSelectYearClassDialog(
   actionType: SelectYearClassActionType,
@@ -23,25 +27,26 @@ export function openSelectYearClassDialog(
       return;
     }
 
-    const template = HtmlService.createTemplateFromFile(
-      "SelectYearClassDialog",
-    );
-    template.years = years;
-    template.classes = VALID_CLASSES.map((c) => c.className);
-    template.actionType = actionType;
-
     const height = actionType === "single" ? 320 : 240;
-    const htmlOutput = template.evaluate().setWidth(400).setHeight(height);
+    const htmlOutput = renderView<GenerateReportFormInitData>(
+      DIALOG_NAMES.generateReportForm,
+      {
+        actionType,
+        years,
+        classes: VALID_CLASSES.map((validClass) => validClass.className),
+      },
+    );
+    htmlOutput.setWidth(400).setHeight(height);
 
-    ui.showModalDialog(
-      htmlOutput,
+    const dialogTitle =
       actionType === "single" ?
         "Gerar Boletim do Aluno"
-      : "Gerar Boletins da Turma",
-    );
-  } catch (e) {
-    const message = e instanceof Error ? e.message : String(e);
-    ui.alert(`Erro ao abrir seleção: ${message}`);
+      : "Gerar Boletins da Turma";
+
+    ui.showModalDialog(htmlOutput, dialogTitle);
+  } catch (error) {
+    const errorMessage = getErrorMsg(error);
+    ui.alert(`Erro ao abrir seleção: ${errorMessage}`);
   }
 }
 
