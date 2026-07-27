@@ -1,4 +1,5 @@
 // server/school-year/creation.ts
+import { getErrorMsg } from "#server/utils/error.ts";
 import { insertMatriculationsIntoResumo } from "./matriculation.ts";
 import { getClassTemplateFile } from "../drive/drive-lookup.ts";
 import { VALID_CLASSES } from "../report/constants.ts";
@@ -63,16 +64,17 @@ export function createSchoolYearStructure({
       }
 
       createdClasses.push(className);
-    } catch (e) {
-      const message = e instanceof Error ? e.message : String(e);
-      creationErrors.push(`${className}: ${message}`);
+    } catch (error) {
+      const errorMassage = getErrorMsg(error);
+      creationErrors.push(`${className}: ${errorMassage}`);
     }
   }
 
   if (creationErrors.length > 0) {
     yearFolder.setTrashed(true);
     throw new Error(
-      `Não foi possível criar o ano letivo "${schoolYearLabel}". Nenhuma alteração foi feita.\n\n${creationErrors.join("\n")}`,
+      `Não foi possível criar o ano letivo "${schoolYearLabel}".` +
+        `Nenhuma alteração foi feita.\n\n${creationErrors.join("\n")}`,
     );
   }
 
