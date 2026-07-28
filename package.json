@@ -22,8 +22,8 @@
     "lint:fix": "bunx --bun eslint . --fix",
     "2###": "",
     "types": "tsc --noEmit",
-    "check": "bun run types && bun run fmt && bun run lint",
-    "fix": "bun run types && bun run fmt:fix && bun run lint:fix"
+    "check": "bun run types && bun run lint && bun run fmt",
+    "fix": "bun run types && bun run lint:fix && bun run fmt:fix"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -35,7 +35,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-node": "^0.4.0",
     "eslint-plugin-import-x": "^4.17.1",
-    "globals": "^17.7.0",
+    "globals": "^17.8.0",
     "posthtml": "^0.16.7",
     "posthtml-component": "^2.3.0",
     "prettier": "^3.9.6",
