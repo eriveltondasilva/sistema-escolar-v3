@@ -21,7 +21,7 @@ export function replacePlaceholder(
 export function insertQRCode(
   body: GoogleAppsScript.Document.Body,
   studentId: string,
-  year: number,
+  year: string,
   className: string,
 ): void {
   const element = body.findText("{{qr_code}}");
@@ -32,14 +32,14 @@ export function insertQRCode(
     const token = generateReportLinkToken({
       studentId,
       className,
-      year: String(year),
+      year,
     });
 
     const validationUrl =
       `https://script.google.com/macros/s/${webAppId}/exec` +
       `?studentId=${encodeURIComponent(studentId)}` +
-      `&year=${encodeURIComponent(String(year))}` +
       `&className=${encodeURIComponent(className)}` +
+      `&year=${encodeURIComponent(year)}` +
       `&token=${encodeURIComponent(token)}`;
     const qrApiUrl =
       "https://quickchart.io/qr" +
@@ -96,7 +96,7 @@ export function generateReportForStudent({
     replacePlaceholder(body, "serie", classInfo?.className ?? "");
     replacePlaceholder(body, "turma", "Única");
     replacePlaceholder(body, "turno", classInfo?.shift ?? "");
-    replacePlaceholder(body, "ano_letivo", String(context.yearNumber));
+    replacePlaceholder(body, "ano_letivo", context.year);
 
     replacePlaceholder(
       body,
@@ -115,7 +115,7 @@ export function generateReportForStudent({
       );
     }
 
-    insertQRCode(body, studentId, context.yearNumber, className);
+    insertQRCode(body, studentId, context.year, className);
 
     doc.saveAndClose();
 

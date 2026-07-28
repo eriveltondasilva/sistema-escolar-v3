@@ -9,7 +9,7 @@ import {
   loadStudentsMap,
 } from "./data-access.ts";
 import {
-  extractYearNumber,
+  extractYear,
   getOrCreateClassPdfFolder,
   getReportTemplateFile,
 } from "../drive/drive-lookup.ts";
@@ -28,18 +28,18 @@ export function buildReportContext({
   className,
   foundSubjects,
 }: BuildReportContextParams): ReportContext {
-  const yearNumber = extractYearNumber(schoolYearLabel);
+  const year = extractYear(schoolYearLabel);
   const assessmentType = getAssessmentType(className);
   const registrationSheet = SpreadsheetApp.openById(
     config.enrollmentSpreadsheetId,
   );
 
   return {
-    yearNumber,
+    year,
     assessmentType,
     templateFile: getReportTemplateFile(config, assessmentType),
     tempFolder: DriveApp.getFolderById(config.tempFolderId),
-    pdfFolder: getOrCreateClassPdfFolder(config, yearNumber, className),
+    pdfFolder: getOrCreateClassPdfFolder(config, year, className),
     studentsMap: loadStudentsMap(registrationSheet),
     guardiansMap: loadGuardiansMap(registrationSheet),
     gradesBySubject: loadGradesBySubject(classSpreadsheet, foundSubjects),
@@ -54,18 +54,18 @@ export function buildSingleStudentReportContext({
   foundSubjects,
   studentId,
 }: BuildSingleStudentReportContextParams): ReportContext {
-  const yearNumber = extractYearNumber(schoolYearLabel);
+  const year = extractYear(schoolYearLabel);
   const assessmentType = getAssessmentType(className);
   const registrationSheet = SpreadsheetApp.openById(
     config.enrollmentSpreadsheetId,
   );
 
   return {
-    yearNumber,
+    year,
     assessmentType,
     templateFile: getReportTemplateFile(config, assessmentType),
     tempFolder: DriveApp.getFolderById(config.tempFolderId),
-    pdfFolder: getOrCreateClassPdfFolder(config, yearNumber, className),
+    pdfFolder: getOrCreateClassPdfFolder(config, year, className),
     studentsMap: loadSingleStudentMap(registrationSheet, studentId),
     guardiansMap: loadSingleStudentGuardiansMap(registrationSheet, studentId),
     gradesBySubject: loadGradesForSingleStudent(

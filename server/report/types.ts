@@ -7,7 +7,7 @@ import type {
 } from "../types.ts";
 
 export interface ReportContext {
-  yearNumber: number;
+  year: string;
   assessmentType: AssessmentType;
   templateFile: GoogleAppsScript.Drive.File;
   tempFolder: GoogleAppsScript.Drive.Folder;
@@ -22,6 +22,8 @@ export type GradeRow = ReadonlyArray<unknown>;
 
 /** Notas de uma disciplina já mapeadas por campo (ver GRADE_COLUMNS). */
 export type SubjectGrades = Record<string, unknown>;
+
+export type SelectYearClassActionType = "single" | "class";
 
 export interface PlaceholderField {
   suffix: string;
@@ -60,7 +62,7 @@ export interface GenerateReportForStudentParams {
 
 /** Payload de GenerateReportFormDialog.html — abertura do form de seleção. */
 export interface GenerateReportFormInitData {
-  actionType: "single" | "class";
+  actionType: SelectYearClassActionType;
   years: string[];
   classes: string[];
 }
