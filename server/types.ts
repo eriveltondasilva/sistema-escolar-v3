@@ -15,8 +15,8 @@ export interface AppConfig {
 
 export interface ReportLinkParams {
   studentId: string;
-  year: string;
   className: string;
+  year: string;
 }
 
 export interface Issue {

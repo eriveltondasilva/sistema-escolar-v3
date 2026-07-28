@@ -31,7 +31,7 @@ export function getSchoolYearFolder(
   return subfolders.next();
 }
 
-export function extractYearNumber(schoolYearLabel: string): number {
+export function extractYear(schoolYearLabel: string): string {
   const match = schoolYearLabel.match(/\d{4}/);
 
   if (!match) {
@@ -40,7 +40,7 @@ export function extractYearNumber(schoolYearLabel: string): number {
     );
   }
 
-  return Number(match[0]);
+  return match[0];
 }
 
 export function getClassSpreadsheetFile(
@@ -107,17 +107,13 @@ export function getClassTemplateFile(
 
 export function getOrCreateClassPdfFolder(
   config: AppConfig,
-  yearNumber: number,
+  year: string,
   className: string,
 ): GoogleAppsScript.Drive.Folder {
   const rootFolder = DriveApp.getFolderById(config.pdfsFolderId);
-  const yearLabel = String(yearNumber);
-
-  const yearFolders = rootFolder.getFoldersByName(yearLabel);
+  const yearFolders = rootFolder.getFoldersByName(year);
   const yearFolder =
-    yearFolders.hasNext() ?
-      yearFolders.next()
-    : rootFolder.createFolder(yearLabel);
+    yearFolders.hasNext() ? yearFolders.next() : rootFolder.createFolder(year);
 
   const classFolders = yearFolder.getFoldersByName(className);
   return classFolders.hasNext() ?
