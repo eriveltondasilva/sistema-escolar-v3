@@ -16,6 +16,8 @@
 
 import { onOpen } from "./menu.js";
 import {
+  cancelClassReportsGeneration,
+  continueClassReportsGeneration,
   executeClassReportsGeneration,
   executeStudentReportGeneration,
   getStudentsDataForClass,
@@ -57,6 +59,8 @@ Object.assign(globalThis, {
   // --- Boletim: dialog (google.script.run) ---
   getStudentsDataForClass, // autocomplete de aluno no form de boletim individual
   executeClassReportsGeneration, // gera os boletins de uma turma inteira
+  continueClassReportsGeneration,
+  cancelClassReportsGeneration,
   executeStudentReportGeneration, // gera o boletim de um único aluno
 
   // --- Diagnóstico: menu ---

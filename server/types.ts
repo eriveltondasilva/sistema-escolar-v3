@@ -54,3 +54,16 @@ export interface GuardianData {
   isPrimary: boolean;
   phone: string;
 }
+
+/**
+ * Payload enviado pelo formulário de cadastro/edição de aluno.
+ * Reaproveita os campos de StudentData que o form realmente edita
+ * (sem enrollmentDate/status, que não fazem parte do form) e a lista
+ * de responsáveis.
+ */
+export interface StudentFormPayload extends Pick<
+  StudentData,
+  "name" | "address" | "nationality" | "sex" | "birthDate"
+> {
+  guardians: GuardianData[];
+}
