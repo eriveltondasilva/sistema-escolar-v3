@@ -1,7 +1,7 @@
 // server/report/dialog-actions.ts
 import { loadConfig, MAX_ERRORS_SHOWN } from "../config.ts";
 import { DIALOG_NAMES } from "../dialog-names.ts";
-import { generateReportsForClass } from "./batch.ts";
+import { continueReportsForClass, generateReportsForClass } from "./batch.ts";
 import { buildSingleStudentReportContext } from "./context-builder.ts";
 import {
   checkClassSubjects,
@@ -15,8 +15,14 @@ import {
 } from "../drive/drive-lookup.ts";
 import { renderView } from "../utils/render-view.ts";
 import { withScriptLock } from "../utils/script-lock.ts";
+import {
+  clearClassReportJob,
+  loadClassReportJob,
+} from "../utils/script-properties.ts";
 
+import type { ClassReportsGenerationResult } from "./batch.ts";
 import type {
+  ClassReportJob,
   ClassReportResultInitData,
   ReportSuccessInitData,
 } from "./types.ts";
@@ -48,8 +54,45 @@ export function executeClassReportsGeneration(
   className: string,
 ): void {
   withScriptLock((ui) => {
+    const pendingJob = loadClassReportJob();
+
+    if (pendingJob) {
+      if (
+        pendingJob.schoolYearLabel !== schoolYearLabel ||
+        pendingJob.className !== className
+      ) {
+        throw new Error(
+          `Existe uma geração pendente para a turma "${pendingJob.className}" ` +
+            `(${pendingJob.schoolYearLabel}). Retome ou cancele essa geração antes de iniciar outra.`,
+        );
+      }
+
+      continueClassReportsGenerationInternal_(ui, pendingJob);
+      return;
+    }
+
     executeClassReportsGenerationInternal_(ui, schoolYearLabel, className);
   }, "Já existe uma geração de boletins em andamento. Tente novamente em alguns instantes.");
+}
+
+export function continueClassReportsGeneration(): void {
+  withScriptLock((ui) => {
+    const pendingJob = loadClassReportJob();
+    if (!pendingJob) {
+      throw new Error(
+        "Não existe uma geração de boletins pendente para retomar.",
+      );
+    }
+
+    continueClassReportsGenerationInternal_(ui, pendingJob);
+  }, "Já existe uma geração de boletins em andamento. Tente novamente em alguns instantes.");
+}
+
+export function cancelClassReportsGeneration(): void {
+  withScriptLock(() => {
+    if (!loadClassReportJob()) return;
+    clearClassReportJob();
+  }, "Não foi possível cancelar enquanto uma geração está em andamento. Tente novamente em alguns instantes.");
 }
 
 export function executeStudentReportGeneration(
@@ -83,7 +126,6 @@ function executeClassReportsGenerationInternal_(
     className,
   );
   const classSpreadsheet = SpreadsheetApp.openById(classFile.getId());
-
   const result = generateReportsForClass(
     config,
     classSpreadsheet,
@@ -91,10 +133,40 @@ function executeClassReportsGenerationInternal_(
     className,
   );
 
-  const errorsToShow = result.errors.slice(0, MAX_ERRORS_SHOWN);
-  const truncatedCount = result.errors.length - errorsToShow.length;
+  showClassReportsGenerationResult_(ui, result, schoolYearLabel, className);
+}
 
-  const height = result.errors.length > 0 ? 600 : 240;
+function continueClassReportsGenerationInternal_(
+  ui: GoogleAppsScript.Base.Ui,
+  pendingJob: ClassReportJob,
+): void {
+  const config = loadConfig();
+  const yearFolder = getSchoolYearFolder(config, pendingJob.schoolYearLabel);
+  const classFile = getClassSpreadsheetFile(
+    yearFolder,
+    pendingJob.schoolYearLabel,
+    pendingJob.className,
+  );
+  const classSpreadsheet = SpreadsheetApp.openById(classFile.getId());
+  const result = continueReportsForClass(config, classSpreadsheet, pendingJob);
+
+  showClassReportsGenerationResult_(
+    ui,
+    result,
+    pendingJob.schoolYearLabel,
+    pendingJob.className,
+  );
+}
+
+function showClassReportsGenerationResult_(
+  ui: GoogleAppsScript.Base.Ui,
+  result: ClassReportsGenerationResult,
+  schoolYearLabel: string,
+  className: string,
+): void {
+  const errorsToShow = result.errors.slice(0, MAX_ERRORS_SHOWN);
+  const truncatedCount = result.errorCount - errorsToShow.length;
+  const height = result.errorCount > 0 || result.interrupted ? 600 : 240;
   const htmlOutput = renderView<ClassReportResultInitData>(
     DIALOG_NAMES.classReportResult,
     {
@@ -103,6 +175,8 @@ function executeClassReportsGenerationInternal_(
       truncatedCount,
       errors: errorsToShow,
       successCount: result.successCount,
+      processedCount: result.processedCount,
+      totalStudents: result.totalStudents,
       pdfFolderUrl: result.pdfFolderUrl,
       interrupted: result.interrupted,
       interruptedMessage: result.interruptedMessage,

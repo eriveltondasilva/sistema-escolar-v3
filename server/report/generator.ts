@@ -128,7 +128,7 @@ export function generateReportForStudent({
       DriveApp.Permission.VIEW,
     );
 
-    trashPreviousPdfVersions(context.pdfFolder, fileName, pdfFile.getId());
+    trashPreviousPdfVersions(context.pdfFolder, studentId, pdfFile.getId());
 
     return pdfFile.getUrl();
   } finally {
@@ -138,15 +138,21 @@ export function generateReportForStudent({
 
 export function trashPreviousPdfVersions(
   pdfFolder: GoogleAppsScript.Drive.Folder,
-  fileName: string,
+  studentId: string,
   keepFileId: string,
 ): void {
-  const existingFiles = pdfFolder.getFilesByName(`${fileName}.pdf`);
+  const prefix = `${studentId}_`;
+  const searchQuery =
+    `title contains '${prefix}' and ` +
+    "mimeType = 'application/pdf' and trashed = false";
+  const existingFiles = pdfFolder.searchFiles(searchQuery);
 
   while (existingFiles.hasNext()) {
     const file = existingFiles.next();
 
-    if (file.getId() !== keepFileId) file.setTrashed(true);
+    if (file.getId() !== keepFileId && file.getName().startsWith(prefix)) {
+      file.setTrashed(true);
+    }
   }
 }
 

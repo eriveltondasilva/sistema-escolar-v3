@@ -70,6 +70,8 @@ export interface GenerateReportFormInitData {
 /** Payload de ClassReportResultDialog.html — resultado da geração em lote. */
 export interface ClassReportResultInitData {
   successCount: number;
+  processedCount: number;
+  totalStudents: number;
   className: string;
   schoolYearLabel: string;
   interrupted: boolean;
@@ -77,6 +79,17 @@ export interface ClassReportResultInitData {
   errors: string[];
   truncatedCount: number;
   pdfFolderUrl: string;
+}
+
+/** Estado persistido de uma geração de boletins em lote que pode ser retomada. */
+export interface ClassReportJob {
+  schoolYearLabel: string;
+  className: string;
+  students: Array<Pick<ClassStudent, "studentId" | "row">>;
+  nextStudentIndex: number;
+  successCount: number;
+  errorCount: number;
+  errors: string[];
 }
 
 /** Payload de ReportSuccessDialog.html — resultado da geração individual. */

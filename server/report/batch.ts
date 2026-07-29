@@ -1,5 +1,5 @@
 // server/report/batch.ts
-import { MAX_RUNTIME_MS } from "../config.ts";
+import { MAX_ERRORS_SHOWN, MAX_RUNTIME_MS } from "../config.ts";
 import { buildReportContext } from "./context-builder.ts";
 import {
   checkClassSubjects,
@@ -7,12 +7,23 @@ import {
 } from "./data-access.ts";
 import { generateReportForStudent } from "./generator.ts";
 import { getErrorMsg } from "../utils/error.ts";
+import {
+  clearClassReportJob,
+  saveClassReportJob,
+} from "../utils/script-properties.ts";
 
 import type { AppConfig } from "../types.ts";
+import type { ClassReportJob } from "./types.ts";
+
+/** Reserva tempo para persistir o cursor antes do limite da execução. */
+const SAFE_RUNTIME_MS = MAX_RUNTIME_MS - 30 * 1000;
 
 export interface ClassReportsGenerationResult {
   successCount: number;
+  processedCount: number;
+  totalStudents: number;
   errors: string[];
+  errorCount: number;
   interrupted: boolean;
   interruptedMessage: string;
   pdfFolderUrl: string;
@@ -34,46 +45,103 @@ export function generateReportsForClass(
     throw new Error('Turma sem alunos cadastrados na aba "Resumo".');
   }
 
+  const job: ClassReportJob = {
+    schoolYearLabel,
+    className,
+    students: students.map(({ studentId, row }) => ({ studentId, row })),
+    nextStudentIndex: 0,
+    successCount: 0,
+    errorCount: 0,
+    errors: [],
+  };
+
+  saveClassReportJob(job);
+
+  return processClassReportJob(config, classSpreadsheet, foundSubjects, job);
+}
+
+export function continueReportsForClass(
+  config: AppConfig,
+  classSpreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
+  job: ClassReportJob,
+): ClassReportsGenerationResult {
+  const { found: foundSubjects } = checkClassSubjects(classSpreadsheet);
+  if (foundSubjects.length === 0) {
+    throw new Error("Nenhuma disciplina reconhecida nessa turma.");
+  }
+
+  return processClassReportJob(config, classSpreadsheet, foundSubjects, job);
+}
+
+function processClassReportJob(
+  config: AppConfig,
+  classSpreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
+  foundSubjects: ReturnType<typeof checkClassSubjects>["found"],
+  job: ClassReportJob,
+): ClassReportsGenerationResult {
   const context = buildReportContext({
     config,
     classSpreadsheet,
-    schoolYearLabel,
-    className,
+    schoolYearLabel: job.schoolYearLabel,
+    className: job.className,
     foundSubjects,
   });
-
-  let successCount = 0;
-  const errors: string[] = [];
-  let interrupted = false;
-  let interruptedMessage = "";
   const startTime = Date.now();
 
-  for (const { studentId, row } of students) {
-    if (Date.now() - startTime > MAX_RUNTIME_MS) {
-      interrupted = true;
-      interruptedMessage = `Processo interrompido após ${MAX_RUNTIME_MS / 60000} min. Gere novamente a partir da linha ${row} (matrícula ${studentId}).`;
-      break;
+  for (let index = job.nextStudentIndex; index < job.students.length; index++) {
+    if (Date.now() - startTime >= SAFE_RUNTIME_MS) {
+      return makeGenerationResult(job, context.pdfFolder.getUrl(), true);
     }
+
+    const { studentId, row } = job.students[index]!;
 
     try {
       generateReportForStudent({
         studentId,
-        className,
+        className: job.className,
         foundSubjects,
         context,
       });
-      successCount++;
+      job.successCount++;
     } catch (error) {
-      const errorMessage = getErrorMsg(error);
-      errors.push(`Linha ${row} (matrícula ${studentId}): ${errorMessage}`);
+      job.errorCount++;
+
+      if (job.errors.length < MAX_ERRORS_SHOWN) {
+        const errorMessage = getErrorMsg(error);
+        job.errors.push(
+          `Linha ${row} (matrícula ${studentId}): ${errorMessage}`,
+        );
+      }
     }
+
+    // Salva após cada aluno para que a retomada não recomece do início.
+    job.nextStudentIndex = index + 1;
+    saveClassReportJob(job);
   }
 
+  clearClassReportJob();
+  return makeGenerationResult(job, context.pdfFolder.getUrl(), false);
+}
+
+function makeGenerationResult(
+  job: ClassReportJob,
+  pdfFolderUrl: string,
+  interrupted: boolean,
+): ClassReportsGenerationResult {
+  const processedCount = job.nextStudentIndex;
+  const totalStudents = job.students.length;
+
   return {
-    successCount,
-    errors,
+    successCount: job.successCount,
+    processedCount,
+    totalStudents,
+    errors: job.errors,
+    errorCount: job.errorCount,
     interrupted,
-    interruptedMessage,
-    pdfFolderUrl: context.pdfFolder.getUrl(),
+    interruptedMessage:
+      interrupted ?
+        `Processamento pausado em ${processedCount} de ${totalStudents} aluno(s). Clique em "Continuar geração" para retomar.`
+      : "",
+    pdfFolderUrl,
   };
 }
