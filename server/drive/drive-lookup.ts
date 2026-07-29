@@ -128,11 +128,22 @@ export function findStudentPdfInFolder(
   const prefix = `${studentId}_`;
   const searchQuery = `title contains '${prefix}' and mimeType = 'application/pdf' and trashed = false`;
   const files = folder.searchFiles(searchQuery);
+  let newestFile: GoogleAppsScript.Drive.File | null = null;
 
   while (files.hasNext()) {
     const file = files.next();
-    if (file.getName().startsWith(prefix)) return file;
+    if (!file.getName().startsWith(prefix)) continue;
+
+    const newestUpdatedAt = newestFile?.getLastUpdated().getTime() ?? -1;
+    const fileUpdatedAt = file.getLastUpdated().getTime();
+    const isNewer = fileUpdatedAt > newestUpdatedAt;
+    const hasSameUpdateTime = fileUpdatedAt === newestUpdatedAt;
+    const hasHigherId = newestFile ? file.getId() > newestFile.getId() : false;
+
+    if (isNewer || (hasSameUpdateTime && hasHigherId)) {
+      newestFile = file;
+    }
   }
 
-  return null;
+  return newestFile;
 }

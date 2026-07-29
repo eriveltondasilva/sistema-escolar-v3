@@ -1,6 +1,6 @@
 // server/school-year/matriculation.ts
 import { DEFAULT_LOCALE, ENROLLMENT_SHEET_NAMES } from "../config.ts";
-import { SUMMARY_FIRST_DATA_ROW } from "../report/constants.ts";
+import { SUMMARY_FIRST_DATA_ROW, VALID_CLASSES } from "../report/constants.ts";
 
 import type { Issue, StudentData } from "../types.ts";
 import type { ClassMatriculationInput } from "./types.ts";
@@ -10,30 +10,64 @@ export function validateClassMatriculations(
   registeredStudentsMap: Map<string, StudentData>,
 ): Issue[] {
   const issues: Issue[] = [];
+  const validClassNames = new Set(
+    VALID_CLASSES.map((validClass) => validClass.className),
+  );
+  const receivedClasses = new Set<string>();
+  const studentClassById = new Map<string, string>();
 
-  for (const { className, studentIds } of matriculations) {
-    const firstSeenAt = new Map<string, number>();
+  for (const matriculation of matriculations) {
+    if (!validClassNames.has(matriculation.className)) {
+      issues.push({
+        type: "error",
+        text: `Turma inválida: "${matriculation.className || "(vazia)"}".`,
+      });
+      continue;
+    }
 
-    studentIds.forEach((studentId, index) => {
-      const trimmedId = studentId.trim();
-      if (!trimmedId) return;
+    if (receivedClasses.has(matriculation.className)) {
+      issues.push({
+        type: "error",
+        text: `A turma "${matriculation.className}" foi enviada mais de uma vez.`,
+      });
+      continue;
+    }
+    receivedClasses.add(matriculation.className);
 
-      if (firstSeenAt.has(trimmedId)) {
+    const idsInThisClass = new Set<string>();
+
+    for (const rawStudentId of matriculation.studentIds) {
+      const studentId = String(rawStudentId ?? "").trim();
+      if (!studentId) continue;
+
+      if (idsInThisClass.has(studentId)) {
         issues.push({
           type: "error",
-          text: `[${className}] Matrícula ${trimmedId} duplicada na lista colada (posições ${firstSeenAt.get(trimmedId)! + 1} e ${index + 1}).`,
+          text: `[${matriculation.className}] Matrícula ${studentId} duplicada na mesma turma.`,
         });
-      } else {
-        firstSeenAt.set(trimmedId, index);
+        continue;
       }
+      idsInThisClass.add(studentId);
 
-      if (!registeredStudentsMap.has(trimmedId)) {
+      const previousClass = studentClassById.get(studentId);
+      if (previousClass) {
         issues.push({
           type: "error",
-          text: `[${className}] Matrícula ${trimmedId} não encontrada no Cadastro de Alunos.`,
+          text:
+            `Matrícula ${studentId} foi informada em mais de uma turma: ` +
+            `"${previousClass}" e "${matriculation.className}".`,
+        });
+        continue;
+      }
+      studentClassById.set(studentId, matriculation.className);
+
+      if (!registeredStudentsMap.has(studentId)) {
+        issues.push({
+          type: "error",
+          text: `[${matriculation.className}] Matrícula ${studentId} não encontrada no Cadastro de Alunos.`,
         });
       }
-    });
+    }
   }
 
   return issues;

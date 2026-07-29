@@ -13,7 +13,7 @@ export function validateClassStudents(
   classSpreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
   registeredStudentsMap: Map<string, StudentData>,
   students: ClassStudent[],
-  year: string,
+  schoolYearLabel: string,
   className: string,
 ): Issue[] {
   const issues: Issue[] = [];
@@ -22,13 +22,13 @@ export function validateClassStudents(
   if (students.length === 0) {
     issues.push({
       type: "error",
-      text: `[${year} / ${className}] Turma sem alunos cadastrados na aba "${ENROLLMENT_SHEET_NAMES.SUMMARY}".`,
+      text: `[${schoolYearLabel} / ${className}] Turma sem alunos cadastrados na aba "${ENROLLMENT_SHEET_NAMES.SUMMARY}".`,
       url: ssUrl,
     });
     return issues;
   }
 
-  const dupes = findDuplicateResumoIds(students, year, className);
+  const dupes = findDuplicateResumoIds(students, schoolYearLabel, className);
   issues.push(
     ...dupes.map((msg) => ({ type: "error" as const, text: msg, url: ssUrl })),
   );
@@ -39,7 +39,7 @@ export function validateClassStudents(
     if (registeredStudent === undefined) {
       issues.push({
         type: "warning",
-        text: `[${year} / ${className} / Resumo, linha ${row}] Matrícula ${studentId} não consta no Cadastro de Alunos.`,
+        text: `[${schoolYearLabel} / ${className} / Resumo, linha ${row}] Matrícula ${studentId} não consta no Cadastro de Alunos.`,
         url: ssUrl,
       });
       continue;
@@ -53,7 +53,7 @@ export function validateClassStudents(
     if (namesDiffer) {
       issues.push({
         type: "warning",
-        text: `[${year} / ${className} / Resumo, linha ${row}] Nome "${name}" diverge do Cadastro ("${registeredStudent.name}") para a matrícula ${studentId}.`,
+        text: `[${schoolYearLabel} / ${className} / Resumo, linha ${row}] Nome "${name}" diverge do Cadastro ("${registeredStudent.name}") para a matrícula ${studentId}.`,
         url: ssUrl,
       });
     }
@@ -65,7 +65,7 @@ export function validateClassStudents(
 /** Verifica se há matrículas duplicadas na aba "Resumo". */
 export function findDuplicateResumoIds(
   students: Array<{ studentId: string; row: number }>,
-  year: string,
+  schoolYearLabel: string,
   className: string,
 ): string[] {
   const rowsByStudentId = new Map<string, number[]>();
@@ -80,7 +80,7 @@ export function findDuplicateResumoIds(
     .filter(([, rows]) => rows.length > 1)
     .map(
       ([studentId, rows]) =>
-        `[${year} / ${className} / Resumo] Matrícula ${studentId} duplicada nas linhas ${rows.join(", ")}.`,
+        `[${schoolYearLabel} / ${className} / Resumo] Matrícula ${studentId} duplicada nas linhas ${rows.join(", ")}.`,
     );
 }
 

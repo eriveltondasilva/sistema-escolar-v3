@@ -2,6 +2,10 @@
 import { ENROLLMENT_SHEET_NAMES, loadConfig } from "../config.ts";
 import { DIALOG_NAMES } from "../dialog-names.ts";
 import {
+  findDuplicateStudentIds,
+  validateClassStudents,
+} from "./validate-roster.ts";
+import {
   getClassSpreadsheetFile,
   getReportTemplateFile,
   getSchoolYearFolder,
@@ -13,10 +17,6 @@ import {
   getClassStudentsFromResumo,
   loadStudentsMap,
 } from "../report/data-access.ts";
-import {
-  findDuplicateStudentIds,
-  validateClassStudents,
-} from "../system-check/validate-roster.ts";
 import { getErrorMsg } from "../utils/error.ts";
 import { renderView } from "../utils/render-view.ts";
 
@@ -151,20 +151,20 @@ function checkRegistration(config: AppConfig): RegistrationCheckResult {
 }
 
 interface SchoolYearsCheckResult {
-  years: string[];
+  schoolYearLabels: string[];
   issues: Issue[];
 }
 
 /** Lista as pastas de ano letivo; reporta erro se nenhuma for encontrada. */
 function checkSchoolYears(config: AppConfig): SchoolYearsCheckResult {
-  let years: string[] = [];
+  let schoolYearLabels: string[];
   try {
-    years = listSchoolYears(config);
+    schoolYearLabels = listSchoolYears(config);
   } catch (error) {
-    return { years: [], issues: [toIssue("Anos Letivos", error)] };
+    return { schoolYearLabels: [], issues: [toIssue("Anos Letivos", error)] };
   }
 
-  if (years.length > 0) return { years, issues: [] };
+  if (schoolYearLabels.length > 0) return { schoolYearLabels, issues: [] };
 
   let rootUrl: string | undefined;
   try {
@@ -176,7 +176,7 @@ function checkSchoolYears(config: AppConfig): SchoolYearsCheckResult {
   }
 
   return {
-    years: [],
+    schoolYearLabels: [],
     issues: [
       {
         type: "error",
@@ -190,33 +190,33 @@ function checkSchoolYears(config: AppConfig): SchoolYearsCheckResult {
 /** Verifica todas as turmas válidas dentro da pasta de um ano letivo. */
 function checkYear(
   config: AppConfig,
-  year: string,
+  schoolYearLabel: string,
   registeredStudentsMap: Map<string, StudentData> | null,
 ): Issue[] {
   let yearFolder: GoogleAppsScript.Drive.Folder;
   try {
-    yearFolder = getSchoolYearFolder(config, year);
+    yearFolder = getSchoolYearFolder(config, schoolYearLabel);
   } catch (error) {
     return [toIssue("Anos Letivos", error)];
   }
 
   return VALID_CLASSES.flatMap(({ className }) =>
-    checkClass(yearFolder, year, className, registeredStudentsMap),
+    checkClass(yearFolder, schoolYearLabel, className, registeredStudentsMap),
   );
 }
 
 /** Verifica uma turma: planilha, disciplinas presentes e consistência de alunos. */
 function checkClass(
   yearFolder: GoogleAppsScript.Drive.Folder,
-  year: string,
+  schoolYearLabel: string,
   className: string,
   registeredStudentsMap: Map<string, StudentData> | null,
 ): Issue[] {
   let classFile: GoogleAppsScript.Drive.File;
   try {
-    classFile = getClassSpreadsheetFile(yearFolder, year, className);
+    classFile = getClassSpreadsheetFile(yearFolder, schoolYearLabel, className);
   } catch (e) {
-    return [toIssue(`[${year}]`, e, yearFolder.getUrl())];
+    return [toIssue(`[${schoolYearLabel}]`, e, yearFolder.getUrl())];
   }
 
   let classSpreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet;
@@ -225,7 +225,7 @@ function checkClass(
   } catch (e) {
     return [
       toIssue(
-        `[${year} / ${className}] Erro ao abrir a planilha`,
+        `[${schoolYearLabel} / ${className}] Erro ao abrir a planilha`,
         e,
         classFile.getUrl(),
       ),
@@ -239,7 +239,7 @@ function checkClass(
   if (missing.length > 0) {
     issues.push({
       type: "warning",
-      text: `[${year} / ${className}] Disciplinas faltando (serão ignoradas): ${missing.join(", ")}`,
+      text: `[${schoolYearLabel} / ${className}] Disciplinas faltando (serão ignoradas): ${missing.join(", ")}`,
       url: ssUrl,
     });
   }
@@ -251,7 +251,7 @@ function checkClass(
         classSpreadsheet,
         registeredStudentsMap,
         students,
-        year,
+        schoolYearLabel,
         className,
       ),
     );
@@ -298,11 +298,11 @@ export function checkSystem(): void {
     checkRegistration(config);
   issues.push(...registrationIssues);
 
-  const { years, issues: yearsIssues } = checkSchoolYears(config);
+  const { schoolYearLabels, issues: yearsIssues } = checkSchoolYears(config);
   issues.push(...yearsIssues);
 
-  for (const year of years) {
-    issues.push(...checkYear(config, year, registeredStudentsMap));
+  for (const schoolYearLabel of schoolYearLabels) {
+    issues.push(...checkYear(config, schoolYearLabel, registeredStudentsMap));
   }
 
   showValidationDialog(issues);
