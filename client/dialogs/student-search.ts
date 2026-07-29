@@ -56,7 +56,6 @@ function studentSearchDialog(): StudentSearchState {
       this.isSearching = true;
 
       // getStudentSearchResults(query): StudentSearchResult[]
-      // — ver server/lib/registration-actions.ts
       google.script.run
         .withSuccessHandler((results: StudentSearchResult[]) => {
           this.results = results;
@@ -73,7 +72,6 @@ function studentSearchDialog(): StudentSearchState {
       this.error = "";
 
       // getStudentDetailsForSearch(studentId): StudentSearchDetails
-      // — ver server/lib/registration-actions.ts
       google.script.run
         .withSuccessHandler((details: StudentSearchDetails) => {
           this.selectedStudent = details;
@@ -96,7 +94,7 @@ function studentSearchDialog(): StudentSearchState {
       this.error = "";
 
       // openStudentEditDialog(studentId): void — abre uma nova modal
-      // e, no sucesso, fechamos esta (ver server/lib/registration-actions.ts)
+      // e, no sucesso, fechamos esta
       google.script.run
         .withSuccessHandler(() => google.script.host.close())
         .withFailureHandler((err: Error) => {

@@ -2,8 +2,44 @@
 <x-dialog-shell class="bg-white p-5 text-slate-900 antialiased">
   <x-alpine-cdn></x-alpine-cdn>
 
-  <x-student-form
-    data-mode="edit"
+  <main
     data-student-id="<?= studentId ?>"
-  ></x-student-form>
+    x-data="studentEditDialog($el)"
+    x-cloak
+    class="space-y-4"
+  >
+    <div>
+      <label
+        class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
+      >
+        Matrícula
+      </label>
+      <p
+        class="rounded-md border border-slate-200 bg-slate-100 px-3 py-2 font-mono text-sm text-slate-600"
+        x-text="studentId"
+      ></p>
+    </div>
+
+    <x-student-form-fields></x-student-form-fields>
+
+    <footer class="flex items-center justify-end space-x-2 pt-2">
+      <button
+        @click="google.script.host.close()"
+        :disabled="isLoading"
+        class="inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none disabled:opacity-50"
+      >
+        Cancelar
+      </button>
+      <button
+        @click="submit()"
+        :disabled="isLoading"
+        class="inline-flex items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800 focus:outline-none disabled:cursor-not-allowed disabled:opacity-70"
+      >
+        <span x-text="isLoading ? loadingLabel : 'Salvar'"></span>
+      </button>
+    </footer>
+  </main>
+
+  <!-- -->
+  <script src="./student-edit.js"></script>
 </x-dialog-shell>

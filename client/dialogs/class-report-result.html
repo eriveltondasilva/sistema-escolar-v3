@@ -34,6 +34,10 @@
               Execução interrompida por tempo
             </p>
             <p class="text-amber-700" x-text="interruptedMessage"></p>
+            <p class="mt-1 text-xs text-amber-700">
+              Progresso: <span x-text="processedCount"></span> de
+              <span x-text="totalStudents"></span> aluno(s).
+            </p>
           </div>
         </div>
       </template>
@@ -81,6 +85,32 @@
         >
           Abrir pasta no Drive
         </a>
+        <template x-if="interrupted">
+          <button
+            @click="continueGeneration()"
+            :disabled="isLoading"
+            class="inline-flex w-full items-center justify-center rounded-md bg-amber-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-amber-700 focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            <span
+              x-text="isLoading ? 'Continuando...' : 'Continuar geração'"
+            ></span>
+          </button>
+        </template>
+        <template x-if="interrupted">
+          <button
+            @click="cancelGeneration()"
+            :disabled="isLoading"
+            class="inline-flex w-full items-center justify-center rounded-md border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-50 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            Cancelar geração pendente
+          </button>
+        </template>
+        <p
+          x-show="error"
+          x-text="error"
+          class="rounded-md border border-red-100 bg-red-50 p-2 text-xs text-red-700"
+          style="display: none"
+        ></p>
       </div>
     </div>
 
@@ -89,9 +119,6 @@
     </footer>
   </main>
 
-  <script>
-    document.addEventListener("alpine:init", () => {
-      Alpine.data("classReportDialog", (el) => JSON.parse(el.dataset.init));
-    });
-  </script>
+  <!-- -->
+  <script src="./class-report-result.js"></script>
 </x-dialog-shell>

@@ -1,0 +1,158 @@
+<!-- client/components/student-form-fields.html -->
+<div>
+  <label
+    class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
+  >
+    Nome completo
+  </label>
+  <input
+    type="text"
+    x-model="form.name"
+    :disabled="isLoading"
+    class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
+  />
+</div>
+
+<div>
+  <label
+    class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
+  >
+    Endereço
+  </label>
+  <input
+    type="text"
+    x-model="form.address"
+    :disabled="isLoading"
+    class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
+  />
+</div>
+
+<div class="grid grid-cols-2 gap-3">
+  <div>
+    <label
+      class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
+    >
+      Nacionalidade
+    </label>
+    <input
+      type="text"
+      x-model="form.nationality"
+      :disabled="isLoading"
+      class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
+    />
+  </div>
+  <div>
+    <label
+      class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
+    >
+      Sexo
+    </label>
+    <select
+      x-model="form.sex"
+      :disabled="isLoading"
+      class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
+    >
+      <option value="">Selecione</option>
+      <option value="F">Feminino</option>
+      <option value="M">Masculino</option>
+    </select>
+  </div>
+</div>
+
+<div>
+  <label
+    class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
+  >
+    Data de nascimento
+  </label>
+  <input
+    type="date"
+    x-model="form.birthDate"
+    :disabled="isLoading"
+    class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
+  />
+</div>
+
+<div>
+  <label
+    class="mb-2 block text-xs font-medium tracking-wider text-slate-500 uppercase"
+  >
+    Responsáveis
+  </label>
+
+  <div class="space-y-3">
+    <template x-for="(guardian, index) in form.guardians" :key="index">
+      <div class="space-y-2 rounded-md border border-slate-200 p-3">
+        <div class="flex items-center justify-between">
+          <label class="flex items-center gap-1.5 text-xs text-slate-600">
+            <input
+              type="radio"
+              name="primaryGuardian"
+              :checked="guardian.isPrimary"
+              @change="setPrimaryGuardian(index)"
+              :disabled="isLoading"
+            />
+            Responsável principal
+          </label>
+          <button
+            type="button"
+            @click="removeGuardian(index)"
+            :disabled="isLoading || form.guardians.length <= 1"
+            class="shrink-0 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-slate-500 transition-colors hover:bg-slate-50 hover:text-red-600 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <img src="../asserts/close-icon.svg" />
+          </button>
+        </div>
+
+        <input
+          type="text"
+          x-model="guardian.name"
+          :disabled="isLoading"
+          placeholder="Nome do responsável"
+          class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
+        />
+
+        <div class="grid grid-cols-2 gap-2">
+          <input
+            type="text"
+            x-model="guardian.relationship"
+            :disabled="isLoading"
+            placeholder="Parentesco"
+            class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
+          />
+          <input
+            type="tel"
+            x-model="guardian.phone"
+            :disabled="isLoading"
+            placeholder="Telefone"
+            class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
+          />
+        </div>
+
+        <input
+          type="text"
+          x-model="guardian.address"
+          :disabled="isLoading"
+          placeholder="Endereço (se diferente do aluno)"
+          class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
+        />
+      </div>
+    </template>
+  </div>
+
+  <button
+    type="button"
+    @click="addGuardian()"
+    :disabled="isLoading"
+    class="mt-2 text-xs font-semibold text-slate-600 hover:text-slate-900 focus:outline-none disabled:opacity-50"
+  >
+    + Adicionar responsável
+  </button>
+</div>
+
+<div
+  x-show="error"
+  x-text="error"
+  class="rounded-md border border-red-100 bg-red-50 p-2.5 text-xs font-medium text-red-600"
+  style="display: none"
+></div>

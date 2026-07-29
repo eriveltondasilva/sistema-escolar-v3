@@ -56,8 +56,7 @@ function createSchoolYearForm(el: HTMLElement): CreateSchoolYearFormState {
       // submitSchoolYearCreation(yearInput, matriculationsByClass): void
       // — valida tudo antes de escrever (tudo ou nada); em caso de
       // sucesso, o próprio servidor já abre a dialog de resultado
-      // (CreateSchoolYearResultDialog.html, já existente) — ver
-      // server/lib/registration-actions.ts
+      // (CreateSchoolYearResultDialog.html, já existente)
       google.script.run
         .withSuccessHandler(() => google.script.host.close())
         .withFailureHandler((err: Error) => {

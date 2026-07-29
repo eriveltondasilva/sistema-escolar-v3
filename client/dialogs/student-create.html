@@ -1,5 +1,57 @@
 <!-- client/dialogs/student-create.html -->
 <x-dialog-shell class="bg-white p-5 text-slate-900 antialiased">
   <x-alpine-cdn></x-alpine-cdn>
-  <x-student-form></x-student-form>
+
+  <main x-data="studentCreateDialog" x-cloak class="space-y-4">
+    <!-- Estado: sucesso do cadastro -->
+    <template x-if="view === 'success'">
+      <div class="space-y-4 text-center">
+        <div
+          class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 text-emerald-600"
+        >
+          <img src="../asserts/success-check-icon.svg" />
+        </div>
+        <h2 class="text-lg font-semibold text-slate-900">
+          Aluno cadastrado com sucesso!
+        </h2>
+        <p class="text-sm text-slate-600">
+          Matrícula:
+          <span class="font-mono font-semibold" x-text="studentId"></span>
+        </p>
+        <button
+          @click="google.script.host.close()"
+          class="w-full rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800 focus:outline-none"
+        >
+          Fechar
+        </button>
+      </div>
+    </template>
+
+    <!-- Estado: formulário -->
+    <template x-if="view === 'form'">
+      <div class="space-y-4">
+        <x-student-form-fields></x-student-form-fields>
+
+        <footer class="flex items-center justify-end space-x-2 pt-2">
+          <button
+            @click="google.script.host.close()"
+            :disabled="isLoading"
+            class="inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none disabled:opacity-50"
+          >
+            Cancelar
+          </button>
+          <button
+            @click="submit()"
+            :disabled="isLoading"
+            class="inline-flex items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800 focus:outline-none disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            <span x-text="isLoading ? 'Salvando...' : 'Cadastrar'"></span>
+          </button>
+        </footer>
+      </div>
+    </template>
+  </main>
+
+  <!-- -->
+  <script src="./student-create.js"></script>
 </x-dialog-shell>
