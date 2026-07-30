@@ -14,34 +14,34 @@
  * em `google.script.run` no client precisa ser adicionada aqui também.
  */
 
-import { onOpen } from "./menu.js";
+import { onOpen } from "./menu.ts";
 import {
   cancelClassReportsGeneration,
   continueClassReportsGeneration,
   executeClassReportsGeneration,
   executeStudentReportGeneration,
   getStudentsDataForClass,
-} from "./report/dialog-actions.js";
+} from "./report/dialog-actions.ts";
 import {
   generateClassReports,
   generateStudentReport,
-} from "./report/menu-actions.js";
+} from "./report/menu-actions.ts";
 import {
   getStudentDetailsForSearch,
   getStudentForEditForm,
   getStudentSearchResults,
   submitStudentEdit,
   submitStudentRegistration,
-} from "./roster/dialog-actions.js";
+} from "./roster/dialog-actions.ts";
 import {
   openStudentEditDialog,
   openStudentRegistrationDialog,
   openStudentSearchDialog,
-} from "./roster/menu-actions.js";
-import { submitSchoolYearCreation } from "./school-year/dialog-actions.js";
-import { openCreateSchoolYearFormDialog } from "./school-year/menu-actions.js";
-import { checkSystem } from "./system-check/checker.js";
-import { doGet } from "./web-app/do-get.js";
+} from "./roster/menu-actions.ts";
+import { submitSchoolYearCreation } from "./school-year/dialog-actions.ts";
+import { openCreateSchoolYearFormDialog } from "./school-year/menu-actions.ts";
+import { checkSystem } from "./system-check/checker.ts";
+import { doGet } from "./web-app/do-get.ts";
 
 Object.assign(globalThis, {
   // --- Menu (onOpen) ---
