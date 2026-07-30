@@ -1,11 +1,9 @@
 // client/dialogs/generate-report-form.ts
+import { parseInitData, runServerAction } from "../utils.ts";
+
+import type { StudentOption } from "../types.ts";
 
 type ActionType = "single" | "class";
-
-type StudentOption = {
-  studentId: string;
-  name: string;
-};
 
 type ReportFormPayload = {
   actionType: ActionType;
@@ -28,7 +26,7 @@ type ReportFormState = ReportFormPayload & {
 };
 
 function reportFormDialog(el: HTMLElement): ReportFormState {
-  const payload: ReportFormPayload = JSON.parse(el.dataset.init as string);
+  const payload = parseInitData<ReportFormPayload>(el);
 
   return {
     ...payload,
@@ -56,18 +54,17 @@ function reportFormDialog(el: HTMLElement): ReportFormState {
       this.studentSearch = "";
       this.error = "";
 
-      // getStudentsDataForClass(schoolYearLabel, className): StudentOption[]
-      // — ver server/lib/actions.ts
-      google.script.run
-        .withSuccessHandler((students: StudentOption[]) => {
+      runServerAction<StudentOption[]>((server) =>
+        server.getStudentsDataForClass(this.schoolYear, this.className),
+      )
+        .then((students) => {
           this.availableStudents = students;
           this.isFetchingStudents = false;
         })
-        .withFailureHandler((err: Error) => {
+        .catch((err: Error) => {
           this.error = "Erro ao buscar alunos: " + err.message;
           this.isFetchingStudents = false;
-        })
-        .getStudentsDataForClass(this.schoolYear, this.className);
+        });
     },
 
     submit() {
@@ -82,29 +79,27 @@ function reportFormDialog(el: HTMLElement): ReportFormState {
           return;
         }
 
-        // executeStudentReportGeneration(schoolYearLabel, className, studentId)
-        // — ver server/lib/actions.ts
-        google.script.run
-          .withSuccessHandler(() => google.script.host.close())
-          .withFailureHandler((err: Error) => {
-            this.error = err.message;
-            this.isLoading = false;
-          })
-          .executeStudentReportGeneration(
+        runServerAction((server) =>
+          server.executeStudentReportGeneration(
             this.schoolYear,
             this.className,
             selectedId,
-          );
-      } else {
-        // executeClassReportsGeneration(schoolYearLabel, className)
-        // — ver server/lib/actions.ts
-        google.script.run
-          .withSuccessHandler(() => google.script.host.close())
-          .withFailureHandler((err: Error) => {
+          ),
+        )
+          .then(() => google.script.host.close())
+          .catch((err: Error) => {
             this.error = err.message;
             this.isLoading = false;
-          })
-          .executeClassReportsGeneration(this.schoolYear, this.className);
+          });
+      } else {
+        runServerAction((server) =>
+          server.executeClassReportsGeneration(this.schoolYear, this.className),
+        )
+          .then(() => google.script.host.close())
+          .catch((err: Error) => {
+            this.error = err.message;
+            this.isLoading = false;
+          });
       }
     },
   };

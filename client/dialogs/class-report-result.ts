@@ -1,4 +1,5 @@
 // client/dialogs/class-report-result.ts
+import { parseInitData, runServerAction } from "../utils.ts";
 
 /** Dados injetados pelo server via `data-init` (renderView). */
 type ClassReportInitData = {
@@ -22,7 +23,7 @@ type ClassReportState = ClassReportInitData & {
 };
 
 function classReportDialog(el: HTMLElement): ClassReportState {
-  const initialState: ClassReportInitData = JSON.parse(el.dataset.init || "{}");
+  const initialState = parseInitData<ClassReportInitData>(el);
 
   return {
     ...initialState,
@@ -33,30 +34,24 @@ function classReportDialog(el: HTMLElement): ClassReportState {
       this.error = "";
       this.isLoading = true;
 
-      // continueClassReportsGeneration(): void
-      // — ver server/report/dialog-actions.ts
-      google.script.run
-        .withSuccessHandler(() => google.script.host.close())
-        .withFailureHandler((err: Error) => {
+      runServerAction((server) => server.continueClassReportsGeneration())
+        .then(() => google.script.host.close())
+        .catch((err: Error) => {
           this.error = err.message;
           this.isLoading = false;
-        })
-        .continueClassReportsGeneration();
+        });
     },
 
     cancelGeneration() {
       this.error = "";
       this.isLoading = true;
 
-      // cancelClassReportsGeneration(): void
-      // — ver server/report/dialog-actions.ts
-      google.script.run
-        .withSuccessHandler(() => google.script.host.close())
-        .withFailureHandler((err: Error) => {
+      runServerAction((server) => server.cancelClassReportsGeneration())
+        .then(() => google.script.host.close())
+        .catch((err: Error) => {
           this.error = err.message;
           this.isLoading = false;
-        })
-        .cancelClassReportsGeneration();
+        });
     },
   };
 }

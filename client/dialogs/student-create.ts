@@ -1,5 +1,5 @@
 // client/dialogs/student-create.ts
-import { validateStudentForm } from "../utils.ts";
+import { runServerAction, validateStudentForm } from "../utils.ts";
 
 import type { GuardianData, StudentFormPayload } from "#server/types.ts";
 
@@ -77,18 +77,20 @@ function studentCreateDialog(): StudentCreateState {
       this.error = "";
       this.isLoading = true;
 
-      // submitStudentRegistration(payload): string (matrícula gerada)
-      google.script.run
-        .withSuccessHandler((newStudentId: string) => {
-          this.isLoading = false;
+      runServerAction<string>((server) =>
+        server.submitStudentRegistration(this.form),
+      )
+        .then((newStudentId) => {
           this.studentId = newStudentId;
           this.view = "success";
         })
-        .withFailureHandler((err: Error) => {
+        .catch((err: Error) => {
           this.error = err.message;
-          this.isLoading = false;
         })
-        .submitStudentRegistration(this.form);
+        .finally(() => {
+          this.isLoading = false;
+          // this.form = emptyForm();
+        });
     },
   };
 }

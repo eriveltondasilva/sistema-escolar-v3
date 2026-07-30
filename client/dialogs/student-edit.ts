@@ -1,5 +1,5 @@
 // client/dialogs/student-edit.ts
-import { validateStudentForm } from "../utils.ts";
+import { runServerAction, validateStudentForm } from "../utils.ts";
 
 import type { GuardianData, StudentFormPayload } from "#server/types.ts";
 
@@ -60,20 +60,21 @@ function studentEditDialog(el: HTMLElement): StudentEditState {
     init() {
       this.isLoadingStudent = true;
 
-      // getStudentForEditForm(studentId): StudentFormPayload
-      google.script.run
-        .withSuccessHandler((student: StudentFormPayload) => {
+      runServerAction<StudentFormPayload>((server) =>
+        server.getStudentForEditForm(this.studentId),
+      )
+        .then((student) => {
           this.form = student;
           if (this.form.guardians.length === 0) {
             this.form.guardians.push({ ...emptyGuardian(), isPrimary: true });
           }
-          this.isLoadingStudent = false;
         })
-        .withFailureHandler((err: Error) => {
+        .catch((err: Error) => {
           this.error = "Erro ao carregar aluno: " + err.message;
-          this.isLoadingStudent = false;
         })
-        .getStudentForEditForm(this.studentId);
+        .finally(() => {
+          this.isLoadingStudent = false;
+        });
     },
 
     addGuardian() {
@@ -107,14 +108,14 @@ function studentEditDialog(el: HTMLElement): StudentEditState {
       this.error = "";
       this.isSaving = true;
 
-      // submitStudentEdit(studentId, payload): void
-      google.script.run
-        .withSuccessHandler(() => google.script.host.close())
-        .withFailureHandler((err: Error) => {
+      runServerAction((server) =>
+        server.submitStudentEdit(this.studentId, this.form),
+      )
+        .then(() => google.script.host.close())
+        .catch((err: Error) => {
           this.error = err.message;
           this.isSaving = false;
-        })
-        .submitStudentEdit(this.studentId, this.form);
+        });
     },
   };
 }

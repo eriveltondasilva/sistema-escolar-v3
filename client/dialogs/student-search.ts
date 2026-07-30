@@ -1,32 +1,13 @@
 // client/dialogs/student-search.ts
+import { runServerAction } from "../utils.ts";
 
-type StudentSearchResult = {
-  studentId: string;
-  name: string;
-};
-
-type PdfHistoryEntry = {
-  pdfUrl: string;
-  yearLabel: string;
-  className: string;
-};
-
-type StudentSearchDetails = {
-  student: {
-    studentId: string;
-    name: string;
-    address: string;
-    birthDate: string;
-  };
-  guardianNamesFormatted: string;
-  pdfHistory: PdfHistoryEntry[];
-};
+import type { StudentOption, StudentSearchDetails } from "../types.ts";
 
 type StudentSearchState = {
   query: string;
   isSearching: boolean;
   isOpeningEdit: boolean;
-  results: StudentSearchResult[];
+  results: StudentOption[];
   selectedStudent: StudentSearchDetails | null;
   error: string;
   search(): void;
@@ -55,31 +36,32 @@ function studentSearchDialog(): StudentSearchState {
 
       this.isSearching = true;
 
-      // getStudentSearchResults(query): StudentSearchResult[]
-      google.script.run
-        .withSuccessHandler((results: StudentSearchResult[]) => {
+      runServerAction<StudentOption[]>((server) =>
+        server.getStudentSearchResults(this.query),
+      )
+        .then((results) => {
           this.results = results;
-          this.isSearching = false;
         })
-        .withFailureHandler((err: Error) => {
+        .catch((err: Error) => {
           this.error = err.message;
-          this.isSearching = false;
         })
-        .getStudentSearchResults(this.query);
+        .finally(() => {
+          this.isSearching = false;
+        });
     },
 
     selectStudent(studentId: string) {
       this.error = "";
 
-      // getStudentDetailsForSearch(studentId): StudentSearchDetails
-      google.script.run
-        .withSuccessHandler((details: StudentSearchDetails) => {
+      runServerAction<StudentSearchDetails>((server) =>
+        server.getStudentDetailsForSearch(studentId),
+      )
+        .then((details) => {
           this.selectedStudent = details;
         })
-        .withFailureHandler((err: Error) => {
+        .catch((err: Error) => {
           this.error = err.message;
-        })
-        .getStudentDetailsForSearch(studentId);
+        });
     },
 
     clearSelection() {
@@ -88,20 +70,21 @@ function studentSearchDialog(): StudentSearchState {
     },
 
     editStudent() {
-      if (!this.selectedStudent) return;
+      const selectedStudent = this.selectedStudent;
+      if (!selectedStudent) return;
 
       this.isOpeningEdit = true;
       this.error = "";
 
-      // openStudentEditDialog(studentId): void — abre uma nova modal
-      // e, no sucesso, fechamos esta
-      google.script.run
-        .withSuccessHandler(() => google.script.host.close())
-        .withFailureHandler((err: Error) => {
+      // abre uma nova modal e, no sucesso, fechamos esta
+      runServerAction((server) =>
+        server.openStudentEditDialog(selectedStudent.student.studentId),
+      )
+        .then(() => google.script.host.close())
+        .catch((err: Error) => {
           this.error = err.message;
           this.isOpeningEdit = false;
-        })
-        .openStudentEditDialog(this.selectedStudent.student.studentId);
+        });
     },
   };
 }

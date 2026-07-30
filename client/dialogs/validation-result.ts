@@ -1,4 +1,5 @@
 // client/dialogs/validation-result.ts
+import { parseInitData } from "../utils.ts";
 
 type IssueType = "error" | "warning";
 
@@ -22,9 +23,7 @@ type DiagnosticPanelState = ValidationResultPayload & {
 };
 
 function diagnosticPanel(el: HTMLElement): DiagnosticPanelState {
-  const { issues }: ValidationResultPayload = JSON.parse(
-    el.dataset.init as string,
-  );
+  const { issues } = parseInitData<ValidationResultPayload>(el);
 
   return {
     issues,

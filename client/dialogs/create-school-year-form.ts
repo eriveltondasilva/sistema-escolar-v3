@@ -1,12 +1,10 @@
 // client/dialogs/create-school-year-form.ts
+import { parseInitData, runServerAction } from "../utils.ts";
+
+import type { MatriculationInput } from "../types.ts";
 
 type CreateSchoolYearFormPayload = {
   classNames: string[];
-};
-
-type MatriculationInput = {
-  className: string;
-  studentIds: string[];
 };
 
 interface CreateSchoolYearFormState {
@@ -19,9 +17,7 @@ interface CreateSchoolYearFormState {
 }
 
 function createSchoolYearForm(el: HTMLElement): CreateSchoolYearFormState {
-  const { classNames }: CreateSchoolYearFormPayload = JSON.parse(
-    el.dataset.init!,
-  );
+  const { classNames } = parseInitData<CreateSchoolYearFormPayload>(el);
 
   return {
     classNames,
@@ -53,17 +49,17 @@ function createSchoolYearForm(el: HTMLElement): CreateSchoolYearFormState {
 
       this.isLoading = true;
 
-      // submitSchoolYearCreation(yearInput, matriculationsByClass): void
-      // — valida tudo antes de escrever (tudo ou nada); em caso de
-      // sucesso, o próprio servidor já abre a dialog de resultado
+      // valida tudo antes de escrever (tudo ou nada); em caso de sucesso,
+      // o próprio servidor já abre a dialog de resultado
       // (CreateSchoolYearResultDialog.html, já existente)
-      google.script.run
-        .withSuccessHandler(() => google.script.host.close())
-        .withFailureHandler((err: Error) => {
+      runServerAction((server) =>
+        server.submitSchoolYearCreation(this.year.trim(), matriculations),
+      )
+        .then(() => google.script.host.close())
+        .catch((err: Error) => {
           this.error = err.message;
           this.isLoading = false;
-        })
-        .submitSchoolYearCreation(this.year.trim(), matriculations);
+        });
     },
   };
 }
