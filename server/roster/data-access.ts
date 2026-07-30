@@ -158,7 +158,7 @@ export function createStudentRecord(
 export function updateStudentRecord(
   registrationSheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
   studentId: string,
-  input: Omit<StudentFormPayload, "studentId" | "enrollment_date">,
+  input: Omit<StudentFormPayload, "studentId" | "enrollmentDate">,
 ): void {
   const studentsSheet = registrationSheet.getSheetByName(
     ENROLLMENT_SHEET_NAMES.STUDENTS,

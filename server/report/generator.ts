@@ -4,7 +4,7 @@ import { getGradesForStudent, getPersonalData } from "./data-access.ts";
 import { getErrorMsg } from "../utils/error.ts";
 import { formatDate, formatSex } from "../utils/formatters.ts";
 import { generateReportLinkToken } from "../utils/link-token.ts";
-import { getWebAppId } from "../utils/script-properties.ts";
+import { getScriptProp } from "../utils/script-properties.ts";
 
 import type { AssessmentType } from "../types.ts";
 import type { GenerateReportForStudentParams, SubjectGrades } from "./types.ts";
@@ -28,7 +28,7 @@ export function insertQRCode(
   if (!element) return;
 
   try {
-    const webAppId = getWebAppId();
+    const webAppId = getScriptProp("WEB_APP_ID");
     const token = generateReportLinkToken({
       studentId,
       className,
