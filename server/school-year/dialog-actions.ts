@@ -7,7 +7,10 @@ import { loadStudentsMap } from "../report/data-access.ts";
 import { renderView } from "../utils/render-view.ts";
 import { withScriptLock } from "../utils/script-lock.ts";
 
-import type { ClassMatriculationInput } from "./types.ts";
+import type {
+  ClassMatriculationInput,
+  CreateSchoolYearResultInitData,
+} from "./types.ts";
 
 export function submitSchoolYearCreation(
   yearInput: string,
@@ -59,7 +62,10 @@ export function submitSchoolYearCreation(
       registeredStudentsMap,
     });
 
-    const htmlOutput = renderView(DIALOG_NAMES.createSchoolYearResult, result);
+    const htmlOutput = renderView<CreateSchoolYearResultInitData>(
+      DIALOG_NAMES.createSchoolYearResult,
+      result,
+    );
     htmlOutput.setWidth(400).setHeight(340);
 
     ui.showModalDialog(htmlOutput, "Ano Letivo Criado");
