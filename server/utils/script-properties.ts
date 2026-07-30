@@ -5,7 +5,7 @@ import type { ClassReportJob } from "../report/types.ts";
 type ScriptPropertyKey = "WEB_APP_ID" | "REPORT_LINK_SECRET";
 const CLASS_REPORT_JOB_KEY = "CLASS_REPORT_JOB";
 
-function getScriptProp(key: ScriptPropertyKey): string {
+export function getScriptProp(key: ScriptPropertyKey): string {
   const props = PropertiesService.getScriptProperties();
   const value = props.getProperty(key);
 
@@ -20,19 +20,20 @@ function getScriptProp(key: ScriptPropertyKey): string {
   return value;
 }
 
-export function getWebAppId(): string {
-  return getScriptProp("WEB_APP_ID");
-}
-
-export function getReportLinkSecret(): string {
-  return getScriptProp("REPORT_LINK_SECRET");
-}
-
 export function loadClassReportJob(): ClassReportJob | null {
-  const value =
-    PropertiesService.getScriptProperties().getProperty(CLASS_REPORT_JOB_KEY);
+  const props = PropertiesService.getScriptProperties();
+  const value = props.getProperty(CLASS_REPORT_JOB_KEY);
 
-  return value ? (JSON.parse(value) as ClassReportJob) : null;
+  if (!value) return null;
+
+  try {
+    return JSON.parse(value) as ClassReportJob;
+  } catch (error) {
+    throw new Error(
+      "O estado salvo da geração de boletins está inválido. Cancele a geração pendente e tente novamente.",
+      { cause: error },
+    );
+  }
 }
 
 export function saveClassReportJob(job: ClassReportJob): void {

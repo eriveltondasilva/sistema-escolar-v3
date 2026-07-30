@@ -1,5 +1,5 @@
 // server/utils/error.ts
 
 export function getErrorMsg(error: unknown): string {
-  return Error.isError(error) ? error.message : String(error);
+  return error instanceof Error ? error.message : String(error);
 }

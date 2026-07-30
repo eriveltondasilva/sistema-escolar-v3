@@ -1,5 +1,5 @@
 // server/utils/link-token.ts
-import { getReportLinkSecret } from "./script-properties.ts";
+import { getScriptProp } from "./script-properties.ts";
 
 import type { ReportLinkParams } from "../types.ts";
 
@@ -8,16 +8,13 @@ export function generateReportLinkToken({
   studentId,
   year,
 }: ReportLinkParams): string {
-  const secret = getReportLinkSecret();
-  const payload = `${studentId}|${year}|${className}|${secret}`;
+  const secret = getScriptProp("REPORT_LINK_SECRET");
+  const payload = `${studentId}|${year}|${className}`;
 
   // Utilities.* são chamadas nativas do GAS.
-  const digest = Utilities.computeDigest(
-    Utilities.DigestAlgorithm.SHA_256,
-    payload,
-  );
+  const signature = Utilities.computeHmacSha256Signature(payload, secret);
 
-  return Utilities.base64EncodeWebSafe(digest);
+  return Utilities.base64EncodeWebSafe(signature);
 }
 
 export function verifyReportLinkToken(

@@ -35,20 +35,23 @@ export function formatStatus(status: unknown): string {
 
 /** Formata um valor simples, inserindo "--" caso esteja vazio. */
 export function formatValue(value: unknown): string {
-  if (value === "" || value == null) {
-    return "--";
-  }
+  const trimmedValue = String(value ?? "").trim();
+  if (trimmedValue === "") return "--";
 
-  return String(value);
+  return trimmedValue;
 }
 
-export function formatSex(sex: string): string {
+export function formatSex(sex: unknown): string {
+  const normalizedSex = String(sex ?? "")
+    .trim()
+    .toUpperCase();
+
   const gender: Record<string, string> = {
     F: "Feminino",
     M: "Masculino",
   };
 
-  return gender[sex] ?? "--";
+  return gender[normalizedSex] ?? "--";
 }
 
 /** Retorna a data no formato extenso e de acordo com as opções nativas do objeto Date. */
