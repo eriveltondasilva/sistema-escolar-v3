@@ -1,17 +1,18 @@
 // server/roster/types.ts
-import type { StudentData } from "../types.ts";
+import type { GuardianData, StudentData, StudentSummary } from "../types.ts";
 
 /**
  * Dados de um aluno para o formulário de cadastro/edição — estende
  * StudentData (já usado por report/*.ts) só com o que o formulário
  * precisa além disso: a matrícula (que em StudentData nunca aparece, pois
- * lá ela é a CHAVE do Map, não um campo do valor) e a lista crua de
- * responsáveis (StudentData/PersonalData só tem a versão já formatada e
- * concatenada, usada no boletim — aqui precisamos da lista editável).
+ * lá ela é a CHAVE do Map, não um campo do valor) e a lista de
+ * responsáveis com todos os dados (endereço, parentesco, telefone e quem
+ * é o principal) — StudentData/PersonalData só tem a versão já
+ * concatenada em texto, usada no boletim.
  */
 export interface StudentFormPayload extends StudentData {
   studentId: string;
-  guardianNames: string[];
+  guardians: GuardianData[];
 }
 
 /**
@@ -28,10 +29,7 @@ export type CreateStudentPayload = Omit<
 >;
 
 /** Resultado de uma busca de aluno (nome ou matrícula) — usado no autocomplete da tela de busca. */
-export interface StudentSearchResult {
-  studentId: string;
-  name: string;
-}
+export type StudentSearchResult = StudentSummary;
 
 /**
  * Payload de student-edit.html. studentId vai aqui (não mais como

@@ -1,17 +1,17 @@
 // server/report/data-access.ts
 import { ENROLLMENT_SHEET_NAMES } from "../config.ts";
+import { formatDate, formatGuardianNames } from "../utils/formatters.ts";
 import {
   FIRST_DATA_ROW,
-  GRADE_COLUMNS,
-  GRADE_COLUMNS_COUNT,
+  getGradeColumns,
+  getGradeColumnsCount,
   GUARDIAN_COLUMNS,
   STUDENT_COLUMNS,
   SUMMARY_FIRST_DATA_ROW,
   VALID_SUBJECTS,
 } from "./constants.ts";
-import { formatDate, formatGuardianNames } from "../utils/formatters.ts";
 
-import type { StudentData, Subject } from "../types.ts";
+import type { AssessmentType, StudentData, Subject } from "../types.ts";
 import type {
   ClassStudent,
   GradeRow,
@@ -108,7 +108,7 @@ export function loadStudentsMap(
   );
   if (!studentsSheet) {
     throw new Error(
-      `Cadastro de Alunos: a aba "${ENROLLMENT_SHEET_NAMES.STUDENTS}" não existe.`,
+      `Cadastro Escolar: a aba "${ENROLLMENT_SHEET_NAMES.STUDENTS}" não existe.`,
     );
   }
 
@@ -139,7 +139,7 @@ export function loadSingleStudentMap(
 
   if (!studentsSheet) {
     throw new Error(
-      `Cadastro de Alunos: a aba "${ENROLLMENT_SHEET_NAMES.STUDENTS}" não existe.`,
+      `Cadastro Escolar: a aba "${ENROLLMENT_SHEET_NAMES.STUDENTS}" não existe.`,
     );
   }
 
@@ -239,6 +239,7 @@ export function loadSingleStudentGuardiansMap(
 export function loadGradesBySubject(
   classSpreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
   foundSubjects: Subject[],
+  assessmentType: AssessmentType,
 ): Map<string, Map<string, GradeRow>> {
   const map = new Map<string, Map<string, GradeRow>>();
 
@@ -254,7 +255,7 @@ export function loadGradesBySubject(
             FIRST_DATA_ROW,
             1,
             lastRow - FIRST_DATA_ROW + 1,
-            GRADE_COLUMNS_COUNT,
+            getGradeColumnsCount(assessmentType),
           )
           .getValues()
       : [];
@@ -275,6 +276,7 @@ export function loadGradesForSingleStudent(
   classSpreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
   foundSubjects: Subject[],
   studentId: string,
+  assessmentType: AssessmentType,
 ): Map<string, Map<string, GradeRow>> {
   const map = new Map<string, Map<string, GradeRow>>();
 
@@ -292,7 +294,7 @@ export function loadGradesForSingleStudent(
 
       if (match) {
         const rowValues = sheet
-          .getRange(match.getRow(), 1, 1, GRADE_COLUMNS_COUNT)
+          .getRange(match.getRow(), 1, 1, getGradeColumnsCount(assessmentType))
           .getValues()[0];
         if (rowValues) byStudentId.set(studentId, rowValues);
       }
@@ -317,10 +319,9 @@ export function getGradesForStudent(
     result[subject.name] =
       rowValues ?
         Object.fromEntries(
-          Object.entries(GRADE_COLUMNS).map(([field, index]) => [
-            field,
-            rowValues[index],
-          ]),
+          Object.entries(getGradeColumns(context.assessmentType)).map(
+            ([field, index]) => [field, rowValues[index]],
+          ),
         )
       : null;
   }
@@ -336,7 +337,7 @@ export function getPersonalData(
 
   if (!student) {
     throw new Error(
-      `Aluno com matrícula ${studentId} não encontrado no Cadastro de Alunos.`,
+      `Aluno com matrícula ${studentId} não encontrado no Cadastro Escolar.`,
     );
   }
 

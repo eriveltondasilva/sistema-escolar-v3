@@ -64,7 +64,7 @@ export function validateClassMatriculations(
       if (!registeredStudentsMap.has(studentId)) {
         issues.push({
           type: "error",
-          text: `[${matriculation.className}] Matrícula ${studentId} não encontrada no Cadastro de Alunos.`,
+          text: `[${matriculation.className}] Matrícula ${studentId} não encontrada no Cadastro Escolar.`,
         });
       }
     }

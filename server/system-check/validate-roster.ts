@@ -6,7 +6,7 @@ import type { ClassStudent } from "../report/types.ts";
 import type { Issue, StudentData } from "../types.ts";
 
 /**
- * Compara os alunos da aba "Resumo" de uma turma com o Cadastro de Alunos.
+ * Compara os alunos da aba "Resumo" de uma turma com o Cadastro Escolar.
  * Retorna objetos detalhados de diagnóstico.
  */
 export function validateClassStudents(
@@ -39,7 +39,7 @@ export function validateClassStudents(
     if (registeredStudent === undefined) {
       issues.push({
         type: "warning",
-        text: `[${schoolYearLabel} / ${className} / Resumo, linha ${row}] Matrícula ${studentId} não consta no Cadastro de Alunos.`,
+        text: `[${schoolYearLabel} / ${className} / Resumo, linha ${row}] Matrícula ${studentId} não consta no Cadastro Escolar.`,
         url: ssUrl,
       });
       continue;
@@ -110,6 +110,6 @@ export function findDuplicateStudentIds(
     .filter(([, dataRows]) => dataRows.length > 1)
     .map(
       ([studentId, dataRows]) =>
-        `Cadastro de Alunos: matrícula ${studentId} duplicada nas linhas ${dataRows.join(", ")}.`,
+        `Cadastro Escolar: matrícula ${studentId} duplicada nas linhas ${dataRows.join(", ")}.`,
     );
 }

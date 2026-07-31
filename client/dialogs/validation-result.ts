@@ -1,16 +1,10 @@
 // client/dialogs/validation-result.ts
 import { parseInitData } from "../utils.ts";
 
-type IssueType = "error" | "warning";
-
-type ValidationIssue = {
-  type: IssueType;
-  text: string;
-  url?: string;
-};
+import type { Issue, IssueType } from "#server/types.ts";
 
 type ValidationResultPayload = {
-  issues: ValidationIssue[];
+  issues: Issue[];
 };
 
 type FilterOption = "all" | IssueType;
@@ -19,7 +13,7 @@ type DiagnosticPanelState = ValidationResultPayload & {
   filter: FilterOption;
   readonly errorCount: number;
   readonly warningCount: number;
-  readonly filteredIssues: ValidationIssue[];
+  readonly filteredIssues: Issue[];
 };
 
 function diagnosticPanel(el: HTMLElement): DiagnosticPanelState {

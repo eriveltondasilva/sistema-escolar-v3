@@ -10,7 +10,17 @@ export const SUMMARY_FIRST_DATA_ROW = 2;
 /** Primeira linha de dados nas abas de disciplina (linha 1 = cabeçalho). */
 export const FIRST_DATA_ROW = 2;
 
-/** Índices (0-based) das colunas na aba "Alunos" do Cadastro de Alunos. */
+
+const ROSTER_FIRST_DATA_ROW = 3
+// const SUMMARY_FIRST_DATA_ROW = 3
+const  SUBJECT_FIRST_DATA_ROW = 4
+
+const ENROLLMENT_FIRST_DATA_ROW = {
+  studentSheet: 3,
+  guardianSheet: 2
+}
+
+/** Índices (0-based) das colunas na aba "Alunos" do Cadastro Escolar. */
 export const STUDENT_COLUMNS = {
   id: 0,
   name: 1,
@@ -32,18 +42,50 @@ export const GUARDIAN_COLUMNS = {
   phone: 5,
 } as const;
 
-/** Índices (0-based) das colunas nas abas de disciplina (ex.: "MAT", "LPO"). */
-export const GRADE_COLUMNS = {
+/** Índices (0-based) das colunas na aba de disciplina — turmas com nota numérica. */
+export const GRADE_COLUMNS_NUMERIC = {
   studentId: 0,
-  bimester1: 1,
-  bimester2: 2,
-  bimester3: 3,
-  bimester4: 4,
-  average: 5,
-  status: 6,
+  grade1Q: 1,
+  absences1Q: 2,
+  grade2Q: 3,
+  absences2Q: 4,
+  makeup1S: 5,
+  average1S: 6,
+  grade3Q: 7,
+  absences3Q: 8,
+  grade4Q: 9,
+  absences4Q: 10,
+  makeup2S: 11,
+  average2S: 12,
+  finalGrade: 13,
+  totalAbsences: 14,
+  status: 15,
 } as const;
 
-export const GRADE_COLUMNS_COUNT = Object.keys(GRADE_COLUMNS).length;
+/** Índices (0-based) das colunas na aba de disciplina — turmas com conceito. */
+export const GRADE_COLUMNS_CONCEPT = {
+  studentId: 0,
+  grade1Q: 1,
+  absences1Q: 2,
+  grade2Q: 3,
+  absences2Q: 4,
+  grade3Q: 5,
+  absences3Q: 6,
+  grade4Q: 7,
+  absences4Q: 8,
+  totalAbsences: 9,
+  status: 10,
+} as const;
+
+export function getGradeColumns(assessmentType: AssessmentType) {
+  return assessmentType === "grade" ?
+      GRADE_COLUMNS_NUMERIC
+    : GRADE_COLUMNS_CONCEPT;
+}
+
+export function getGradeColumnsCount(assessmentType: AssessmentType): number {
+  return Object.keys(getGradeColumns(assessmentType)).length;
+}
 
 /** Turmas únicas, não insira duas vezes o mesmo className. */
 export const VALID_CLASSES: ValidClass[] = [
@@ -124,4 +166,41 @@ export function getPlaceholderFields(
   return assessmentType === "grade" ?
       GRADE_PLACEHOLDER_FIELDS
     : CONCEPT_PLACEHOLDER_FIELDS;
+}
+
+/**
+ * Sufixos de PLACEHOLDER_FIELDS que são preenchidos manualmente pelo
+ * professor nas abas de disciplina. Os demais campos são fórmula (calculados
+ * a partir dos manuais) e devem ficar bloqueados quando a aba é protegida.
+ */
+export const GRADE_MANUAL_SUFFIXES = new Set([
+  "n1",
+  "f1",
+  "n2",
+  "f2",
+  "rs1",
+  "n3",
+  "f3",
+  "n4",
+  "f4",
+  "rs2",
+]);
+
+export const CONCEPT_MANUAL_SUFFIXES = new Set([
+  "c1",
+  "f1",
+  "c2",
+  "f2",
+  "c3",
+  "f3",
+  "c4",
+  "f4",
+  "sf",
+]);
+
+/** Escolhe o conjunto de sufixos de entrada manual de acordo com o tipo de avaliação da turma. */
+export function getManualSuffixes(assessmentType: AssessmentType): Set<string> {
+  return assessmentType === "grade" ?
+      GRADE_MANUAL_SUFFIXES
+    : CONCEPT_MANUAL_SUFFIXES;
 }

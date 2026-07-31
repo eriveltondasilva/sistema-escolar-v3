@@ -1,4 +1,9 @@
 // server/report/context-builder.ts
+import {
+  extractYear,
+  getOrCreateClassPdfFolder,
+  getReportTemplateFile,
+} from "../drive/drive-lookup.ts";
 import { VALID_CLASSES } from "./constants.ts";
 import {
   loadGradesBySubject,
@@ -8,11 +13,6 @@ import {
   loadSingleStudentMap,
   loadStudentsMap,
 } from "./data-access.ts";
-import {
-  extractYear,
-  getOrCreateClassPdfFolder,
-  getReportTemplateFile,
-} from "../drive/drive-lookup.ts";
 
 import type { AssessmentType } from "../types.ts";
 import type {
@@ -42,7 +42,11 @@ export function buildReportContext({
     pdfFolder: getOrCreateClassPdfFolder(config, year, className),
     studentsMap: loadStudentsMap(registrationSheet),
     guardiansMap: loadGuardiansMap(registrationSheet),
-    gradesBySubject: loadGradesBySubject(classSpreadsheet, foundSubjects),
+    gradesBySubject: loadGradesBySubject(
+      classSpreadsheet,
+      foundSubjects,
+      assessmentType,
+    ),
   };
 }
 
@@ -72,6 +76,7 @@ export function buildSingleStudentReportContext({
       classSpreadsheet,
       foundSubjects,
       studentId,
+      assessmentType,
     ),
   };
 }

@@ -10,6 +10,7 @@ import { findStudentPdfHistory } from "./pdf-history.ts";
 import { formatGuardianNames } from "../utils/formatters.ts";
 import { withScriptLock } from "../utils/script-lock.ts";
 
+import type { GuardianData } from "../types.ts";
 import type {
   CreateStudentPayload,
   StudentFormPayload,
@@ -48,7 +49,9 @@ export function getStudentDetailsForSearch(
 
   return {
     student,
-    guardianNamesFormatted: formatGuardianNames(student.guardianNames),
+    guardianNamesFormatted: formatGuardianNames(
+      student.guardians.map((guardian) => guardian.name),
+    ),
     pdfHistory: findStudentPdfHistory(config, trimmedId),
   };
 }
@@ -72,15 +75,18 @@ export function getStudentForEditForm(studentId: string): StudentFormPayload {
 
 function validateStudentPayload(payload: {
   name: string;
-  guardianNames: string[];
+  guardians: GuardianData[];
 }): void {
   if (!payload.name?.trim()) {
     throw new Error("Nome é obrigatório.");
   }
 
-  const hasGuardians =
-    !Array.isArray(payload.guardianNames) || payload.guardianNames.length === 0;
-  if (hasGuardians) {
+  const validGuardiansCount =
+    Array.isArray(payload.guardians) ?
+      payload.guardians.filter((guardian) => guardian.name?.trim()).length
+    : 0;
+
+  if (validGuardiansCount === 0) {
     throw new Error("Informe ao menos um responsável.");
   }
 }

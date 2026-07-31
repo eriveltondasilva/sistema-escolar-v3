@@ -1,7 +1,8 @@
 // client/dialogs/student-edit.ts
 import { runServerAction, validateStudentForm } from "../utils.ts";
 
-import type { GuardianData, StudentFormPayload } from "#server/types.ts";
+import type { StudentFormPayload } from "#server/roster/types.ts";
+import type { GuardianData } from "#server/types.ts";
 
 function emptyGuardian(): GuardianData {
   return {
@@ -15,11 +16,14 @@ function emptyGuardian(): GuardianData {
 
 function emptyForm(): StudentFormPayload {
   return {
+    studentId: "",
     name: "",
     address: "",
     nationality: "",
     sex: "",
     birthDate: "",
+    enrollmentDate: "",
+    status: "",
     guardians: [],
   };
 }

@@ -1,10 +1,10 @@
 // server/roster/data-access.ts
 import { DEFAULT_LOCALE, ENROLLMENT_SHEET_NAMES } from "../config.ts";
-import { diffStudentFields, logStudentChanges } from "./change-log.ts";
 import { GUARDIAN_COLUMNS, STUDENT_COLUMNS } from "../report/constants.ts";
-import { loadSingleStudentGuardiansMap } from "../report/data-access.ts";
 import { formatDate } from "../utils/formatters.ts";
+import { diffStudentFields, logStudentChanges } from "./change-log.ts";
 
+import type { GuardianData } from "../types.ts";
 import type {
   CreateStudentPayload,
   StudentFormPayload,
@@ -24,7 +24,7 @@ export function generateNextStudentId(
   );
   if (!studentsSheet) {
     throw new Error(
-      `Cadastro de Alunos: a aba "${ENROLLMENT_SHEET_NAMES.STUDENTS}" não existe.`,
+      `Cadastro Escolar: a aba "${ENROLLMENT_SHEET_NAMES.STUDENTS}" não existe.`,
     );
   }
 
@@ -77,6 +77,53 @@ export function searchStudents(
     });
 }
 
+/** Monta um GuardianData completo a partir de uma linha da aba "Responsáveis". */
+function mapGuardianRow(row: ReadonlyArray<unknown>): GuardianData {
+  return {
+    name: String(row[GUARDIAN_COLUMNS.name] ?? "").trim(),
+    address: String(row[GUARDIAN_COLUMNS.address] ?? ""),
+    relationship: String(row[GUARDIAN_COLUMNS.relationship] ?? ""),
+    isPrimary:
+      String(row[GUARDIAN_COLUMNS.isPrimary] ?? "não").toLowerCase() === "Sim",
+    phone: String(row[GUARDIAN_COLUMNS.phone] ?? ""),
+  };
+}
+
+/**
+ * Busca os responsáveis de um único aluno na aba "Responsáveis" pela
+ * matrícula, já com todos os campos (endereço, parentesco, telefone,
+ * principal) — usado pelo formulário de edição.
+ */
+function loadStudentGuardians(
+  registrationSheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
+  studentId: string,
+): GuardianData[] {
+  const guardiansSheet = registrationSheet.getSheetByName(
+    ENROLLMENT_SHEET_NAMES.GUARDIANS,
+  );
+  if (!guardiansSheet) return [];
+
+  const lastRow = guardiansSheet.getLastRow();
+  if (lastRow < 2) return [];
+
+  const matches = guardiansSheet
+    .getRange(2, GUARDIAN_COLUMNS.studentId + 1, lastRow - 1, 1)
+    .createTextFinder(studentId)
+    .matchEntireCell(true)
+    .findAll();
+
+  return matches
+    .map(
+      (cell) =>
+        guardiansSheet
+          .getRange(cell.getRow(), 1, 1, guardiansSheet.getLastColumn())
+          .getValues()[0],
+    )
+    .filter((row): row is any[] => row !== undefined)
+    .map(mapGuardianRow)
+    .filter((guardian) => guardian.name.length > 0);
+}
+
 export function getStudentForEdit(
   registrationSheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
   studentId: string,
@@ -86,7 +133,7 @@ export function getStudentForEdit(
   );
   if (!studentsSheet) {
     throw new Error(
-      `Cadastro de Alunos: a aba "${ENROLLMENT_SHEET_NAMES.STUDENTS}" não existe.`,
+      `Cadastro Escolar: a aba "${ENROLLMENT_SHEET_NAMES.STUDENTS}" não existe.`,
     );
   }
 
@@ -116,10 +163,7 @@ export function getStudentForEdit(
     enrollmentDate: formatDate(row[STUDENT_COLUMNS.enrollmentDate]),
     sex: String(row[STUDENT_COLUMNS.sex] ?? ""),
     status: String(row[STUDENT_COLUMNS.status] ?? ""),
-    guardianNames:
-      loadSingleStudentGuardiansMap(registrationSheet, studentId).get(
-        studentId,
-      ) ?? [],
+    guardians: loadStudentGuardians(registrationSheet, studentId),
   };
 }
 
@@ -132,7 +176,7 @@ export function createStudentRecord(
   );
   if (!studentsSheet) {
     throw new Error(
-      `Cadastro de Alunos: a aba "${ENROLLMENT_SHEET_NAMES.STUDENTS}" não existe.`,
+      `Cadastro Escolar: a aba "${ENROLLMENT_SHEET_NAMES.STUDENTS}" não existe.`,
     );
   }
 
@@ -150,7 +194,7 @@ export function createStudentRecord(
     DEFAULT_STUDENT_STATUS,
   ]);
 
-  replaceGuardians(registrationSheet, studentId, input.guardianNames);
+  replaceGuardians(registrationSheet, studentId, input.guardians);
 
   return studentId;
 }
@@ -165,7 +209,7 @@ export function updateStudentRecord(
   );
   if (!studentsSheet) {
     throw new Error(
-      `Cadastro de Alunos: a aba "${ENROLLMENT_SHEET_NAMES.STUDENTS}" não existe.`,
+      `Cadastro Escolar: a aba "${ENROLLMENT_SHEET_NAMES.STUDENTS}" não existe.`,
     );
   }
 
@@ -209,7 +253,7 @@ export function updateStudentRecord(
     .getRange(match.getRow(), STUDENT_COLUMNS.status + 1)
     .setValue(input.status);
 
-  replaceGuardians(registrationSheet, studentId, input.guardianNames);
+  replaceGuardians(registrationSheet, studentId, input.guardians);
 
   const changes = diffStudentFields(oldData, {
     name: input.name,
@@ -222,23 +266,28 @@ export function updateStudentRecord(
   logStudentChanges(registrationSheet, studentId, changes);
 }
 
+/**
+ * Substitui todos os responsáveis de um aluno pelos informados, gravando
+ * nome, endereço, parentesco, telefone e o marcador de responsável
+ * principal — todas as colunas de GUARDIAN_COLUMNS.
+ */
 export function replaceGuardians(
   registrationSheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
   studentId: string,
-  guardianNames: string[],
+  guardians: GuardianData[],
 ): void {
   const guardiansSheet = registrationSheet.getSheetByName(
     ENROLLMENT_SHEET_NAMES.GUARDIANS,
   );
   if (!guardiansSheet) {
     throw new Error(
-      `Cadastro de Alunos: a aba "${ENROLLMENT_SHEET_NAMES.GUARDIANS}" não existe.`,
+      `Cadastro Escolar: a aba "${ENROLLMENT_SHEET_NAMES.GUARDIANS}" não existe.`,
     );
   }
 
-  const validNames = guardianNames
-    .map((name) => name.trim())
-    .filter((name) => name.length > 0);
+  const validGuardians = guardians.filter(
+    (guardian) => guardian.name.trim().length > 0,
+  );
 
   const lastRow = guardiansSheet.getLastRow();
   const existingRows: number[] = [];
@@ -257,10 +306,17 @@ export function replaceGuardians(
   // 1. Insere os novos responsáveis primeiro (no final da aba). Se isso
   // falhar (quota, timeout), as linhas antigas abaixo continuam intactas
   // e o aluno não fica sem nenhum responsável cadastrado.
-  if (validNames.length > 0) {
-    const newRows = validNames.map((name) => [studentId, name]);
+  if (validGuardians.length > 0) {
+    const newRows = validGuardians.map((guardian) => [
+      studentId,
+      guardian.name.trim(),
+      guardian.address,
+      guardian.relationship,
+      guardian.isPrimary,
+      guardian.phone,
+    ]);
     guardiansSheet
-      .getRange(guardiansSheet.getLastRow() + 1, 1, newRows.length, 2)
+      .getRange(guardiansSheet.getLastRow() + 1, 1, newRows.length, 6)
       .setValues(newRows);
   }
 

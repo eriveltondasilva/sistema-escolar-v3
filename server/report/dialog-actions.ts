@@ -20,6 +20,7 @@ import {
   loadClassReportJob,
 } from "../utils/script-properties.ts";
 
+import type { StudentSummary } from "../types.ts";
 import type { ClassReportsGenerationResult } from "./batch.ts";
 import type {
   ClassReportJob,
@@ -27,15 +28,10 @@ import type {
   ReportSuccessInitData,
 } from "./types.ts";
 
-interface ClassStudent {
-  studentId: string;
-  name: string;
-}
-
 export function getStudentsDataForClass(
   schoolYearLabel: string,
   className: string,
-): ClassStudent[] {
+): StudentSummary[] {
   const config = loadConfig();
   const yearFolder = getSchoolYearFolder(config, schoolYearLabel);
   const classFile = getClassSpreadsheetFile(

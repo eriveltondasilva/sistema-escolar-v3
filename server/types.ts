@@ -27,14 +27,14 @@ export interface Issue {
 
 export interface ValidClass {
   className: string;
-  stage: string;
-  shift: string;
+  stage: `Ensino Fundamental ${"I" | "II"}`;
+  shift: "Matutino" | "Vespertino";
   assessmentType: AssessmentType;
 }
 
 export interface Subject {
   name: string;
-  code: string;
+  code: Uppercase<string>;
 }
 
 export interface StudentData {
@@ -47,23 +47,26 @@ export interface StudentData {
   status: string;
 }
 
+/**
+ * Forma mínima de identificação de um aluno ({studentId, name}), usada em
+ * listas/autocomplete — resultado de busca (roster) ou de alunos de uma
+ * turma (report). Fonte única para evitar redefinir o mesmo par de campos
+ * em cada domínio.
+ */
+export interface StudentSummary {
+  studentId: string;
+  name: string;
+}
+
+/**
+ * Dados completos de um responsável, usados pelo formulário de
+ * cadastro/edição de aluno (ver roster/types.ts::StudentFormPayload).
+ * Mapeia 1:1 para as colunas de GUARDIAN_COLUMNS (report/constants.ts).
+ */
 export interface GuardianData {
   name: string;
   address: string;
   relationship: string;
   isPrimary: boolean;
   phone: string;
-}
-
-/**
- * Payload enviado pelo formulário de cadastro/edição de aluno.
- * Reaproveita os campos de StudentData que o form realmente edita
- * (sem enrollmentDate/status, que não fazem parte do form) e a lista
- * de responsáveis.
- */
-export interface StudentFormPayload extends Pick<
-  StudentData,
-  "name" | "address" | "nationality" | "sex" | "birthDate"
-> {
-  guardians: GuardianData[];
 }

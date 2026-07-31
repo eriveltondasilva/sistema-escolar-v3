@@ -1,7 +1,8 @@
 // client/dialogs/student-create.ts
 import { runServerAction, validateStudentForm } from "../utils.ts";
 
-import type { GuardianData, StudentFormPayload } from "#server/types.ts";
+import type { CreateStudentPayload } from "#server/roster/types.ts";
+import type { GuardianData } from "#server/types.ts";
 
 type StudentCreateView = "form" | "success";
 
@@ -15,7 +16,7 @@ function emptyGuardian(): GuardianData {
   };
 }
 
-function emptyForm(): StudentFormPayload {
+function emptyForm(): CreateStudentPayload {
   return {
     name: "",
     address: "",
@@ -31,7 +32,7 @@ type StudentCreateState = {
   studentId: string;
   isLoading: boolean;
   error: string;
-  form: StudentFormPayload;
+  form: CreateStudentPayload;
   addGuardian(): void;
   removeGuardian(index: number): void;
   setPrimaryGuardian(index: number): void;

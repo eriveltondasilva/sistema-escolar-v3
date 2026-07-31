@@ -26,7 +26,7 @@ export type SubjectGrades = Record<string, unknown>;
 export type SelectYearClassActionType = "single" | "class";
 
 export interface PlaceholderField {
-  suffix: string;
+  suffix: Lowercase<string>;
   field: string;
   format: (value: unknown) => string;
 }

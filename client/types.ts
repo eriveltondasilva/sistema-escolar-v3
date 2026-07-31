@@ -1,36 +1,22 @@
 // client/types.ts
-import type { StudentFormPayload } from "#server/types.ts";
+import type { StudentSearchDetails as ServerStudentSearchDetails } from "#server/roster/dialog-actions.ts";
+import type {
+  CreateStudentPayload,
+  StudentFormPayload,
+} from "#server/roster/types.ts";
+import type { ClassMatriculationInput } from "#server/school-year/types.ts";
+import type { StudentSummary } from "#server/types.ts";
 
 /**
- * Tipos auxiliares que trafegam entre client e server, mas não vivem em
- * server/types.ts porque são específicos do payload de cada dialog.
+ * Tipos deste arquivo são aliases dos tipos reais do server — o server é
+ * a fonte única; o client só reexporta com o nome que faz sentido no
+ * contexto de cada dialog, sem redefinir a forma.
  */
-export type MatriculationInput = {
-  className: string;
-  studentIds: string[];
-};
+export type MatriculationInput = ClassMatriculationInput;
 
-export type StudentOption = {
-  studentId: string;
-  name: string;
-};
+export type StudentOption = StudentSummary;
 
-export type PdfHistoryEntry = {
-  pdfUrl: string;
-  yearLabel: string;
-  className: string;
-};
-
-export type StudentSearchDetails = {
-  student: {
-    studentId: string;
-    name: string;
-    address: string;
-    birthDate: string;
-  };
-  guardianNamesFormatted: string;
-  pdfHistory: PdfHistoryEntry[];
-};
+export type StudentSearchDetails = ServerStudentSearchDetails;
 
 /** Funções expostas pelo server via google.script.run (ver server/main.ts). */
 export interface GasServerFunctions {
@@ -56,8 +42,11 @@ export interface GasServerFunctions {
   getStudentSearchResults(query: string): StudentOption[];
   getStudentDetailsForSearch(studentId: string): StudentSearchDetails;
   getStudentForEditForm(studentId: string): StudentFormPayload;
-  submitStudentRegistration(payload: StudentFormPayload): string;
-  submitStudentEdit(studentId: string, payload: StudentFormPayload): void;
+  submitStudentRegistration(payload: CreateStudentPayload): string;
+  submitStudentEdit(
+    studentId: string,
+    payload: Omit<StudentFormPayload, "studentId" | "enrollmentDate">,
+  ): void;
 
   // --- Ano Letivo ---
   submitSchoolYearCreation(

@@ -24,7 +24,7 @@ export interface RegistrationCheckResult {
   issues: Issue[];
 }
 
-/** Abre o Cadastro de Alunos, confere abas obrigatórias e matrículas duplicadas. */
+/** Abre o Cadastro Escolar, confere abas obrigatórias e matrículas duplicadas. */
 export function checkRegistration(config: AppConfig): RegistrationCheckResult {
   const issues: Issue[] = [];
 
@@ -34,7 +34,7 @@ export function checkRegistration(config: AppConfig): RegistrationCheckResult {
   } catch (e) {
     return {
       registeredStudentsMap: null,
-      issues: [toIssue("Cadastro de Alunos", e)],
+      issues: [toIssue("Cadastro Escolar", e)],
     };
   }
 
@@ -47,7 +47,7 @@ export function checkRegistration(config: AppConfig): RegistrationCheckResult {
     if (!registrationSheet.getSheetByName(sheetName)) {
       issues.push({
         type: "error",
-        text: `Cadastro de Alunos: a aba "${sheetName}" não existe.`,
+        text: `Cadastro Escolar: a aba "${sheetName}" não existe.`,
         url: regUrl,
       });
     }
@@ -57,7 +57,7 @@ export function checkRegistration(config: AppConfig): RegistrationCheckResult {
   try {
     registeredStudentsMap = loadStudentsMap(registrationSheet);
   } catch (e) {
-    issues.push(toIssue("Cadastro de Alunos", e, regUrl));
+    issues.push(toIssue("Cadastro Escolar", e, regUrl));
   }
 
   if (registeredStudentsMap) {

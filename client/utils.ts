@@ -1,5 +1,5 @@
 // client/utils.ts
-import type { StudentFormPayload } from "#server/types.ts";
+import type { GuardianData } from "#server/types.ts";
 import type { GasServerFunctions } from "./types.ts";
 
 /**
@@ -36,10 +36,25 @@ export function runServerAction<TReturn = void, TServer = GasServerFunctions>(
 const VALID_SEX_VALUES = ["F", "M"];
 
 /**
+ * Forma mínima aceita por validateStudentForm — compatível tanto com o
+ * payload de criação (CreateStudentPayload) quanto com o de edição
+ * (Omit<StudentFormPayload, "studentId" | "enrollmentDate">), sem
+ * acoplar a validação a um dos dois tipos específicos.
+ */
+interface StudentFormLike {
+  name: string;
+  birthDate: string;
+  sex: string;
+  address: string;
+  nationality: string;
+  guardians: GuardianData[];
+}
+
+/**
  * Valida o payload do formulário de aluno (cadastro ou edição).
  * Retorna a mensagem de erro do primeiro problema encontrado, ou null se válido.
  */
-export function validateStudentForm(form: StudentFormPayload): string | null {
+export function validateStudentForm(form: StudentFormLike): string | null {
   if (!form.name.trim()) {
     return "Nome é obrigatório.";
   }
