@@ -1,21 +1,21 @@
 // server/system-check/structure-checks.ts
 import { ENROLLMENT_SHEET_NAMES } from "../config.ts";
-import { toIssue } from "./issue-helper.ts";
-import {
-  findDuplicateStudentIds,
-  validateClassStudents,
-} from "./validate-roster.ts";
-import {
-  getClassSpreadsheetFile,
-  getSchoolYearFolder,
-  listSchoolYears,
-} from "../drive/drive-lookup.ts";
 import { VALID_CLASSES } from "../report/constants.ts";
 import {
   checkClassSubjects,
   getClassStudentsFromResumo,
   loadStudentsMap,
 } from "../report/data-access.ts";
+import {
+  getClassSpreadsheetFile,
+  getSchoolYearFolder,
+  listSchoolYears,
+} from "../shared/drive-lookup.ts";
+import { toIssue } from "./issue-helper.ts";
+import {
+  findDuplicateStudentIds,
+  validateClassStudents,
+} from "./validate-roster.ts";
 
 import type { AppConfig, Issue, StudentData } from "../types.ts";
 
@@ -124,7 +124,7 @@ export function checkYear(
     return [toIssue("Anos Letivos", error)];
   }
 
-  return VALID_CLASSES.flatMap(({ className }) =>
+  return VALID_CLASSES.flatMap(({ name: className }) =>
     checkClass(yearFolder, schoolYearLabel, className, registeredStudentsMap),
   );
 }

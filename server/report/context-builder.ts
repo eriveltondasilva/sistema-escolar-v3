@@ -3,7 +3,7 @@ import {
   extractYear,
   getOrCreateClassPdfFolder,
   getReportTemplateFile,
-} from "../drive/drive-lookup.ts";
+} from "../shared/drive-lookup.ts";
 import { VALID_CLASSES } from "./constants.ts";
 import {
   loadGradesBySubject,
@@ -84,7 +84,7 @@ export function buildSingleStudentReportContext({
 /** Resolve o tipo de avaliação (nota/conceito) configurado para a turma. */
 function getAssessmentType(className: string): AssessmentType {
   const classInfo = VALID_CLASSES.find(
-    (validClass) => validClass.className === className,
+    (validClass) => validClass.name === className,
   );
 
   if (!classInfo) {

@@ -1,11 +1,11 @@
 // server/system-check/environment-checks.ts
 import { loadConfig } from "../config.ts";
 import { toIssue } from "./issue-helper.ts";
+import { VALID_CLASSES } from "../report/constants.ts";
 import {
   getClassTemplateFile,
   getReportTemplateFile,
-} from "../drive/drive-lookup.ts";
-import { VALID_CLASSES } from "../report/constants.ts";
+} from "../shared/drive-lookup.ts";
 import { getScriptProp } from "../utils/script-properties.ts";
 
 import type { AppConfig, Issue } from "../types.ts";

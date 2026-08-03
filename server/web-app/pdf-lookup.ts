@@ -1,13 +1,13 @@
 // server/web-app/pdf-lookup.ts
 import { loadConfig } from "../config.ts";
-import { findStudentPdfInFolder } from "../drive/drive-lookup.ts";
+import { findStudentPdfInFolder } from "../shared/drive-lookup.ts";
 
 import type { ReportLinkParams } from "../types.ts";
 
 export function findReportPdfId({
   studentId,
-  year,
   className,
+  year,
 }: ReportLinkParams): string | null {
   const { pdfsFolderId } = loadConfig();
 
@@ -25,7 +25,7 @@ export function findReportPdfId({
 
   if (!classFolderIterator.hasNext()) {
     throw new Error(
-      `Pasta da turma "${className}" não encontrada dentro do ano "${year}".`,
+      `Pasta da turma "${className}" não encontrada dentro do ano letivo "${year}".`,
     );
   }
 

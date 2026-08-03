@@ -10,7 +10,7 @@ export function openCreateSchoolYearFormDialog(): void {
   const htmlOutput = renderView<CreateSchoolYearFormInitData>(
     DIALOG_NAMES.createSchoolYearForm,
     {
-      classNames: VALID_CLASSES.map((validClass) => validClass.className),
+      classNames: VALID_CLASSES.map((validClass) => validClass.name),
     },
   );
   htmlOutput.setWidth(560).setHeight(640);

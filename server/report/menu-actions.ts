@@ -1,10 +1,10 @@
 // server/report/menu-actions.ts
 import { loadConfig } from "../config.ts";
 import { DIALOG_NAMES } from "../dialog-names.ts";
-import { VALID_CLASSES } from "./constants.ts";
-import { listSchoolYears } from "../drive/drive-lookup.ts";
+import { listSchoolYears } from "../shared/drive-lookup.ts";
 import { getErrorMsg } from "../utils/error.ts";
 import { renderView } from "../utils/render-view.ts";
+import { VALID_CLASSES } from "./constants.ts";
 
 import type { GenerateReportFormInitData } from "./types.ts";
 
@@ -33,7 +33,7 @@ export function openSelectYearClassDialog(
       {
         actionType,
         years,
-        classes: VALID_CLASSES.map((validClass) => validClass.className),
+        classes: VALID_CLASSES.map((validClass) => validClass.name),
       },
     );
     htmlOutput.setWidth(400).setHeight(height);

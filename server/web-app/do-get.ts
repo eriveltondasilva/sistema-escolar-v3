@@ -1,9 +1,7 @@
 // server/web-app/do-get.ts
 import { DIALOG_NAMES } from "../dialog-names.ts";
+import { getErrorMsg, renderView, verifyReportLinkToken } from "../utils";
 import { findReportPdfId } from "./pdf-lookup.ts";
-import { getErrorMsg } from "../utils/error.ts";
-import { verifyReportLinkToken } from "../utils/link-token.ts";
-import { renderView } from "../utils/render-view.ts";
 
 import type { ReportLinkParams } from "../types.ts";
 import type { ErrorInitData, ReportDownloadInitData } from "./types.ts";
@@ -17,17 +15,15 @@ const REQUIRED_PARAMS: (keyof GetParams)[] = [
   "year",
   "className",
   "token",
-];
-const STUDENT_ID_PATTERN = /^[A-Za-z0-9]+$/;
+] as const;
 
-const GENERIC_LOOKUP_ERROR_MESSAGE =
-  "Não foi possível localizar o boletim no momento. Tente novamente mais " +
-  "tarde ou entre em contato com a secretaria da escola.";
+const GENERIC_ERROR_MESSAGE =
+  "Não foi possível localizar o boletim no momento. " +
+  "Tente novamente mais tarde ou entre em contato com a secretaria da escola.";
 
 function renderError(errorMessage: string): GoogleAppsScript.HTML.HtmlOutput {
-  const htmlOutput = renderView<ErrorInitData>(DIALOG_NAMES.error, {
-    errorMessage,
-  });
+  const initData: ErrorInitData = { errorMessage };
+  const htmlOutput = renderView(DIALOG_NAMES.error, initData);
 
   return htmlOutput.setTitle("Erro no Sistema");
 }
@@ -41,33 +37,28 @@ export function doGet({
   const missingParams = REQUIRED_PARAMS.filter((key) => !params[key]);
 
   if (missingParams.length > 0) {
-    return renderError(
-      `Parâmetros obrigatórios ausentes: ${missingParams.join(", ")}. Por favor, tente novamente.`,
+    console.error(
+      `[doGet] Parâmetros obrigatórios ausentes: ${missingParams.join(", ")}.`,
     );
+
+    return renderError(GENERIC_ERROR_MESSAGE);
   }
 
-  const { className, studentId, year, token } = params;
-  const reportLinkParams: ReportLinkParams = { studentId, year, className };
-
-  if (!STUDENT_ID_PATTERN.test(studentId)) {
-    return renderError(
-      `Matrícula "${studentId}" inválida: use apenas letras e números.`,
-    );
-  }
+  const { className, studentId, year } = params;
 
   let isTokenValid: boolean;
   try {
-    isTokenValid = verifyReportLinkToken(reportLinkParams, token);
+    isTokenValid = verifyReportLinkToken(params);
   } catch (error) {
-    const errorMessage = getErrorMsg(error);
-    console.error(`[doGet] Falha ao validar token: ${errorMessage}`);
+    console.error(`[doGet] Falha ao validar token: ${getErrorMsg(error)}`);
 
-    return renderError(GENERIC_LOOKUP_ERROR_MESSAGE);
+    return renderError(GENERIC_ERROR_MESSAGE);
   }
 
   if (!isTokenValid) {
     console.error(
-      `[doGet] Token inválido para studentId=${studentId}, year=${year}, className=${className}.`,
+      "[doGet] Token inválido: " +
+        `studentId="${studentId}", className="${className}", year="${year}".`,
     );
 
     return renderError(
@@ -77,28 +68,30 @@ export function doGet({
 
   let reportPdfId: string | null;
   try {
-    reportPdfId = findReportPdfId(reportLinkParams);
+    reportPdfId = findReportPdfId({ studentId, className, year });
   } catch (error) {
-    const errorMessage = getErrorMsg(error);
     console.error(
-      `[doGet] Falha ao localizar boletim (studentId=${studentId}, year=${year}, className=${className}): ${errorMessage}`,
+      "[doGet] Falha ao localizar boletim: " +
+        `studentId="${studentId}", className="${className}", year="${year}".\n` +
+        `Error: ${getErrorMsg(error)}`,
     );
 
-    return renderError(GENERIC_LOOKUP_ERROR_MESSAGE);
+    return renderError(GENERIC_ERROR_MESSAGE);
   }
 
   if (!reportPdfId) {
-    return renderError(
-      `O boletim ainda não foi gerado para a matrícula "${studentId}" na turma "${className}" (${year}).`,
+    console.error(
+      `[doGet] Boletim não encontrado: ` +
+        `studentId="${studentId}", className="${className}", year="${year}".`,
     );
+
+    return renderError(GENERIC_ERROR_MESSAGE);
   }
 
-  const htmlOutput = renderView<ReportDownloadInitData>(
-    DIALOG_NAMES.reportDownload,
-    {
-      downloadUrl: `https://drive.google.com/uc?export=download&id=${reportPdfId}`,
-    },
-  );
+  const initData: ReportDownloadInitData = {
+    downloadUrl: `https://drive.google.com/uc?export=download&id=${reportPdfId}`,
+  };
+  const htmlOutput = renderView(DIALOG_NAMES.reportDownload, initData);
 
   return htmlOutput.setTitle("Boletim Escolar");
 }

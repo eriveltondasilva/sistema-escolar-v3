@@ -1,25 +1,32 @@
-// server/drive/drive-lookup.ts
-import type { AppConfig, AssessmentType } from "../types.ts";
+// server/shared/drive-lookup.ts
+import type { AssessmentType } from "../types.ts";
 
-export function listSchoolYears({ schoolYearsFolderId }: AppConfig): string[] {
+/**
+ * Retorna uma lista decrescente de anos letivos cadastrados na pasta "Anos Letivos".
+ */
+export function listSchoolYears(schoolYearsFolderId: string): string[] {
   const rootFolder = DriveApp.getFolderById(schoolYearsFolderId);
   const folderIterator = rootFolder.getFolders();
 
-  const folderNames: string[] = [];
+  const years: string[] = [];
 
   while (folderIterator.hasNext()) {
-    const folder = folderIterator.next().getName();
-    if (/\d{4}/.test(folder)) folderNames.push(folder);
+    const name = folderIterator.next().getName();
+    const match = name.trim().match(/\d{4}$/);
+    if (match) years.push(match[0]);
   }
 
-  return folderNames.toSorted();
+  return years.toSorted((a, b) => b.localeCompare(a));
 }
 
+/**
+ * Retorna a pasta do ano letivo dentro da pasta "Anos Letivos".
+ */
 export function getSchoolYearFolder(
-  config: AppConfig,
+  schoolYearsFolderId: string,
   schoolYearLabel: string,
 ): GoogleAppsScript.Drive.Folder {
-  const rootFolder = DriveApp.getFolderById(config.schoolYearsFolderId);
+  const rootFolder = DriveApp.getFolderById(schoolYearsFolderId);
   const subfolders = rootFolder.getFoldersByName(schoolYearLabel);
 
   if (!subfolders.hasNext()) {
@@ -31,8 +38,11 @@ export function getSchoolYearFolder(
   return subfolders.next();
 }
 
+/**
+ * Extrai o ano de 4 dígitos do nome da pasta de um ano letivo.
+ */
 export function extractYear(schoolYearLabel: string): string {
-  const match = schoolYearLabel.match(/\d{4}/);
+  const match = schoolYearLabel.trim().match(/\d{4}$/);
 
   if (!match) {
     throw new Error(
@@ -43,6 +53,9 @@ export function extractYear(schoolYearLabel: string): string {
   return match[0];
 }
 
+/**
+ * Retorna a planilha da turma dentro da pasta do ano letivo.
+ */
 export function getClassSpreadsheetFile(
   yearFolder: GoogleAppsScript.Drive.Folder,
   schoolYearLabel: string,
@@ -67,13 +80,16 @@ export function getClassSpreadsheetFile(
   return file;
 }
 
+/**
+ * Retorna o arquivo de template de boletim.
+ */
 export function getReportTemplateFile(
-  config: AppConfig,
+  conceptReportId: string,
+  gradeReportId: string,
   assessmentType: AssessmentType,
 ): GoogleAppsScript.Drive.File {
   const templateId =
-    assessmentType === "grade" ? config.gradeReportId : config.conceptReportId;
-
+    assessmentType === "grade" ? gradeReportId : conceptReportId;
   const file = DriveApp.getFileById(templateId);
 
   if (file.getMimeType() !== MimeType.GOOGLE_DOCS) {
@@ -85,15 +101,16 @@ export function getReportTemplateFile(
   return file;
 }
 
+/**
+ * Retorna o modelo de planilha de turma.
+ */
 export function getClassTemplateFile(
-  config: AppConfig,
+  conceptSpreadsheetId: string,
+  gradeSpreadsheetId: string,
   assessmentType: AssessmentType,
 ): GoogleAppsScript.Drive.File {
   const templateId =
-    assessmentType === "grade" ?
-      config.gradeSpreadsheetId
-    : config.conceptSpreadsheetId;
-
+    assessmentType === "grade" ? gradeSpreadsheetId : conceptSpreadsheetId;
   const file = DriveApp.getFileById(templateId);
 
   if (file.getMimeType() !== MimeType.GOOGLE_SHEETS) {
@@ -105,45 +122,46 @@ export function getClassTemplateFile(
   return file;
 }
 
+/**
+ * Retorna ou cria a pasta de PDFs da turma.
+ */
 export function getOrCreateClassPdfFolder(
-  config: AppConfig,
-  year: string,
+  pdfsFolderId: string,
   className: string,
+  year: string,
 ): GoogleAppsScript.Drive.Folder {
-  const rootFolder = DriveApp.getFolderById(config.pdfsFolderId);
+  const rootFolder = DriveApp.getFolderById(pdfsFolderId);
+
   const yearFolders = rootFolder.getFoldersByName(year);
   const yearFolder =
     yearFolders.hasNext() ? yearFolders.next() : rootFolder.createFolder(year);
-
   const classFolders = yearFolder.getFoldersByName(className);
+
   return classFolders.hasNext() ?
       classFolders.next()
     : yearFolder.createFolder(className);
 }
 
+/**
+ * Retorna o PDF do aluno dentro da pasta da turma.
+ */
 export function findStudentPdfInFolder(
   folder: GoogleAppsScript.Drive.Folder,
   studentId: string,
 ): GoogleAppsScript.Drive.File | null {
   const prefix = `${studentId}_`;
-  const searchQuery = `title contains '${prefix}' and mimeType = 'application/pdf' and trashed = false`;
+  const searchQuery =
+    `title contains '${prefix}' ` +
+    "and mimeType = 'application/pdf' " +
+    "and trashed = false";
   const files = folder.searchFiles(searchQuery);
-  let newestFile: GoogleAppsScript.Drive.File | null = null;
 
   while (files.hasNext()) {
     const file = files.next();
-    if (!file.getName().startsWith(prefix)) continue;
+    const isFileNameValid = file.getName().startsWith(prefix);
 
-    const newestUpdatedAt = newestFile?.getLastUpdated().getTime() ?? -1;
-    const fileUpdatedAt = file.getLastUpdated().getTime();
-    const isNewer = fileUpdatedAt > newestUpdatedAt;
-    const hasSameUpdateTime = fileUpdatedAt === newestUpdatedAt;
-    const hasHigherId = newestFile ? file.getId() > newestFile.getId() : false;
-
-    if (isNewer || (hasSameUpdateTime && hasHigherId)) {
-      newestFile = file;
-    }
+    if (isFileNameValid) return file;
   }
 
-  return newestFile;
+  return null;
 }

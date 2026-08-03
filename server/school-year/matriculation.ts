@@ -11,7 +11,7 @@ export function validateClassMatriculations(
 ): Issue[] {
   const issues: Issue[] = [];
   const validClassNames = new Set(
-    VALID_CLASSES.map((validClass) => validClass.className),
+    VALID_CLASSES.map((validClass) => validClass.name),
   );
   const receivedClasses = new Set<string>();
   const studentClassById = new Map<string, string>();

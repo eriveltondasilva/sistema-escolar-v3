@@ -1,8 +1,8 @@
 // server/roster/data-access.ts
 import { DEFAULT_LOCALE, ENROLLMENT_SHEET_NAMES } from "../config.ts";
+import { diffStudentFields, logStudentChanges } from "./change-log.ts";
 import { GUARDIAN_COLUMNS, STUDENT_COLUMNS } from "../report/constants.ts";
 import { formatDate } from "../utils/formatters.ts";
-import { diffStudentFields, logStudentChanges } from "./change-log.ts";
 
 import type { GuardianData } from "../types.ts";
 import type {

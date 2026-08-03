@@ -1,9 +1,9 @@
 // server/school-year/creation.ts
+import { VALID_CLASSES } from "../report/constants.ts";
+import { getClassTemplateFile } from "../shared/drive-lookup.ts";
+import { getErrorMsg } from "../utils/error.ts";
 import { insertMatriculationsIntoResumo } from "./matriculation.ts";
 import { createSubjectSheets } from "./subject-sheets.ts";
-import { getClassTemplateFile } from "../drive/drive-lookup.ts";
-import { VALID_CLASSES } from "../report/constants.ts";
-import { getErrorMsg } from "../utils/error.ts";
 
 import type { AppConfig, StudentData } from "../types.ts";
 import type { ClassMatriculationInput, CreateSchoolYearData } from "./types.ts";
@@ -46,7 +46,7 @@ export function createSchoolYearStructure({
   const createdClasses: string[] = [];
   const creationErrors: string[] = [];
 
-  for (const { className, assessmentType } of VALID_CLASSES) {
+  for (const { name: className, assessmentType } of VALID_CLASSES) {
     try {
       const classTemplateFile = getClassTemplateFile(config, assessmentType);
       const classFile = classTemplateFile.makeCopy(className, yearFolder);

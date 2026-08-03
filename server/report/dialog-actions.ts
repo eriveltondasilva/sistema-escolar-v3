@@ -12,7 +12,7 @@ import { generateReportForStudent } from "./generator.ts";
 import {
   getClassSpreadsheetFile,
   getSchoolYearFolder,
-} from "../drive/drive-lookup.ts";
+} from "../shared/drive-lookup.ts";
 import { renderView } from "../utils/render-view.ts";
 import { withScriptLock } from "../utils/script-lock.ts";
 import {

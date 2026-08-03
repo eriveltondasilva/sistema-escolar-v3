@@ -1,81 +1,67 @@
 // server/config.ts
 import type { AppConfig } from "./types.ts";
 
-export const SCHOOL_YEAR_LABEL_PREFIX = "Ano Letivo — ";
-export const DEFAULT_LOCALE = "pt-BR";
-export const DEFAULT_TIMEZONE = "America/Sao_Paulo";
-
-export const MAX_ERRORS_SHOWN = 15;
-
-export const MAX_RUNTIME_MS = 5 * 60 * 1000; // 5 minutos
-export const SCRIPT_LOCK_TIMEOUT_MS = 5 * 1000; // 5 segundos
-
-export const CONFIG_START_ROW = 3;
-
-export const ENROLLMENT_SHEET_NAMES = {
-  STUDENTS: "Alunos",
-  GUARDIANS: "Responsáveis",
-  SUMMARY: "Resumo",
-  LOG: "Log",
+/** Aba "Configuração": onde o script lê as chaves/valores de configuração. */
+export const SYSTEM_CONFIG_SHEET = {
+  name: "Configuração",
+  startRow: 3,
 } as const;
 
-const SYSTEM_CONFIG_SHEET_NAME = "Configuração";
-
-export const CONFIG_KEY_MAP: Record<string, keyof AppConfig> = {
+export const CONFIG_KEY_MAP = {
   PASTA_ANOS_LETIVOS_ID: "schoolYearsFolderId",
   PASTA_PDFS_ID: "pdfsFolderId",
   PASTA_TEMP_ID: "tempFolderId",
   //
-  MODELO_BOLETIM_NOTA_ID: "gradeReportId",
   MODELO_BOLETIM_CONCEITO_ID: "conceptReportId",
+  MODELO_BOLETIM_NOTA_ID: "gradeReportId",
   //
-  MODELO_LANCAMENTO_NOTA_ID: "gradeSpreadsheetId",
   MODELO_LANCAMENTO_CONCEITO_ID: "conceptSpreadsheetId",
+  MODELO_LANCAMENTO_NOTA_ID: "gradeSpreadsheetId",
   //
   CADASTRO_ESCOLAR_ID: "enrollmentSpreadsheetId",
-} as const;
+} as const satisfies Record<string, keyof AppConfig>;
 
 // Cache assume que a aba "Configuração" não muda durante a execução do script.
 let cachedConfig: AppConfig | null = null;
 
 /**
  * Lê e valida as configurações da aba "Configuração".
- *
- * @throws { Error } se a aba "Configuração" não for encontrada ou se ela tiver poucas linhas.
  */
 export function loadConfig(): AppConfig {
   if (cachedConfig) return cachedConfig;
 
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sheet = ss.getSheetByName(SYSTEM_CONFIG_SHEET_NAME);
+  const sheet = ss.getSheetByName(SYSTEM_CONFIG_SHEET.name);
 
   if (!sheet) {
     throw new Error(
-      `Aba "${SYSTEM_CONFIG_SHEET_NAME}" não encontrada na planilha "${ss.getName()}". ` +
+      `Aba "${SYSTEM_CONFIG_SHEET.name}" não encontrada na planilha "${ss.getName()}". ` +
         `Verifique se a aba existe e se o nome está escrito exatamente igual.`,
     );
   }
 
   const configKeysCount = Object.keys(CONFIG_KEY_MAP).length;
   const lastRow = sheet.getLastRow();
-  const availableRows = lastRow - CONFIG_START_ROW + 1;
+  const availableRows = lastRow - SYSTEM_CONFIG_SHEET.startRow + 1;
 
   if (availableRows < configKeysCount) {
     throw new Error(
-      `Aba "${SYSTEM_CONFIG_SHEET_NAME}" tem poucas linhas: esperava ao menos ` +
-        `${configKeysCount} linhas a partir da linha ${CONFIG_START_ROW}, ` +
-        `mas a aba termina na linha ${lastRow}.`,
+      `Aba "${SYSTEM_CONFIG_SHEET.name}" tem poucas linhas: ` +
+        ` esperava ao menos ${configKeysCount} linhas a partir da linha ` +
+        `${SYSTEM_CONFIG_SHEET.startRow}, mas a aba termina na linha ${lastRow}.`,
     );
   }
 
   const rows = sheet
-    .getRange(CONFIG_START_ROW, 1, configKeysCount, 2)
+    .getRange(SYSTEM_CONFIG_SHEET.startRow, 1, configKeysCount, 2)
     .getValues();
 
-  const rawConfig = new Map<string, unknown>();
+  const rawConfig = new Map<string, string>();
   for (const [key, value] of rows) {
     const trimmedKey = String(key ?? "").trim();
-    if (trimmedKey) rawConfig.set(trimmedKey, value);
+    const trimmedValue = String(value ?? "").trim();
+
+    if (trimmedKey) rawConfig.set(trimmedKey, trimmedValue);
   }
 
   const unknownKeys = [...rawConfig.keys()].filter(
@@ -99,9 +85,9 @@ export function loadConfig(): AppConfig {
     }
 
     throw new Error(
-      `Configuração inválida na aba "${SYSTEM_CONFIG_SHEET_NAME}": ` +
+      `Configuração inválida na aba "${SYSTEM_CONFIG_SHEET.name}": ` +
         `${problems.join("; ")}. Verifique as linhas a partir de ` +
-        `${CONFIG_START_ROW} (coluna A = chave, coluna B = valor). Chaves ` +
+        `${SYSTEM_CONFIG_SHEET.startRow} (coluna A = chave, coluna B = valor). Chaves ` +
         `esperadas: ${Object.keys(CONFIG_KEY_MAP).join(", ")}.`,
     );
   }

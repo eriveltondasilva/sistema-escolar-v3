@@ -1,5 +1,5 @@
 // server/roster/pdf-history.ts
-import { findStudentPdfInFolder } from "../drive/drive-lookup.ts";
+import { findStudentPdfInFolder } from "../shared/drive-lookup.ts";
 
 import type { AppConfig } from "../types.ts";
 

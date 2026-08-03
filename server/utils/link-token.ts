@@ -17,9 +17,12 @@ export function generateReportLinkToken({
   return Utilities.base64EncodeWebSafe(signature);
 }
 
+interface VerifyReportLinkTokenParams extends ReportLinkParams {
+  token: string;
+}
+
 export function verifyReportLinkToken(
-  params: ReportLinkParams,
-  token: string,
+  params: VerifyReportLinkTokenParams,
 ): boolean {
-  return generateReportLinkToken(params) === token;
+  return generateReportLinkToken(params) === params.token;
 }
