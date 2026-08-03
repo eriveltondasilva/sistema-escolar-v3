@@ -5,10 +5,7 @@
   "type": "module",
   "private": true,
   "license": "MIT",
-  "imports": {
-    "#client": "./client/*",
-    "#server/*": "./server/*"
-  },
+  "imports": {},
   "scripts": {
     "build": "bun run ./scripts/build.ts --minify",
     "build:dev": "bun run ./scripts/build.ts",
@@ -29,19 +26,19 @@
     "@eslint/js": "^10.0.1",
     "@types/alpinejs": "^3.13.11",
     "@types/bun": "latest",
-    "@types/google-apps-script": "^2.0.11",
+    "@types/google-apps-script": "^2.0.12",
     "bun-plugin-tailwind": "^0.1.2",
     "eslint": "^10.8.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-node": "^0.4.0",
     "eslint-plugin-import-x": "^4.17.1",
-    "globals": "^17.8.0",
+    "globals": "^17.9.0",
     "posthtml": "^0.16.7",
     "posthtml-component": "^2.3.0",
     "prettier": "^3.9.6",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4.3.3",
-    "typescript-eslint": "^8.65.0"
+    "typescript-eslint": "^8.66.0"
   },
   "peerDependencies": {
     "typescript": "^6.0.3"
