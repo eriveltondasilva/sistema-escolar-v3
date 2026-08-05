@@ -1,12 +1,12 @@
 // server/report/generator.ts
-import { getErrorMsg } from "../utils/error.ts";
-import { formatDate, formatSex } from "../utils/formatters.ts";
-import { generateReportLinkToken } from "../utils/link-token.ts";
-import { getScriptProp } from "../utils/script-properties.ts";
+import { getErrorMsg } from "#utils/error.ts";
+import { formatDate, formatSex } from "#utils/formatters.ts";
+import { generateReportLinkToken } from "#utils/link-token.ts";
+import { getScriptProp } from "#utils/script-properties.ts";
 import { getPlaceholderFields, VALID_CLASSES } from "./constants.ts";
 import { getGradesForStudent, getPersonalData } from "./data-access.ts";
 
-import type { AssessmentType } from "../types.ts";
+import type { AssessmentType } from "#types.ts";
 import type { GenerateReportForStudentParams, SubjectGrades } from "./types.ts";
 
 interface ReplacePlaceholderParams {
@@ -93,8 +93,8 @@ function insertQRCode({
       `&className=${encodeURIComponent(className)}` +
       `&year=${encodeURIComponent(year)}` +
       `&token=${encodeURIComponent(token)}`;
-    const qrApiUrl =
-      "https://quickchart.io/qr" + `?text=${validationUrl}` + "&size=80";
+
+    const qrApiUrl = `https://quickchart.io/qr?text=${validationUrl}&size=80`;
 
     const imageBlob = UrlFetchApp.fetch(qrApiUrl).getBlob();
     const textElement = element.getElement();
@@ -103,9 +103,8 @@ function insertQRCode({
 
     parent.insertInlineImage(childIndex, imageBlob);
   } catch (error) {
-    const errorMessage = getErrorMsg(error);
     console.warn(
-      `insertQRCode: falha ao gerar QR para matrícula ${studentId} — ${errorMessage}`,
+      `insertQRCode: falha ao gerar QR para matrícula ${studentId} — ${getErrorMsg(error)}`,
     );
   } finally {
     element.getElement().removeFromParent();
@@ -177,21 +176,23 @@ function fillSubjectPlaceholders({
 
 // -------------------------------------
 
-/** @returns O URL do arquivo PDF gerado */
+/**
+ *  @returns O URL do arquivo PDF gerado
+ */
 export function generateReportForStudent({
   studentId,
   className,
   foundSubjects,
   context,
 }: GenerateReportForStudentParams): string {
-  const personalData = getPersonalData(studentId, context);
-  const gradesData = getGradesForStudent(studentId, foundSubjects, context);
-
-  const fileName = `${studentId}_${personalData.name.replace(/\s+/g, "_").toLowerCase()}`;
-  const docCopy = context.templateFile.makeCopy(fileName, context.tempFolder);
+  const personalData = getPersonalData(context, studentId);
+  const gradesData = getGradesForStudent({ studentId, foundSubjects, context });
   const classInfo = VALID_CLASSES.find(
     (validClass) => validClass.name === className,
   );
+
+  const fileName = `${studentId}_${personalData.name.replace(/\s+/g, "_").toLowerCase()}`;
+  const docCopy = context.templateFile.makeCopy(fileName, context.tempFolder);
 
   const date = new Date();
 
@@ -199,6 +200,7 @@ export function generateReportForStudent({
     const doc = DocumentApp.openById(docCopy.getId());
     const body = doc.getBody();
 
+    // dados pessoais do aluno
     replacePlaceholder({ body, key: "nome", value: personalData.name });
     replacePlaceholder({ body, key: "matricula", value: studentId });
     replacePlaceholder({
@@ -207,7 +209,6 @@ export function generateReportForStudent({
       value: personalData.guardianNames,
     });
     replacePlaceholder({ body, key: "endereco", value: personalData.address });
-
     replacePlaceholder({
       body,
       key: "data_nascimento",
@@ -224,12 +225,14 @@ export function generateReportForStudent({
       value: formatSex(personalData.sex),
     });
 
+    // dados da turma e ano letivo
     replacePlaceholder({ body, key: "etapa", value: classInfo?.stage });
     replacePlaceholder({ body, key: "serie", value: classInfo?.name });
     replacePlaceholder({ body, key: "turma", value: "Única" });
     replacePlaceholder({ body, key: "turno", value: classInfo?.shift });
     replacePlaceholder({ body, key: "ano_letivo", value: context.year });
 
+    // data e hora de emissão
     replacePlaceholder({
       body,
       key: "data_emissao",
@@ -241,6 +244,7 @@ export function generateReportForStudent({
       value: date.toLocaleTimeString(),
     });
 
+    // notas por disciplina
     for (const subject of foundSubjects) {
       const grades = gradesData[subject.name] ?? {};
       fillSubjectPlaceholders({
@@ -259,6 +263,7 @@ export function generateReportForStudent({
     const pdfFile = context.pdfFolder
       .createFile(pdfBlob)
       .setName(`${fileName}.pdf`);
+
     pdfFile.setSharing(
       DriveApp.Access.ANYONE_WITH_LINK,
       DriveApp.Permission.VIEW,

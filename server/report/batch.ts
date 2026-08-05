@@ -1,19 +1,21 @@
 // server/report/batch.ts
-import { MAX_ERRORS_SHOWN, MAX_RUNTIME_MS } from "../config.ts";
-import { buildReportContext } from "./context-builder.ts";
-import {
-  checkClassSubjects,
-  getClassStudentsFromResumo,
-} from "./data-access.ts";
-import { generateReportForStudent } from "./generator.ts";
-import { getErrorMsg } from "../utils/error.ts";
+import { MAX_ERRORS_SHOWN } from "#config/constants.ts";
+import { getErrorMsg } from "#utils/error.ts";
 import {
   clearClassReportJob,
   saveClassReportJob,
-} from "../utils/script-properties.ts";
+} from "#utils/script-properties.ts";
+import { buildReportContext } from "./context-builder.ts";
+import {
+  checkClassSubjects,
+  getClassStudentsFromSummary,
+} from "./data-access.ts";
+import { generateReportForStudent } from "./generator.ts";
 
-import type { AppConfig } from "../types.ts";
+import type { AppConfig } from "#types.ts";
 import type { ClassReportJob } from "./types.ts";
+
+const MAX_RUNTIME_MS = 5 * 60 * 1000; // 5 minutos
 
 /** Reserva tempo para persistir o cursor antes do limite da execução. */
 const SAFE_RUNTIME_MS = MAX_RUNTIME_MS - 30 * 1000;
@@ -35,12 +37,12 @@ export function generateReportsForClass(
   schoolYearLabel: string,
   className: string,
 ): ClassReportsGenerationResult {
-  const { found: foundSubjects } = checkClassSubjects(classSpreadsheet);
+  const { foundSubjects } = checkClassSubjects(classSpreadsheet);
   if (foundSubjects.length === 0) {
     throw new Error("Nenhuma disciplina reconhecida nessa turma.");
   }
 
-  const students = getClassStudentsFromResumo(classSpreadsheet);
+  const students = getClassStudentsFromSummary(classSpreadsheet);
   if (students.length === 0) {
     throw new Error('Turma sem alunos cadastrados na aba "Resumo".');
   }
@@ -65,7 +67,7 @@ export function continueReportsForClass(
   classSpreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
   job: ClassReportJob,
 ): ClassReportsGenerationResult {
-  const { found: foundSubjects } = checkClassSubjects(classSpreadsheet);
+  const { foundSubjects } = checkClassSubjects(classSpreadsheet);
   if (foundSubjects.length === 0) {
     throw new Error("Nenhuma disciplina reconhecida nessa turma.");
   }
@@ -76,7 +78,7 @@ export function continueReportsForClass(
 function processClassReportJob(
   config: AppConfig,
   classSpreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
-  foundSubjects: ReturnType<typeof checkClassSubjects>["found"],
+  foundSubjects: ReturnType<typeof checkClassSubjects>["foundSubjects"],
   job: ClassReportJob,
 ): ClassReportsGenerationResult {
   const context = buildReportContext({

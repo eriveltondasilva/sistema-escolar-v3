@@ -1,97 +1,97 @@
 // server/report/columns.ts
-import { formatGrade, formatStatus, formatValue } from "../utils/formatters.ts";
+import { formatGrade, formatStatus, formatValue } from "#utils/formatters.ts";
 
-import type { AssessmentType, Subject, ValidClass } from "../types.ts";
+import type { AssessmentType, Subject, ValidClass } from "#types.ts";
 import type { PlaceholderField } from "./types.ts";
 
 interface SheetSchema {
+  readonly name: string;
   readonly startRow: number;
   readonly columns: Record<string, number>;
-  readonly columnsCount: number;
 }
 
 /** Aba "Alunos" do Cadastro Escolar. */
-export const STUDENTS_SHEET: SheetSchema = {
-  startRow: 2,
+export const STUDENTS_SHEET = {
+  name: "Alunos",
+  startRow: 3,
   columns: {
-    id: 0,
-    name: 1,
-    address: 2,
-    nationality: 3,
-    birthDate: 4,
-    enrollmentDate: 5,
-    sex: 6,
-    status: 7,
+    id: 0, // A - Matrícula
+    name: 1, // B - Nome Completo
+    address: 2, // C - Endereço
+    nationality: 3, // D - Nacionalidade
+    birthDate: 4, // E - Data de Nascimento
+    enrollmentDate: 5, // F - Data de Matrícula
+    sex: 6, // G - Sexo
+    status: 7, // H - Status
   },
-  columnsCount: 8,
-} as const;
+} as const satisfies SheetSchema;
 
 /** Aba "Responsáveis" do Cadastro Escolar. */
-export const GUARDIANS_SHEET: SheetSchema = {
-  startRow: 2,
+export const GUARDIANS_SHEET = {
+  name: "Responsáveis",
+  startRow: 3,
   columns: {
-    studentId: 0,
-    name: 1,
-    address: 2,
-    relationship: 3,
-    isPrimary: 4,
-    phone: 5,
+    studentId: 0, // A - Matrícula
+    name: 1, // B - Nome
+    address: 2, // C - Endereço
+    relationship: 3, // D - Parentesco
+    isPrimary: 4, // E - R. Principal
+    phone: 5, // F - Telefone
   },
-  columnsCount: 6,
-} as const;
+} as const satisfies SheetSchema;
 
 /** Aba "Resumo" da planilha de turma. */
-export const SUMMARY_SHEET: SheetSchema = {
-  startRow: 2,
+export const SUMMARY_SHEET = {
+  name: "Resumo",
+  startRow: 3,
   columns: {
-    studentId: 0,
-    name: 1,
+    studentId: 0, // A - Matrícula
+    name: 1, // B - Nome
   },
-  columnsCount: 2,
-} as const;
+} as const satisfies SheetSchema;
 
 /** Aba de disciplina (nome = subject.code) — turmas com nota numérica. */
-export const NUMERIC_GRADE_SHEET: SheetSchema = {
-  startRow: 2,
+export const NUMERIC_GRADE_SHEET = {
+  startRow: 4,
   columns: {
-    studentId: 0,
-    grade1Q: 1,
-    absences1Q: 2,
-    grade2Q: 3,
-    absences2Q: 4,
-    makeup1S: 5,
-    average1S: 6,
-    grade3Q: 7,
-    absences3Q: 8,
-    grade4Q: 9,
-    absences4Q: 10,
-    makeup2S: 11,
-    average2S: 12,
-    finalGrade: 13,
-    totalAbsences: 14,
-    status: 15,
+    studentId: 0, // A - Matrícula
+    name: 1, // B - Nome
+    grade1Q: 2, // C - Nota - 1Bim
+    absences1Q: 3, // D - Faltas - 1Bim
+    grade2Q: 4, // E - Nota - 2Bim
+    absences2Q: 5, // F - Faltas - 2Bim
+    makeup1S: 6, // G - Rec. - 1Sem
+    average1S: 7, // H - Média - 1Sem
+    grade3Q: 8, // I - Nota - 3Bim
+    absences3Q: 9, // J - Faltas - 3Bim
+    grade4Q: 10, // K - Nota - 4Bim
+    absences4Q: 11, // L - Faltas - 4Bim
+    makeup2S: 12, // M - Rec. - 2Sem
+    average2S: 13, // N - Média - 2Sem
+    totalAbsences: 14, // O - Totais Faltas
+    finalGrade: 15, // P - Média Final
+    status: 16, // Q - Situação Final
   },
-  columnsCount: 16,
-} as const;
+} as const satisfies Omit<SheetSchema, "name">;
 
 /** Aba de disciplina (nome = subject.code) — turmas com conceito. */
-export const CONCEPT_GRADE_SHEET: SheetSchema = {
-  startRow: 2,
+export const CONCEPT_GRADE_SHEET = {
+  startRow: 4,
   columns: {
-    studentId: 0,
-    grade1Q: 1,
-    absences1Q: 2,
-    grade2Q: 3,
-    absences2Q: 4,
-    grade3Q: 5,
-    absences3Q: 6,
-    grade4Q: 7,
-    absences4Q: 8,
-    totalAbsences: 9,
-    status: 10,
+    studentId: 0, // A - Matrícula
+    name: 1, // B - Nome
+    grade1Q: 2, // C - Conceito - 1B.
+    absences1Q: 3, // D - Faltas - 1B.
+    grade2Q: 4, // E - Conceito - 2B.
+    absences2Q: 5, // F - Faltas - 2B.
+    grade3Q: 6, // G - Conceito - 3B.
+    absences3Q: 7, // H - Faltas - 3B.
+    grade4Q: 8, // I - Conceito - 4B.
+    absences4Q: 9, // J - Faltas - 4B.
+    totalAbsences: 10, // K - Totais Faltas
+    status: 11, // L - Situação Final
   },
-  columnsCount: 11,
-} as const;
+} as const satisfies Omit<SheetSchema, "name">;
 
 export function getGradeColumns(assessmentType: AssessmentType) {
   return assessmentType === "numeric" ? NUMERIC_GRADE_SHEET : (

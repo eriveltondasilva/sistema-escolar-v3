@@ -1,17 +1,14 @@
 // server/report/data-access.ts
-import { ENROLLMENT_SHEET_NAMES } from "../config.ts";
+import { formatDate, formatGuardianNames } from "#utils/formatters.ts";
 import {
-  FIRST_DATA_ROW,
   getGradeColumns,
-  getGradeColumnsCount,
-  GUARDIAN_COLUMNS,
-  STUDENT_COLUMNS,
-  SUMMARY_FIRST_DATA_ROW,
+  GUARDIANS_SHEET,
+  STUDENTS_SHEET,
+  SUMMARY_SHEET,
   VALID_SUBJECTS,
 } from "./constants.ts";
-import { formatDate, formatGuardianNames } from "../utils/formatters.ts";
 
-import type { AssessmentType, StudentData, Subject } from "../types.ts";
+import type { AssessmentType, StudentData, Subject } from "#types.ts";
 import type {
   ClassStudent,
   GradeRow,
@@ -21,56 +18,58 @@ import type {
 } from "./types.ts";
 
 /** Encontra a aba de uma disciplina na planilha de turma. */
-export function findSubjectSheet(
+function findSubjectSheet(
   classSpreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
   subject: Subject,
 ): GoogleAppsScript.Spreadsheet.Sheet | null {
   return classSpreadsheet.getSheetByName(subject.code);
 }
 
+// -------------------------------------
+
 /** Confere quais disciplinas esperadas existem como aba na planilha de turma. */
 export function checkClassSubjects(
   classSpreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
-): { found: Subject[]; missing: string[] } {
+): { foundSubjects: Subject[]; missingSubjectNames: string[] } {
   return VALID_SUBJECTS.reduce(
     (acc, subject) => {
       if (findSubjectSheet(classSpreadsheet, subject)) {
-        acc.found.push(subject);
+        acc.foundSubjects.push(subject);
       } else {
-        acc.missing.push(subject.name);
+        acc.missingSubjectNames.push(subject.name);
       }
       return acc;
     },
-    { found: [] as Subject[], missing: [] as string[] },
+    { foundSubjects: [] as Subject[], missingSubjectNames: [] as string[] },
   );
 }
 
-export function getClassStudentsFromResumo(
+export function getClassStudentsFromSummary(
   classSpreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
 ): ClassStudent[] {
-  const resumoSheet = classSpreadsheet.getSheetByName(
-    ENROLLMENT_SHEET_NAMES.SUMMARY,
-  );
-  if (!resumoSheet) return [];
+  const summarySheet = classSpreadsheet.getSheetByName(SUMMARY_SHEET.name);
+  if (!summarySheet) return [];
 
-  const lastRow = resumoSheet.getLastRow();
-  if (lastRow < SUMMARY_FIRST_DATA_ROW) return [];
-  const values = resumoSheet
+  const lastRow = summarySheet.getLastRow();
+  if (lastRow < SUMMARY_SHEET.startRow) return [];
+
+  const colCount = Object.keys(SUMMARY_SHEET.columns).length;
+  const values = summarySheet
     .getRange(
-      SUMMARY_FIRST_DATA_ROW,
+      SUMMARY_SHEET.startRow,
       1,
-      lastRow - SUMMARY_FIRST_DATA_ROW + 1,
-      2,
+      lastRow - SUMMARY_SHEET.startRow + 1,
+      colCount,
     )
     .getValues();
 
   return values
     .map(([studentId, name], index) => ({
-      studentId: String(studentId ?? "").trim(),
-      name: String(name ?? "").trim(),
-      row: SUMMARY_FIRST_DATA_ROW + index,
+      studentId: String(studentId).trim(),
+      name: String(name).trim(),
+      row: SUMMARY_SHEET.startRow + index,
     }))
-    .filter(({ studentId }) => studentId.length > 0);
+    .filter((s) => s.studentId.length > 0);
 }
 
 /**
@@ -81,21 +80,22 @@ export function isStudentInClass(
   classSpreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
   studentId: string,
 ): boolean {
-  return getClassStudentsFromResumo(classSpreadsheet).some(
-    (student) => student.studentId === studentId,
-  );
+  const students = getClassStudentsFromSummary(classSpreadsheet);
+  return students.some((s) => s.studentId === studentId);
 }
 
-/** Monta um StudentData completo (7 campos) a partir de uma linha da aba "Alunos". */
+/** Monta um StudentData completo a partir de uma linha da aba "Alunos". */
 function mapStudentRow(row: ReadonlyArray<unknown>): StudentData {
+  const col = STUDENTS_SHEET.columns;
+
   return {
-    name: String(row[STUDENT_COLUMNS.name] ?? "").trim(),
-    address: String(row[STUDENT_COLUMNS.address] ?? ""),
-    nationality: String(row[STUDENT_COLUMNS.nationality] ?? ""),
-    birthDate: formatDate(row[STUDENT_COLUMNS.birthDate]),
-    enrollmentDate: formatDate(row[STUDENT_COLUMNS.enrollmentDate]),
-    sex: String(row[STUDENT_COLUMNS.sex] ?? ""),
-    status: String(row[STUDENT_COLUMNS.status] ?? ""),
+    name: String(row[col.name]).trim(),
+    address: String(row[col.address]).trim(),
+    nationality: String(row[col.nationality]).trim(),
+    birthDate: formatDate(row[col.birthDate]),
+    enrollmentDate: formatDate(row[col.enrollmentDate]),
+    sex: String(row[col.sex]).trim(),
+    status: String(row[col.status]).trim(),
   };
 }
 
@@ -103,21 +103,31 @@ function mapStudentRow(row: ReadonlyArray<unknown>): StudentData {
 export function loadStudentsMap(
   registrationSheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
 ): Map<string, StudentData> {
-  const studentsSheet = registrationSheet.getSheetByName(
-    ENROLLMENT_SHEET_NAMES.STUDENTS,
-  );
+  const studentsSheet = registrationSheet.getSheetByName(STUDENTS_SHEET.name);
   if (!studentsSheet) {
     throw new Error(
-      `Cadastro Escolar: a aba "${ENROLLMENT_SHEET_NAMES.STUDENTS}" não existe.`,
+      `Cadastro Escolar: a aba "${STUDENTS_SHEET.name}" não existe.`,
     );
   }
 
-  const rows = studentsSheet.getDataRange().getValues().slice(1);
-  const map = new Map<string, StudentData>();
+  const lastRow = studentsSheet.getLastRow();
+  if (lastRow < STUDENTS_SHEET.startRow) return new Map();
 
+  const colCount = Object.keys(STUDENTS_SHEET.startRow).length;
+  const rows = studentsSheet
+    .getRange(
+      STUDENTS_SHEET.startRow,
+      1,
+      lastRow - STUDENTS_SHEET.startRow + 1,
+      colCount,
+    )
+    .getValues();
+
+  const map = new Map<string, StudentData>();
   for (const row of rows) {
-    const studentId = String(row[STUDENT_COLUMNS.id] ?? "").trim();
+    const studentId = String(row[STUDENTS_SHEET.columns.id]).trim();
     if (!studentId) continue;
+
     map.set(studentId, mapStudentRow(row));
   }
 
@@ -133,22 +143,28 @@ export function loadSingleStudentMap(
   registrationSheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
   studentId: string,
 ): Map<string, StudentData> {
-  const studentsSheet = registrationSheet.getSheetByName(
-    ENROLLMENT_SHEET_NAMES.STUDENTS,
-  );
+  const studentsSheet = registrationSheet.getSheetByName(STUDENTS_SHEET.name);
 
   if (!studentsSheet) {
     throw new Error(
-      `Cadastro Escolar: a aba "${ENROLLMENT_SHEET_NAMES.STUDENTS}" não existe.`,
+      `Cadastro Escolar: a aba "${STUDENTS_SHEET.name}" não existe.`,
     );
   }
 
   const map = new Map<string, StudentData>();
   const lastRow = studentsSheet.getLastRow();
-  if (lastRow < 2) return map;
+  if (lastRow < STUDENTS_SHEET.startRow) return map;
+
+  const col = STUDENTS_SHEET.columns;
+  const colCount = Object.keys(col).length;
 
   const match = studentsSheet
-    .getRange(2, STUDENT_COLUMNS.id + 1, lastRow - 1, 1)
+    .getRange(
+      STUDENTS_SHEET.startRow,
+      col.id + 1,
+      lastRow - STUDENTS_SHEET.startRow + 1,
+      1,
+    )
     .createTextFinder(studentId)
     .matchEntireCell(true)
     .findNext();
@@ -156,13 +172,12 @@ export function loadSingleStudentMap(
   if (!match) return map;
 
   const row = studentsSheet
-    .getRange(match.getRow(), 1, 1, studentsSheet.getLastColumn())
+    .getRange(match.getRow(), 1, 1, colCount)
     .getValues()[0];
 
   if (!row) return map;
 
   map.set(studentId, mapStudentRow(row));
-
   return map;
 }
 
@@ -176,47 +191,60 @@ export function loadSingleStudentMap(
 export function loadGuardiansMap(
   registrationSheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
 ): Map<string, string[]> {
-  const guardiansSheet = registrationSheet.getSheetByName(
-    ENROLLMENT_SHEET_NAMES.GUARDIANS,
-  );
-
+  const guardiansSheet = registrationSheet.getSheetByName(GUARDIANS_SHEET.name);
   if (!guardiansSheet) return new Map();
 
-  const rows = guardiansSheet.getDataRange().getValues().slice(1);
+  const lastRow = guardiansSheet.getLastRow();
+  if (lastRow < GUARDIANS_SHEET.startRow) return new Map();
+
+  const col = GUARDIANS_SHEET.columns;
+  const colCount = Object.keys(col).length;
+  const rows = guardiansSheet
+    .getRange(
+      GUARDIANS_SHEET.startRow,
+      1,
+      lastRow - GUARDIANS_SHEET.startRow + 1,
+      colCount,
+    )
+    .getValues();
+
   const validRows = rows
     .map((row) => ({
-      studentId: String(row[GUARDIAN_COLUMNS.studentId] ?? "").trim(),
-      name: String(row[GUARDIAN_COLUMNS.name] ?? "").trim(),
+      studentId: String(row[col.studentId]).trim(),
+      name: String(row[col.name]).trim(),
     }))
     .filter(({ studentId, name }) => studentId.length > 0 && name.length > 0);
 
   return validRows.reduce((map, { studentId, name }) => {
     const names = map.get(studentId) ?? [];
-    names.push(name);
-    map.set(studentId, names);
+    map.set(studentId, [...names, name]);
     return map;
   }, new Map<string, string[]>());
 }
 
 /**
- * Busca os responsáveis de um único aluno na aba "Responsáveis" pela
- * matrícula, sem ler a planilha inteira do Cadastro.
+ * Busca os responsáveis de um único aluno na aba "Responsáveis" pela matrícula, sem ler a planilha inteira do Cadastro.
  */
 export function loadSingleStudentGuardiansMap(
   registrationSheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
   studentId: string,
 ): Map<string, string[]> {
-  const guardiansSheet = registrationSheet.getSheetByName(
-    ENROLLMENT_SHEET_NAMES.GUARDIANS,
-  );
+  const guardiansSheet = registrationSheet.getSheetByName(GUARDIANS_SHEET.name);
   const map = new Map<string, string[]>();
   if (!guardiansSheet) return map;
 
   const lastRow = guardiansSheet.getLastRow();
-  if (lastRow < 2) return map;
+  if (lastRow < GUARDIANS_SHEET.startRow) return map;
+
+  const col = GUARDIANS_SHEET.columns;
 
   const matches = guardiansSheet
-    .getRange(2, GUARDIAN_COLUMNS.studentId + 1, lastRow - 1, 1)
+    .getRange(
+      GUARDIANS_SHEET.startRow,
+      col.studentId + 1,
+      lastRow - GUARDIANS_SHEET.startRow + 1,
+      1,
+    )
     .createTextFinder(studentId)
     .matchEntireCell(true)
     .findAll();
@@ -224,23 +252,28 @@ export function loadSingleStudentGuardiansMap(
   const names = matches
     .map((cell) =>
       String(
-        guardiansSheet
-          .getRange(cell.getRow(), GUARDIAN_COLUMNS.name + 1)
-          .getValue() ?? "",
+        guardiansSheet.getRange(cell.getRow(), col.name + 1).getValue(),
       ).trim(),
     )
     .filter((name) => name.length > 0);
 
   if (names.length > 0) map.set(studentId, names);
-
   return map;
 }
 
-export function loadGradesBySubject(
-  classSpreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
-  foundSubjects: Subject[],
-  assessmentType: AssessmentType,
-): Map<string, Map<string, GradeRow>> {
+interface LoadGradesBySubject {
+  classSpreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet;
+  foundSubjects: Subject[];
+  assessmentType: AssessmentType;
+}
+
+export function loadGradesBySubject({
+  classSpreadsheet,
+  foundSubjects,
+  assessmentType,
+}: LoadGradesBySubject): Map<string, Map<string, GradeRow>> {
+  const gradeSheet = getGradeColumns(assessmentType);
+  const colCount = Object.keys(gradeSheet.columns).length;
   const map = new Map<string, Map<string, GradeRow>>();
 
   for (const subject of foundSubjects) {
@@ -249,20 +282,20 @@ export function loadGradesBySubject(
 
     const lastRow = sheet.getLastRow();
     const rows =
-      lastRow >= FIRST_DATA_ROW ?
+      lastRow >= gradeSheet.startRow ?
         sheet
           .getRange(
-            FIRST_DATA_ROW,
+            gradeSheet.startRow,
             1,
-            lastRow - FIRST_DATA_ROW + 1,
-            getGradeColumnsCount(assessmentType),
+            lastRow - gradeSheet.startRow + 1,
+            colCount,
           )
           .getValues()
       : [];
 
     const byStudentId = new Map<string, GradeRow>(
       rows
-        .map((row): [string, GradeRow] => [String(row[0] ?? "").trim(), row])
+        .map((row): [string, GradeRow] => [String(row[0]).trim(), row])
         .filter(([studentId]) => studentId.length > 0),
     );
 
@@ -272,12 +305,21 @@ export function loadGradesBySubject(
   return map;
 }
 
-export function loadGradesForSingleStudent(
-  classSpreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
-  foundSubjects: Subject[],
-  studentId: string,
-  assessmentType: AssessmentType,
-): Map<string, Map<string, GradeRow>> {
+interface LoadGradesForSingleStudent {
+  classSpreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet;
+  foundSubjects: Subject[];
+  studentId: string;
+  assessmentType: AssessmentType;
+}
+
+export function loadGradesForSingleStudent({
+  classSpreadsheet,
+  foundSubjects,
+  studentId,
+  assessmentType,
+}: LoadGradesForSingleStudent): Map<string, Map<string, GradeRow>> {
+  const gradeSheet = getGradeColumns(assessmentType);
+  const colCount = Object.keys(gradeSheet.columns).length;
   const map = new Map<string, Map<string, GradeRow>>();
 
   for (const subject of foundSubjects) {
@@ -285,16 +327,16 @@ export function loadGradesForSingleStudent(
     const byStudentId = new Map<string, GradeRow>();
 
     const lastRow = sheet?.getLastRow() ?? 0;
-    if (sheet && lastRow >= FIRST_DATA_ROW) {
+    if (sheet && lastRow >= gradeSheet.startRow) {
       const match = sheet
-        .getRange(FIRST_DATA_ROW, 1, lastRow - FIRST_DATA_ROW + 1, 1)
+        .getRange(gradeSheet.startRow, 1, lastRow - gradeSheet.startRow + 1, 1)
         .createTextFinder(studentId)
         .matchEntireCell(true)
         .findNext();
 
       if (match) {
         const rowValues = sheet
-          .getRange(match.getRow(), 1, 1, getGradeColumnsCount(assessmentType))
+          .getRange(match.getRow(), 1, 1, colCount)
           .getValues()[0];
         if (rowValues) byStudentId.set(studentId, rowValues);
       }
@@ -306,12 +348,19 @@ export function loadGradesForSingleStudent(
   return map;
 }
 
-export function getGradesForStudent(
-  studentId: string,
-  foundSubjects: Subject[],
-  context: ReportContext,
-): Record<string, SubjectGrades | null> {
+interface GetGradesForStudent {
+  studentId: string;
+  foundSubjects: Subject[];
+  context: ReportContext;
+}
+
+export function getGradesForStudent({
+  studentId,
+  foundSubjects,
+  context,
+}: GetGradesForStudent): Record<string, SubjectGrades | null> {
   const result: Record<string, SubjectGrades | null> = {};
+  const gradeColumns = getGradeColumns(context.assessmentType).columns;
 
   for (const subject of foundSubjects) {
     const rowValues = context.gradesBySubject.get(subject.name)?.get(studentId);
@@ -319,9 +368,10 @@ export function getGradesForStudent(
     result[subject.name] =
       rowValues ?
         Object.fromEntries(
-          Object.entries(getGradeColumns(context.assessmentType)).map(
-            ([field, index]) => [field, rowValues[index]],
-          ),
+          Object.entries(gradeColumns).map(([field, index]) => [
+            field,
+            rowValues[index],
+          ]),
         )
       : null;
   }
@@ -330,8 +380,8 @@ export function getGradesForStudent(
 }
 
 export function getPersonalData(
-  studentId: string,
   context: ReportContext,
+  studentId: string,
 ): PersonalData {
   const student = context.studentsMap.get(studentId);
 

@@ -3,7 +3,7 @@ import {
   extractYear,
   getOrCreateClassPdfFolder,
   getReportTemplateFile,
-} from "../shared/drive-lookup.ts";
+} from "#drive/drive-lookup.ts";
 import { VALID_CLASSES } from "./constants.ts";
 import {
   loadGradesBySubject,
@@ -14,7 +14,7 @@ import {
   loadStudentsMap,
 } from "./data-access.ts";
 
-import type { AssessmentType } from "../types.ts";
+import type { AssessmentType } from "#types.ts";
 import type {
   BuildReportContextParams,
   BuildSingleStudentReportContextParams,
@@ -28,25 +28,38 @@ export function buildReportContext({
   className,
   foundSubjects,
 }: BuildReportContextParams): ReportContext {
+  const {
+    conceptReportId,
+    gradeReportId,
+    enrollmentSpreadsheetId,
+    tempFolderId,
+    pdfsFolderId,
+  } = config;
   const year = extractYear(schoolYearLabel);
   const assessmentType = getAssessmentType(className);
-  const registrationSheet = SpreadsheetApp.openById(
-    config.enrollmentSpreadsheetId,
-  );
+  const registrationSheet = SpreadsheetApp.openById(enrollmentSpreadsheetId);
 
   return {
     year,
     assessmentType,
-    templateFile: getReportTemplateFile(config, assessmentType),
-    tempFolder: DriveApp.getFolderById(config.tempFolderId),
-    pdfFolder: getOrCreateClassPdfFolder(config, year, className),
+    templateFile: getReportTemplateFile({
+      conceptReportId,
+      gradeReportId,
+      assessmentType,
+    }),
+    tempFolder: DriveApp.getFolderById(tempFolderId),
+    pdfFolder: getOrCreateClassPdfFolder({
+      pdfsFolderId,
+      className,
+      schoolYearLabel,
+    }),
     studentsMap: loadStudentsMap(registrationSheet),
     guardiansMap: loadGuardiansMap(registrationSheet),
-    gradesBySubject: loadGradesBySubject(
+    gradesBySubject: loadGradesBySubject({
       classSpreadsheet,
       foundSubjects,
       assessmentType,
-    ),
+    }),
   };
 }
 
@@ -58,26 +71,38 @@ export function buildSingleStudentReportContext({
   foundSubjects,
   studentId,
 }: BuildSingleStudentReportContextParams): ReportContext {
+  const {
+    conceptReportId,
+    gradeReportId,
+    enrollmentSpreadsheetId,
+    pdfsFolderId,
+  } = config;
   const year = extractYear(schoolYearLabel);
   const assessmentType = getAssessmentType(className);
-  const registrationSheet = SpreadsheetApp.openById(
-    config.enrollmentSpreadsheetId,
-  );
+  const registrationSheet = SpreadsheetApp.openById(enrollmentSpreadsheetId);
 
   return {
     year,
     assessmentType,
-    templateFile: getReportTemplateFile(config, assessmentType),
+    templateFile: getReportTemplateFile({
+      conceptReportId,
+      gradeReportId,
+      assessmentType,
+    }),
     tempFolder: DriveApp.getFolderById(config.tempFolderId),
-    pdfFolder: getOrCreateClassPdfFolder(config, year, className),
+    pdfFolder: getOrCreateClassPdfFolder({
+      pdfsFolderId,
+      className,
+      schoolYearLabel,
+    }),
     studentsMap: loadSingleStudentMap(registrationSheet, studentId),
     guardiansMap: loadSingleStudentGuardiansMap(registrationSheet, studentId),
-    gradesBySubject: loadGradesForSingleStudent(
+    gradesBySubject: loadGradesForSingleStudent({
       classSpreadsheet,
       foundSubjects,
       studentId,
       assessmentType,
-    ),
+    }),
   };
 }
 

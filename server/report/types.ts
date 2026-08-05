@@ -4,7 +4,7 @@ import type {
   AssessmentType,
   StudentData,
   Subject,
-} from "../types.ts";
+} from "#types.ts";
 
 export interface ReportContext {
   year: string;
@@ -23,7 +23,7 @@ export type GradeRow = ReadonlyArray<unknown>;
 /** Notas de uma disciplina já mapeadas por campo (ver GRADE_COLUMNS). */
 export type SubjectGrades = Record<string, unknown>;
 
-export type SelectYearClassActionType = "single" | "class";
+export type YearClassSelectionType = "single" | "class";
 
 export interface PlaceholderField {
   suffix: Lowercase<string>;
@@ -62,8 +62,8 @@ export interface GenerateReportForStudentParams {
 
 /** Payload de GenerateReportFormDialog.html — abertura do form de seleção. */
 export interface GenerateReportFormInitData {
-  actionType: SelectYearClassActionType;
-  years: string[];
+  actionType: YearClassSelectionType;
+  schoolYearLabels: string[];
   classes: string[];
 }
 

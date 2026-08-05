@@ -1,42 +1,39 @@
 // server/report/menu-actions.ts
-import { loadConfig } from "../config.ts";
-import { DIALOG_NAMES } from "../dialog-names.ts";
-import { listSchoolYears } from "../shared/drive-lookup.ts";
-import { getErrorMsg } from "../utils/error.ts";
-import { renderView } from "../utils/render-view.ts";
+import { loadConfig } from "#config/app-config.ts";
+import { DIALOG_NAMES } from "#config/dialog-names.ts";
+import { listSchoolYears } from "#drive/drive-lookup.ts";
+import { getErrorMsg } from "#utils/error.ts";
+import { renderView } from "#utils/render-view.ts";
 import { VALID_CLASSES } from "./constants.ts";
 
-import type { GenerateReportFormInitData } from "./types.ts";
-
-type SelectYearClassActionType = "single" | "class";
+import type {
+  GenerateReportFormInitData,
+  YearClassSelectionType,
+} from "./types.ts";
 
 /**
  * Abre o diálogo unificado de seleção de Ano Letivo e Turma.
  */
-export function openSelectYearClassDialog(
-  actionType: SelectYearClassActionType,
-): void {
+function openSelectYearClassDialog(actionType: YearClassSelectionType): void {
   const ui = SpreadsheetApp.getUi();
 
   try {
-    const config = loadConfig();
-    const years = listSchoolYears(config);
+    const { schoolYearsFolderId } = loadConfig();
+    const schoolYearLabels = listSchoolYears(schoolYearsFolderId);
 
-    if (years.length === 0) {
+    if (schoolYearLabels.length === 0) {
       ui.alert('Nenhum ano letivo encontrado dentro da pasta "Anos Letivos".');
       return;
     }
 
-    const height = actionType === "single" ? 320 : 240;
-    const htmlOutput = renderView<GenerateReportFormInitData>(
-      DIALOG_NAMES.generateReportForm,
-      {
-        actionType,
-        years,
-        classes: VALID_CLASSES.map((validClass) => validClass.name),
-      },
-    );
-    htmlOutput.setWidth(400).setHeight(height);
+    const classes = VALID_CLASSES.map((validClass) => validClass.name);
+    const initData: GenerateReportFormInitData = {
+      actionType,
+      schoolYearLabels,
+      classes,
+    };
+    const htmlOutput = renderView(DIALOG_NAMES.generateReportForm, initData);
+    htmlOutput.setWidth(400).setHeight(actionType === "single" ? 320 : 240);
 
     const dialogTitle =
       actionType === "single" ?
@@ -45,10 +42,11 @@ export function openSelectYearClassDialog(
 
     ui.showModalDialog(htmlOutput, dialogTitle);
   } catch (error) {
-    const errorMessage = getErrorMsg(error);
-    ui.alert(`Erro ao abrir seleção: ${errorMessage}`);
+    ui.alert(`Erro ao abrir seleção: ${getErrorMsg(error)}`);
   }
 }
+
+// -------------------------------------
 
 export function generateStudentReport(): void {
   openSelectYearClassDialog("single");
