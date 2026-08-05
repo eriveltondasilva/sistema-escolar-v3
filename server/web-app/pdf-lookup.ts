@@ -1,8 +1,8 @@
 // server/web-app/pdf-lookup.ts
-import { loadConfig } from "../config.ts";
-import { findStudentPdfInFolder } from "../shared/drive-lookup.ts";
+import { loadConfig } from "#config/app-config.ts";
+import { findStudentPdfInFolder } from "#drive/drive-lookup.ts";
 
-import type { ReportLinkParams } from "../types.ts";
+import type { ReportLinkParams } from "#types.ts";
 
 export function findReportPdfId({
   studentId,

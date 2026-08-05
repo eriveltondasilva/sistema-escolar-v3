@@ -1,9 +1,11 @@
 // server/web-app/do-get.ts
-import { DIALOG_NAMES } from "../dialog-names.ts";
-import { getErrorMsg, renderView, verifyReportLinkToken } from "../utils";
+import { DIALOG_NAMES } from "#config/dialog-names.ts";
+import { getErrorMsg } from "#utils/error.ts";
+import { verifyReportLinkToken } from "#utils/link-token.ts";
+import { renderView } from "#utils/render-view.ts";
 import { findReportPdfId } from "./pdf-lookup.ts";
 
-import type { ReportLinkParams } from "../types.ts";
+import type { ReportLinkParams } from "#types.ts";
 import type { ErrorInitData, ReportDownloadInitData } from "./types.ts";
 
 interface GetParams extends ReportLinkParams {
