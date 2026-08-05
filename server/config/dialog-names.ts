@@ -1,4 +1,5 @@
 // server/dialog-names.ts
+
 export const DIALOG_NAMES = {
   classReportResult: "class-report-result",
   createSchoolYearForm: "create-school-year-form",
