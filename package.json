@@ -5,7 +5,14 @@
   "type": "module",
   "private": true,
   "license": "MIT",
-  "imports": {},
+  "imports": {
+    "#config/*.ts": "./server/config/*.ts",
+    "#drive/*.ts": "./server/drive/*.ts",
+    "#report/*.ts": "./server/report/*.ts",
+    "#roster/*.ts": "./server/roster/*.ts",
+    "#utils/*.ts": "./server/utils/*.ts",
+    "#types.ts": "./server/types.ts"
+  },
   "scripts": {
     "build": "bun run ./scripts/build.ts --minify",
     "build:dev": "bun run ./scripts/build.ts",
