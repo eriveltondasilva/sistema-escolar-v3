@@ -1,5 +1,7 @@
 // server/utils/formatters.ts
-import { DEFAULT_LOCALE, DEFAULT_TIMEZONE } from "../config.ts";
+import { DEFAULT_LOCALE } from "#config/constants.ts";
+
+const DEFAULT_TIMEZONE = "America/Sao_Paulo";
 
 /** Formata os nomes dos responsáveis concatenando-os corretamente. */
 export function formatGuardianNames(names: string[]): string {

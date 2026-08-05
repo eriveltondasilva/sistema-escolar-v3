@@ -1,5 +1,5 @@
 // server/utils/render-view.ts
-import type { DialogName } from "../dialog-names.ts";
+import type { DialogName } from "#config/dialog-names.ts";
 
 /** Renderiza um template HTML. */
 export function renderView<T>(
