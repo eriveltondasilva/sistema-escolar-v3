@@ -24,8 +24,8 @@ const CONFIG_SHEET = {
 } as const satisfies ConfigSheet;
 
 type SheetKey = keyof typeof CONFIG_SHEET.keys;
-
 const SHEET_KEYS = Object.keys(CONFIG_SHEET.keys) as SheetKey[];
+
 let cachedConfig: AppConfig | undefined;
 
 /**
@@ -85,7 +85,7 @@ export function loadConfig(): AppConfig {
       return config;
     },
     {} as Record<keyof AppConfig, string>,
-  ) as AppConfig;
+  );
 
   return cachedConfig;
 }
