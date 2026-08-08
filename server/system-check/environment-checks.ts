@@ -1,16 +1,16 @@
 // server/system-check/environment-checks.ts
-import { loadConfig } from "../config.ts";
-import { toIssue } from "./issue-helper.ts";
-import { VALID_CLASSES } from "../report/constants.ts";
+import { loadConfig } from "#config/app-config.ts";
 import {
   getClassTemplateFile,
   getReportTemplateFile,
-} from "../shared/drive-lookup.ts";
-import { getScriptProp } from "../utils/script-properties.ts";
+} from "#drive/drive-lookup.ts";
+import { VALID_CLASSES } from "#report/constants.ts";
+import { getScriptProp } from "#utils/script-properties.ts";
+import { toIssue } from "./issue-helper.ts";
 
-import type { AppConfig, Issue } from "../types.ts";
+import type { AppConfig, Issue } from "#types.ts";
 
-export interface ConfigCheckResult {
+interface ConfigCheckResult {
   config: AppConfig | null;
   issues: Issue[];
 }
@@ -23,11 +23,11 @@ export function checkConfig(): ConfigCheckResult {
     return {
       config: null,
       issues: [
-        toIssue(
-          "Configuração",
+        toIssue({
+          label: "Configuração",
           error,
-          SpreadsheetApp.getActiveSpreadsheet().getUrl(),
-        ),
+          url: SpreadsheetApp.getActiveSpreadsheet().getUrl(),
+        }),
       ],
     };
   }
@@ -35,9 +35,10 @@ export function checkConfig(): ConfigCheckResult {
 
 /**
  * Um template por assessmentType único usado nas turmas (evita validar
- * "grade" duas vezes se todas as turmas forem do mesmo tipo).
+ * "numeric" duas vezes se todas as turmas forem do mesmo tipo).
  */
 export function checkReportTemplates(config: AppConfig): Issue[] {
+  const { conceptReportId, gradeReportId } = config;
   const issues: Issue[] = [];
   const assessmentTypes = new Set(
     VALID_CLASSES.map((validClass) => validClass.assessmentType),
@@ -45,14 +46,14 @@ export function checkReportTemplates(config: AppConfig): Issue[] {
 
   for (const assessmentType of assessmentTypes) {
     const label =
-      assessmentType === "grade" ?
+      assessmentType === "numeric" ?
         "Modelo de boletim (nota)"
       : "Modelo de boletim (conceito)";
 
     try {
-      getReportTemplateFile(config, assessmentType);
-    } catch (e) {
-      issues.push(toIssue(label, e));
+      getReportTemplateFile({ conceptReportId, gradeReportId, assessmentType });
+    } catch (error) {
+      issues.push(toIssue({ label, error }));
     }
   }
 
@@ -61,10 +62,11 @@ export function checkReportTemplates(config: AppConfig): Issue[] {
 
 /**
  * Um template por assessmentType único usado nas turmas (mesmo motivo de
- * checkReportTemplates: evita validar "grade" duas vezes se todas as
+ * checkReportTemplates: evita validar "numeric" duas vezes se todas as
  * turmas forem do mesmo tipo).
  */
 export function checkClassTemplates(config: AppConfig): Issue[] {
+  const { conceptSpreadsheetId, gradeSpreadsheetId } = config;
   const issues: Issue[] = [];
   const assessmentTypes = new Set(
     VALID_CLASSES.map((validClass) => validClass.assessmentType),
@@ -72,14 +74,18 @@ export function checkClassTemplates(config: AppConfig): Issue[] {
 
   for (const assessmentType of assessmentTypes) {
     const label =
-      assessmentType === "grade" ?
+      assessmentType === "numeric" ?
         "Modelo de planilha de turma (nota)"
       : "Modelo de planilha de turma (conceito)";
 
     try {
-      getClassTemplateFile(config, assessmentType);
-    } catch (e) {
-      issues.push(toIssue(label, e));
+      getClassTemplateFile({
+        conceptSpreadsheetId,
+        gradeSpreadsheetId,
+        assessmentType,
+      });
+    } catch (error) {
+      issues.push(toIssue({ label, error }));
     }
   }
 
@@ -91,8 +97,8 @@ export function checkPdfsFolder(config: AppConfig): Issue[] {
   try {
     DriveApp.getFolderById(config.pdfsFolderId);
     return [];
-  } catch (e) {
-    return [toIssue("PDFs", e)];
+  } catch (error) {
+    return [toIssue({ label: "PDFs", error })];
   }
 }
 
@@ -101,8 +107,8 @@ export function checkTempFolder(config: AppConfig): Issue[] {
   try {
     DriveApp.getFolderById(config.tempFolderId);
     return [];
-  } catch (e) {
-    return [toIssue("Pasta temporária", e)];
+  } catch (error) {
+    return [toIssue({ label: "Pasta temporária", error })];
   }
 }
 
@@ -128,8 +134,8 @@ export function checkScriptProperties(): Issue[] {
   for (const [label, getter] of checks) {
     try {
       getter();
-    } catch (e) {
-      issues.push(toIssue(label, e));
+    } catch (error) {
+      issues.push(toIssue({ label, error }));
     }
   }
 

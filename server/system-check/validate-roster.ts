@@ -1,34 +1,47 @@
 // server/system-check/validate-roster.ts
-import { DEFAULT_LOCALE, ENROLLMENT_SHEET_NAMES } from "../config.ts";
-import { STUDENT_COLUMNS } from "../report/constants.ts";
 
-import type { ClassStudent } from "../report/types.ts";
-import type { Issue, StudentData } from "../types.ts";
+import { DEFAULT_LOCALE } from "#config/constants.ts";
+import { STUDENTS_SHEET, SUMMARY_SHEET } from "#report/constants.ts";
+
+import type { ClassStudent } from "#report/types.ts";
+import type { Issue, StudentData } from "#types.ts";
+
+interface ValidateClassStudents {
+  classSpreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet;
+  registeredStudentsMap: Map<string, StudentData>;
+  students: ClassStudent[];
+  schoolYearLabel: string;
+  className: string;
+}
 
 /**
  * Compara os alunos da aba "Resumo" de uma turma com o Cadastro Escolar.
  * Retorna objetos detalhados de diagnóstico.
  */
-export function validateClassStudents(
-  classSpreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
-  registeredStudentsMap: Map<string, StudentData>,
-  students: ClassStudent[],
-  schoolYearLabel: string,
-  className: string,
-): Issue[] {
+export function validateClassStudents({
+  classSpreadsheet,
+  registeredStudentsMap,
+  students,
+  schoolYearLabel,
+  className,
+}: ValidateClassStudents): Issue[] {
   const issues: Issue[] = [];
   const ssUrl = classSpreadsheet.getUrl();
 
   if (students.length === 0) {
     issues.push({
       type: "error",
-      text: `[${schoolYearLabel} / ${className}] Turma sem alunos cadastrados na aba "${ENROLLMENT_SHEET_NAMES.SUMMARY}".`,
+      text: `[${schoolYearLabel} / ${className}] Turma sem alunos cadastrados na aba "${SUMMARY_SHEET.name}".`,
       url: ssUrl,
     });
     return issues;
   }
 
-  const dupes = findDuplicateResumoIds(students, schoolYearLabel, className);
+  const dupes = findDuplicateSummaryIds({
+    students,
+    schoolYearLabel,
+    className,
+  });
   issues.push(
     ...dupes.map((msg) => ({ type: "error" as const, text: msg, url: ssUrl })),
   );
@@ -62,12 +75,18 @@ export function validateClassStudents(
   return issues;
 }
 
+interface RosterValidation {
+  students: { studentId: string; row: number }[];
+  schoolYearLabel: string;
+  className: string;
+}
+
 /** Verifica se há matrículas duplicadas na aba "Resumo". */
-export function findDuplicateResumoIds(
-  students: Array<{ studentId: string; row: number }>,
-  schoolYearLabel: string,
-  className: string,
-): string[] {
+export function findDuplicateSummaryIds({
+  students,
+  schoolYearLabel,
+  className,
+}: RosterValidation): string[] {
   const rowsByStudentId = new Map<string, number[]>();
 
   for (const { studentId, row } of students) {
@@ -88,16 +107,14 @@ export function findDuplicateResumoIds(
 export function findDuplicateStudentIds(
   registrationSheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
 ): string[] {
-  const studentsSheet = registrationSheet.getSheetByName(
-    ENROLLMENT_SHEET_NAMES.STUDENTS,
-  );
+  const studentsSheet = registrationSheet.getSheetByName(STUDENTS_SHEET.name);
   if (!studentsSheet) return [];
 
   const rows = studentsSheet.getDataRange().getValues().slice(1);
   const rowsByStudentId = new Map<string, number[]>();
 
   rows.forEach((row, index) => {
-    const studentId = String(row[STUDENT_COLUMNS.id] ?? "").trim();
+    const studentId = String(row[STUDENTS_SHEET.columns.id]).trim();
     if (!studentId) return;
 
     const dataRow = index + 2;
