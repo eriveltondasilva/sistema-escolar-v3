@@ -34,8 +34,8 @@ import {
   submitStudentRegistration,
 } from "./roster/dialog-actions.ts";
 import {
+  openStudentCreationDialog,
   openStudentEditDialog,
-  openStudentRegistrationDialog,
   openStudentSearchDialog,
 } from "./roster/menu-actions.ts";
 import { submitSchoolYearCreation } from "./school-year/dialog-actions.ts";
@@ -46,42 +46,42 @@ import { doGet } from "./web-app/do-get.ts";
 Object.assign(globalThis, {
   // --- Menu (onOpen) ---
   // Menu principal da planilha (onOpen) — não pertence a nenhum domínio.
-  onOpen,
+  onOpen: onOpen,
 
   // --- Web App público (sem autenticação, acessado via QR do boletim) ---
-  doGet,
+  doGet: doGet,
 
   // --- Boletim: menu ---
   // Domínio "Boletim": geração individual e em lote.
-  generateStudentReport, // abre o dialog de seleção (ano/turma/aluno)
-  generateClassReports, // abre o dialog de seleção (ano/turma, turma toda)
+  generateStudentReport: generateStudentReport, // abre o dialog de seleção (ano/turma/aluno)
+  generateClassReports: generateClassReports, // abre o dialog de seleção (ano/turma, turma toda)
 
   // --- Boletim: dialog (google.script.run) ---
-  getStudentsDataForClass, // autocomplete de aluno no form de boletim individual
-  executeClassReportsGeneration, // gera os boletins de uma turma inteira
-  continueClassReportsGeneration,
-  cancelClassReportsGeneration,
-  executeStudentReportGeneration, // gera o boletim de um único aluno
+  getStudentsDataForClass: getStudentsDataForClass, // autocomplete de aluno no form de boletim individual
+  executeClassReportsGeneration: executeClassReportsGeneration, // gera os boletins de uma turma inteira
+  continueClassReportsGeneration: continueClassReportsGeneration,
+  cancelClassReportsGeneration: cancelClassReportsGeneration,
+  executeStudentReportGeneration: executeStudentReportGeneration, // gera o boletim de um único aluno
 
   // --- Diagnóstico: menu ---
   // Domínio "Diagnóstico": verificação agregada de config, pastas, planilhas e cadastro.
-  checkSystem, // roda a verificação completa e mostra o relatório
+  checkSystem: checkSystem, // roda a verificação completa e mostra o relatório
 
   // --- Aluno: menu ---
-  openStudentSearchDialog, // abre a tela de busca de aluno
-  openStudentRegistrationDialog, // abre o formulário de cadastro
+  openStudentSearchDialog: openStudentSearchDialog, // abre a tela de busca de aluno
+  openStudentCreationDialog: openStudentCreationDialog, // abre o formulário de cadastro
 
   // --- Aluno: dialog (google.script.run) ---
-  openStudentEditDialog, // abre o formulário de edição a partir da busca
-  getStudentSearchResults, // autocomplete da tela de busca
-  getStudentDetailsForSearch, // detalhes + histórico de PDFs do aluno selecionado
-  getStudentForEditForm, // carrega os dados do aluno no formulário de edição
-  submitStudentRegistration, // cria um novo aluno, devolve a matrícula gerada
-  submitStudentEdit, // atualiza os dados de um aluno existente
+  openStudentEditDialog: openStudentEditDialog, // abre o formulário de edição a partir da busca
+  getStudentSearchResults: getStudentSearchResults, // autocomplete da tela de busca
+  getStudentDetailsForSearch: getStudentDetailsForSearch, // detalhes + histórico de PDFs do aluno selecionado
+  getStudentForEditForm: getStudentForEditForm, // carrega os dados do aluno no formulário de edição
+  submitStudentRegistration: submitStudentRegistration, // cria um novo aluno, devolve a matrícula gerada
+  submitStudentEdit: submitStudentEdit, // atualiza os dados de um aluno existente
 
   // --- Ano Letivo: menu ---
-  openCreateSchoolYearFormDialog, // abre o formulário de criação de ano letivo
+  openCreateSchoolYearFormDialog: openCreateSchoolYearFormDialog, // abre o formulário de criação de ano letivo
 
   // --- Ano Letivo: dialog (google.script.run) ---
-  submitSchoolYearCreation, // valida e cria a estrutura do ano letivo (tudo ou nada)
+  submitSchoolYearCreation: submitSchoolYearCreation, // valida e cria a estrutura do ano letivo (tudo ou nada)
 });

@@ -8,7 +8,7 @@ export function onOpen(): void {
     //
     .addSeparator()
     .addItem("Buscar aluno", "openStudentSearchDialog")
-    .addItem("Cadastrar aluno", "openStudentRegistrationDialog")
+    .addItem("Cadastrar aluno", "openStudentCreationDialog")
     //
     .addSeparator()
     .addItem("Criar ano letivo", "openCreateSchoolYearFormDialog")
