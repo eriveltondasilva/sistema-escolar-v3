@@ -3,7 +3,6 @@
   "trailingComma": "all",
   "useTabs": false,
   "semi": true,
-  "width": 100,
 
   "plugins": ["prettier-plugin-tailwindcss"]
 }

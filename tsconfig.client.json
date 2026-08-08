@@ -6,5 +6,8 @@
     "lib": ["ESNext", "DOM"],
     "types": ["bun", "alpinejs"]
   },
-  "include": ["client/**/*.ts", "client/**/*.d.ts", "server/types.ts"]
+  "include": [
+    "client/**/*.ts",
+    "client/**/*.d.ts"
+  ]
 }

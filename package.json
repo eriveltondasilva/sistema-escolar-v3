@@ -6,6 +6,7 @@
   "private": true,
   "license": "MIT",
   "imports": {
+    "#server": "./server/**/*.ts",
     "#config/*.ts": "./server/config/*.ts",
     "#drive/*.ts": "./server/drive/*.ts",
     "#report/*.ts": "./server/report/*.ts",
