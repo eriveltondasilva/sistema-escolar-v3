@@ -1,5 +1,5 @@
 // server/roster/types.ts
-import type { GuardianData, StudentData, StudentSummary } from "../types.ts";
+import type { GuardianData, StudentData, StudentSummary } from "#types.ts";
 
 /**
  * Dados de um aluno para o formulário de cadastro/edição — estende

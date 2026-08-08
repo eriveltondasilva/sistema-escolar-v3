@@ -1,5 +1,7 @@
 // server/roster/dialog-actions.ts
-import { loadConfig } from "../config.ts";
+import { loadConfig } from "#config/app-config.ts";
+import { formatGuardianNames } from "#utils/formatters.ts";
+import { withScriptLock } from "#utils/script-lock.ts";
 import {
   createStudentRecord,
   getStudentForEdit,
@@ -7,71 +9,13 @@ import {
   updateStudentRecord,
 } from "./data-access.ts";
 import { findStudentPdfHistory } from "./pdf-history.ts";
-import { formatGuardianNames } from "../utils/formatters.ts";
-import { withScriptLock } from "../utils/script-lock.ts";
 
-import type { GuardianData } from "../types.ts";
+import type { GuardianData } from "#types.ts";
 import type {
   CreateStudentPayload,
   StudentFormPayload,
   StudentSearchResult,
 } from "./types.ts";
-
-export function getStudentSearchResults(query: string): StudentSearchResult[] {
-  const config = loadConfig();
-  const registrationSheet = SpreadsheetApp.openById(
-    config.enrollmentSpreadsheetId,
-  );
-  return searchStudents(registrationSheet, query);
-}
-
-export interface StudentSearchDetails {
-  student: StudentFormPayload;
-  guardianNamesFormatted: string;
-  pdfHistory: ReturnType<typeof findStudentPdfHistory>;
-}
-
-export function getStudentDetailsForSearch(
-  studentId: string,
-): StudentSearchDetails {
-  const trimmedId = String(studentId ?? "").trim();
-  if (!trimmedId) throw new Error("Matrícula não pode ser vazia.");
-
-  const config = loadConfig();
-  const registrationSheet = SpreadsheetApp.openById(
-    config.enrollmentSpreadsheetId,
-  );
-
-  const student = getStudentForEdit(registrationSheet, trimmedId);
-  if (!student) {
-    throw new Error(`Matrícula ${trimmedId} não encontrada.`);
-  }
-
-  return {
-    student,
-    guardianNamesFormatted: formatGuardianNames(
-      student.guardians.map((guardian) => guardian.name),
-    ),
-    pdfHistory: findStudentPdfHistory(config, trimmedId),
-  };
-}
-
-export function getStudentForEditForm(studentId: string): StudentFormPayload {
-  const trimmedId = String(studentId ?? "").trim();
-  if (!trimmedId) throw new Error("Matrícula não pode ser vazia.");
-
-  const config = loadConfig();
-  const registrationSheet = SpreadsheetApp.openById(
-    config.enrollmentSpreadsheetId,
-  );
-
-  const student = getStudentForEdit(registrationSheet, trimmedId);
-  if (!student) {
-    throw new Error(`Matrícula ${trimmedId} não encontrada.`);
-  }
-
-  return student;
-}
 
 function validateStudentPayload(payload: {
   name: string;
@@ -91,6 +35,61 @@ function validateStudentPayload(payload: {
   }
 }
 
+// -------------------------------------
+
+export function getStudentSearchResults(query: string): StudentSearchResult[] {
+  const { enrollmentSpreadsheetId } = loadConfig();
+  const registrationSheet = SpreadsheetApp.openById(enrollmentSpreadsheetId);
+
+  return searchStudents(registrationSheet, query);
+}
+
+interface StudentSearchDetails {
+  student: StudentFormPayload;
+  guardianNamesFormatted: string;
+  pdfHistory: ReturnType<typeof findStudentPdfHistory>;
+}
+
+export function getStudentDetailsForSearch(
+  studentId: string,
+): StudentSearchDetails {
+  const trimmedId = String(studentId ?? "").trim();
+  if (!trimmedId) throw new Error("Matrícula não pode ser vazia.");
+
+  const { enrollmentSpreadsheetId, pdfsFolderId } = loadConfig();
+  const registrationSheet = SpreadsheetApp.openById(enrollmentSpreadsheetId);
+
+  const student = getStudentForEdit(registrationSheet, trimmedId);
+  if (!student) {
+    throw new Error(`Matrícula ${trimmedId} não encontrada.`);
+  }
+
+  return {
+    student,
+    guardianNamesFormatted: formatGuardianNames(
+      student.guardians.map((guardian) => guardian.name),
+    ),
+    pdfHistory: findStudentPdfHistory(pdfsFolderId, trimmedId),
+  };
+}
+
+export function getStudentForEditForm(studentId: string): StudentFormPayload {
+  const trimmedId = String(studentId ?? "").trim();
+  if (!trimmedId) throw new Error("Matrícula não pode ser vazia.");
+
+  const { enrollmentSpreadsheetId } = loadConfig();
+  const registrationSheet = SpreadsheetApp.openById(enrollmentSpreadsheetId);
+
+  const student = getStudentForEdit(registrationSheet, trimmedId);
+  if (!student) {
+    throw new Error(`Matrícula ${trimmedId} não encontrada.`);
+  }
+
+  return student;
+}
+
+// -------------------------------------
+
 /** @returns A matrícula gerada para o novo aluno. */
 export function submitStudentRegistration(
   payload: CreateStudentPayload,
@@ -100,10 +99,8 @@ export function submitStudentRegistration(
   let newStudentId = "";
 
   withScriptLock(() => {
-    const config = loadConfig();
-    const registrationSheet = SpreadsheetApp.openById(
-      config.enrollmentSpreadsheetId,
-    );
+    const { enrollmentSpreadsheetId } = loadConfig();
+    const registrationSheet = SpreadsheetApp.openById(enrollmentSpreadsheetId);
     newStudentId = createStudentRecord(registrationSheet, payload);
   }, "Já existe um cadastro em andamento. Tente novamente em alguns instantes.");
 
@@ -120,13 +117,12 @@ export function submitStudentEdit(
 ): void {
   const trimmedId = String(studentId ?? "").trim();
   if (!trimmedId) throw new Error("Matrícula não pode ser vazia.");
+
   validateStudentPayload(payload);
 
   withScriptLock(() => {
-    const config = loadConfig();
-    const registrationSheet = SpreadsheetApp.openById(
-      config.enrollmentSpreadsheetId,
-    );
+    const { enrollmentSpreadsheetId } = loadConfig();
+    const registrationSheet = SpreadsheetApp.openById(enrollmentSpreadsheetId);
     updateStudentRecord(registrationSheet, trimmedId, payload);
   }, "Já existe uma edição em andamento. Tente novamente em alguns instantes.");
 }

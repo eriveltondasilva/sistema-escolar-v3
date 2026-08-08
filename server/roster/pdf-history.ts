@@ -1,26 +1,24 @@
 // server/roster/pdf-history.ts
-import { findStudentPdfInFolder } from "../shared/drive-lookup.ts";
+import { findStudentPdfInFolder } from "#drive/drive-lookup.ts";
 
-import type { AppConfig } from "../types.ts";
-
-export interface StudentPdfHistoryEntry {
-  yearLabel: string;
+interface StudentPdfHistoryEntry {
+  schoolYearLabel: string;
   className: string;
   pdfUrl: string;
 }
 
 export function findStudentPdfHistory(
-  config: AppConfig,
+  pdfsFolderId: string,
   studentId: string,
 ): StudentPdfHistoryEntry[] {
   const results: StudentPdfHistoryEntry[] = [];
 
-  const pdfRootFolder = DriveApp.getFolderById(config.pdfsFolderId);
+  const pdfRootFolder = DriveApp.getFolderById(pdfsFolderId);
   const yearFolders = pdfRootFolder.getFolders();
 
   while (yearFolders.hasNext()) {
     const yearFolder = yearFolders.next();
-    const yearLabel = yearFolder.getName();
+    const schoolYearLabel = yearFolder.getName();
     const classFolders = yearFolder.getFolders();
 
     while (classFolders.hasNext()) {
@@ -28,12 +26,14 @@ export function findStudentPdfHistory(
       const file = findStudentPdfInFolder(classFolder, studentId);
       if (file)
         results.push({
-          yearLabel,
+          schoolYearLabel,
           className: classFolder.getName(),
           pdfUrl: file.getUrl(),
         });
     }
   }
 
-  return results.sort((a, b) => b.yearLabel.localeCompare(a.yearLabel));
+  return results.sort(
+    (a, b) => Number(b.schoolYearLabel) - Number(a.schoolYearLabel),
+  );
 }
