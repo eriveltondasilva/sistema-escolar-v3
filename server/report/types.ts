@@ -69,16 +69,16 @@ export interface GenerateReportFormInitData {
 
 /** Payload de ClassReportResultDialog.html — resultado da geração em lote. */
 export interface ClassReportResultInitData {
-  successCount: number;
-  processedCount: number;
-  totalStudents: number;
   className: string;
-  schoolYearLabel: string;
+  errors: string[];
   interrupted: boolean;
   interruptedMessage: string;
-  errors: string[];
-  truncatedCount: number;
   pdfFolderUrl: string;
+  processedCount: number;
+  schoolYearLabel: string;
+  successCount: number;
+  totalStudents: number;
+  truncatedCount: number;
 }
 
 /** Estado persistido de uma geração de boletins em lote que pode ser retomada. */
