@@ -2,7 +2,7 @@
 import { Glob, build as bunBuild } from "bun";
 import { copyFileSync, existsSync, mkdirSync, rmSync } from "node:fs";
 import { join } from "node:path";
-import { argv, cwd, exit } from "node:process";
+import { cwd, exit } from "node:process";
 
 import tailwind from "bun-plugin-tailwind";
 
@@ -14,14 +14,25 @@ const DIALOGS_DIR = join(cwd(), "client", "dialogs");
 const SERVER_ENTRY = join(cwd(), "server", "main.ts");
 const DIST_DIR = join(cwd(), "dist");
 
-const isMinified = argv.includes("--minify");
-
 function assertBuildSuccess(result: BuildOutput, label: string): void {
   if (result.success) return;
 
-  const logs = result.logs.map(String).join("\n");
-  throw new Error(`${label} build failed:\n${logs}`);
+  throw new Error(
+    `${label} build failed:\n${result.logs.map(String).join("\n")}`,
+  );
 }
+
+/**
+ * Remove a declaração "export { ... }" que o Bun injeta no final de um
+ * bundle ESM. O GAS não entende sintaxe de módulo — basta apagar essa linha
+ * para que as variáveis declaradas no topo do arquivo fiquem no escopo
+ * global e sejam encontradas pelo nome.
+ */
+function removeESMExports(code: string): string {
+  return code.replace(/export\s*\{[^}]*\};?/, "").trimEnd();
+}
+
+// -------------------------------------
 
 async function buildClient() {
   const glob = new Glob("*.html");
@@ -42,7 +53,6 @@ async function buildClient() {
     compile: true,
     plugins: [tailwind, posthtmlPlugin()],
     naming: "[name].[ext]",
-    minify: isMinified,
   });
 
   assertBuildSuccess(result, "Client");
@@ -53,14 +63,18 @@ async function buildServer() {
   console.log("🚀 Building server bundle...");
 
   const codeName = "code.js";
+  const outPath = join(DIST_DIR, codeName);
+
   const result = await bunBuild({
     entrypoints: [SERVER_ENTRY],
     outdir: DIST_DIR,
     target: "browser",
-    format: "iife",
+    format: "esm",
     naming: codeName,
-    minify: isMinified,
   });
+
+  // const raw = readFileSync(outPath, "utf-8");
+  // writeFileSync(outPath, removeESMExports(raw), "utf-8");
 
   assertBuildSuccess(result, "Server");
   console.log(`✨ Server build completed! → dist/${codeName}\n`);
@@ -82,10 +96,6 @@ async function main() {
   const appsScript = "appsscript.json";
   copyFileSync(join(cwd(), appsScript), join(DIST_DIR, appsScript));
   console.log("✨ Copied appsscript.json\n");
-
-  if (isMinified) {
-    console.log("🚀 Minifying...\n");
-  }
 
   await buildClient();
   await buildServer();
