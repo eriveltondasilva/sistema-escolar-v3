@@ -3,16 +3,16 @@ import { parseInitData, runServerAction } from "../utils.ts";
 
 /** Dados injetados pelo server via `data-init` (renderView). */
 type ClassReportInitData = {
-  successCount: number;
   className: string;
-  schoolYearLabel: string;
+  errors: string[];
   interrupted: boolean;
   interruptedMessage: string;
-  processedCount: number;
-  totalStudents: number;
-  errors: string[];
-  truncatedCount: number;
   pdfFolderUrl: string;
+  processedCount: number;
+  schoolYearLabel: string;
+  successCount: number;
+  totalStudents: number;
+  truncatedCount: number;
 };
 
 type ClassReportState = ClassReportInitData & {
