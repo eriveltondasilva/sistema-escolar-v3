@@ -16,7 +16,6 @@
   },
   "scripts": {
     "build": "bun run ./scripts/build.ts",
-    "build:dev": "bun run ./scripts/build.ts",
     "generate:secret": "bun run ./scripts/generate-secret.ts",
     "push": "clasp push",
     "deploy": "bun run build && bun run push",

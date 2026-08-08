@@ -1,6 +1,13 @@
 // scripts/build.ts
 import { Glob, build as bunBuild } from "bun";
-import { copyFileSync, existsSync, mkdirSync, rmSync } from "node:fs";
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { join } from "node:path";
 import { cwd, exit } from "node:process";
 
@@ -73,8 +80,8 @@ async function buildServer() {
     naming: codeName,
   });
 
-  // const raw = readFileSync(outPath, "utf-8");
-  // writeFileSync(outPath, removeESMExports(raw), "utf-8");
+  const raw = readFileSync(outPath, "utf-8");
+  writeFileSync(outPath, removeESMExports(raw), "utf-8");
 
   assertBuildSuccess(result, "Server");
   console.log(`✨ Server build completed! → dist/${codeName}\n`);
