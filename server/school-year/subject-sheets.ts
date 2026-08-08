@@ -1,12 +1,12 @@
 // server/school-year/subject-sheets.ts
 import {
-  FIRST_DATA_ROW,
+  getGradeColumns,
   getManualSuffixes,
   getPlaceholderFields,
   VALID_SUBJECTS,
-} from "../report/constants.ts";
+} from "#report/constants.ts";
 
-import type { AssessmentType } from "../types.ts";
+import type { AssessmentType } from "#types.ts";
 
 export const TEMPLATE_SHEET_NAME = "_Base";
 
@@ -24,13 +24,14 @@ function unprotectManualColumns(
   assessmentType: AssessmentType,
 ): void {
   const manualSuffixes = getManualSuffixes(assessmentType);
+  const firstDataRow = getGradeColumns(assessmentType).startRow;
   const lastRow = sheet.getMaxRows();
-  const rowCount = lastRow - FIRST_DATA_ROW + 1;
+  const rowCount = lastRow - firstDataRow + 1;
 
   const unprotectedRanges = getPlaceholderFields(assessmentType)
     .map((field, index) => ({ field, column: FIRST_FIELD_COLUMN + index }))
     .filter(({ field }) => manualSuffixes.has(field.suffix))
-    .map(({ column }) => sheet.getRange(FIRST_DATA_ROW, column, rowCount, 1));
+    .map(({ column }) => sheet.getRange(firstDataRow, column, rowCount, 1));
 
   protection.setUnprotectedRanges(unprotectedRanges);
 }
@@ -45,6 +46,8 @@ function protectSubjectSheet(
 
   unprotectManualColumns(protection, sheet, assessmentType);
 }
+
+// -------------------------------------
 
 /**
  * Duplica a aba "_Base" uma vez para cada disciplina cadastrada, renomeando
@@ -69,11 +72,11 @@ export function createSubjectSheets(
       .copyTo(classSpreadsheet)
       .setName(subject.code);
 
+    // Preenche os campos de {{subject_name}} e {{subject_code}}
     subjectSheet
       .createTextFinder("{{subject_name}}")
       .matchEntireCell(false)
       .replaceAllWith(subject.name);
-
     subjectSheet
       .createTextFinder("{{subject_code}}")
       .matchEntireCell(false)

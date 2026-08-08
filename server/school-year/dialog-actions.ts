@@ -1,16 +1,18 @@
 // server/school-year/dialog-actions.ts
-import { SCHOOL_YEAR_LABEL_PREFIX, loadConfig } from "../config.ts";
-import { DIALOG_NAMES } from "../dialog-names.ts";
+import { loadConfig } from "#config/app-config.ts";
+import { DIALOG_NAMES } from "#config/dialog-names.ts";
+import { loadStudentsMap } from "#report/data-access.ts";
+import { renderView } from "#utils/render-view.ts";
+import { withScriptLock } from "#utils/script-lock.ts";
 import { createSchoolYearStructure } from "./creation.ts";
 import { validateClassMatriculations } from "./matriculation.ts";
-import { loadStudentsMap } from "../report/data-access.ts";
-import { renderView } from "../utils/render-view.ts";
-import { withScriptLock } from "../utils/script-lock.ts";
 
 import type {
   ClassMatriculationInput,
   CreateSchoolYearResultInitData,
 } from "./types.ts";
+
+const SCHOOL_YEAR_LABEL_PREFIX = "Ano Letivo - ";
 
 export function submitSchoolYearCreation(
   yearInput: string,
@@ -24,7 +26,7 @@ export function submitSchoolYearCreation(
 
   withScriptLock((ui) => {
     const config = loadConfig();
-    const schoolYearLabel = `${SCHOOL_YEAR_LABEL_PREFIX}${yearInput}`;
+    const schoolYearLabel = SCHOOL_YEAR_LABEL_PREFIX + yearInput;
 
     const rootFolder = DriveApp.getFolderById(config.schoolYearsFolderId);
     if (rootFolder.getFoldersByName(schoolYearLabel).hasNext()) {
@@ -53,7 +55,7 @@ export function submitSchoolYearCreation(
       );
     }
 
-    const result = createSchoolYearStructure({
+    const initData: CreateSchoolYearResultInitData = createSchoolYearStructure({
       config,
       rootFolder,
       schoolYearLabel,
@@ -61,10 +63,9 @@ export function submitSchoolYearCreation(
       matriculationsByClass,
       registeredStudentsMap,
     });
-
-    const htmlOutput = renderView<CreateSchoolYearResultInitData>(
+    const htmlOutput = renderView(
       DIALOG_NAMES.createSchoolYearResult,
-      result,
+      initData,
     );
     htmlOutput.setWidth(400).setHeight(340);
 
