@@ -1,5 +1,5 @@
 // client/dialogs/student-search.ts
-import { runServerAction } from "../utils.ts";
+import { runServerAction } from "../utils/run-server-action.ts";
 
 import type { StudentOption, StudentSearchDetails } from "../types.ts";
 
@@ -16,7 +16,7 @@ type StudentSearchState = {
   editStudent(): void;
 };
 
-function studentSearchDialog(): StudentSearchState {
+function initDialog(): StudentSearchState {
   return {
     query: "",
     isSearching: false,
@@ -90,5 +90,5 @@ function studentSearchDialog(): StudentSearchState {
 }
 
 document.addEventListener("alpine:init", () => {
-  Alpine.data("studentSearchDialog", studentSearchDialog);
+  Alpine.data(initDialog.name, initDialog);
 });

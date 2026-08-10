@@ -1,5 +1,5 @@
 // server/config.ts
-import type { AppConfig } from "#types.ts";
+import type { AppConfig } from "../types.ts";
 
 interface ConfigSheet {
   name: string;

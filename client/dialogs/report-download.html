@@ -2,11 +2,9 @@
 <x-dialog-shell
   class="flex h-screen items-center justify-center bg-slate-50 font-sans text-slate-800 antialiased"
 >
-  <x-alpine-cdn></x-alpine-cdn>
-
   <main
     data-init="<?= initData ?>"
-    x-data="reportDownloadDialog($el)"
+    x-data="initDialog($el)"
     x-cloak
     class="mx-4 w-full max-w-sm rounded-lg border border-slate-200 bg-white p-6 text-center shadow-sm"
   >
@@ -31,21 +29,6 @@
     </a>
   </main>
 
-  <script>
-    document.addEventListener("alpine:init", () => {
-      Alpine.data("reportDownloadDialog", (el) => {
-        const { downloadUrl } = JSON.parse(el.dataset.init);
-
-        return {
-          downloadUrl,
-
-          init() {
-            setTimeout(() => {
-              window.location.replace(this.downloadUrl);
-            }, 1_000);
-          },
-        };
-      });
-    });
-  </script>
+  <!-- Scripts -->
+  <script src="./report-download.ts"></script>
 </x-dialog-shell>

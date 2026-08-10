@@ -1,5 +1,6 @@
 // client/dialogs/student-create.ts
-import { runServerAction, validateStudentForm } from "../utils.ts";
+import { runServerAction } from "../utils/run-server-action.ts";
+import { validateStudentForm } from "../utils/validate";
 
 import type { CreateStudentPayload } from "#server/roster/types.ts";
 import type { GuardianData } from "#server/types.ts";
@@ -20,8 +21,8 @@ function emptyForm(): CreateStudentPayload {
   return {
     name: "",
     address: "",
-    nationality: "",
-    sex: "",
+    nationality: "Brasileiro(a)",
+    sex: "M",
     birthDate: "",
     guardians: [{ ...emptyGuardian(), isPrimary: true }],
   };
@@ -39,7 +40,7 @@ type StudentCreateState = {
   submit(): void;
 };
 
-function studentCreateDialog(): StudentCreateState {
+function initDialog(): StudentCreateState {
   return {
     view: "form",
     studentId: "",
@@ -70,6 +71,7 @@ function studentCreateDialog(): StudentCreateState {
 
     submit() {
       const validationError = validateStudentForm(this.form);
+
       if (validationError) {
         this.error = validationError;
         return;
@@ -90,12 +92,12 @@ function studentCreateDialog(): StudentCreateState {
         })
         .finally(() => {
           this.isLoading = false;
-          // this.form = emptyForm();
+          this.form = emptyForm();
         });
     },
   };
 }
 
 document.addEventListener("alpine:init", () => {
-  Alpine.data("studentCreateDialog", studentCreateDialog);
+  Alpine.data(initDialog.name, initDialog);
 });

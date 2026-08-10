@@ -1,10 +1,8 @@
 <!-- client/dialogs/class-report-result.html -->
 <x-dialog-shell>
-  <x-alpine-cdn></x-alpine-cdn>
-
   <main
     data-init="<?= initData ?>"
-    x-data="classReportDialog($el)"
+    x-data="initDialog($el)"
     x-cloak
     class="flex h-full flex-col justify-between bg-slate-50 p-5 font-sans text-slate-800 antialiased"
   >
@@ -13,6 +11,7 @@
         <p class="font-semibold text-emerald-900">
           <span x-text="successCount"></span> boletim(ns) gerado(s) com sucesso
         </p>
+
         <p class="text-emerald-700">
           Turma: <span x-text="className"></span> (
           <span x-text="schoolYearLabel"></span>)
@@ -24,11 +23,7 @@
         <div
           class="flex items-start space-x-3 rounded-md border border-amber-200 bg-amber-50 p-3"
         >
-          <img
-            src="../asserts/timeout-clock-icon.svg"
-            alt=""
-            aria-hidden="true"
-          />
+          <x-clock-icon></x-clock-icon>
           <div class="text-sm">
             <p class="font-semibold text-amber-900">
               Execução interrompida por tempo
@@ -46,11 +41,7 @@
       <template x-if="errors.length > 0">
         <div class="space-y-2 rounded-md border border-red-200 bg-red-50 p-3">
           <div class="flex items-center space-x-2 text-red-600">
-            <img
-              src="../asserts/error-circle-icon.svg"
-              alt=""
-              aria-hidden="true"
-            />
+            <x-circle-alert-icon></x-circle-alert-icon>
             <h2 class="text-sm font-semibold text-red-900">
               <span x-text="errors.length"></span> erro(s) na geração:
             </h2>
@@ -85,6 +76,7 @@
         >
           Abrir pasta no Drive
         </a>
+
         <template x-if="interrupted">
           <button
             @click="continueGeneration()"
@@ -96,6 +88,7 @@
             ></span>
           </button>
         </template>
+
         <template x-if="interrupted">
           <button
             @click="cancelGeneration()"
@@ -105,12 +98,8 @@
             Cancelar geração pendente
           </button>
         </template>
-        <p
-          x-show="error"
-          x-text="error"
-          class="rounded-md border border-red-100 bg-red-50 p-2 text-xs text-red-700"
-          style="display: none"
-        ></p>
+
+        <x-error-alert></x-error-alert>
       </div>
     </div>
 
@@ -119,6 +108,6 @@
     </footer>
   </main>
 
-  <!-- -->
+  <!-- Scripts -->
   <script src="./class-report-result.ts"></script>
 </x-dialog-shell>

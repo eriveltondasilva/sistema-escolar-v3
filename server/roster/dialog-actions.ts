@@ -10,12 +10,8 @@ import {
 } from "./data-access.ts";
 import { findStudentPdfHistory } from "./pdf-history.ts";
 
-import type { GuardianData } from "#types.ts";
-import type {
-  CreateStudentPayload,
-  StudentFormPayload,
-  StudentSearchResult,
-} from "./types.ts";
+import type { GuardianData, StudentSummary } from "../types.ts";
+import type { CreateStudentPayload, StudentFormPayload } from "./types.ts";
 
 function validateStudentPayload(payload: {
   name: string;
@@ -37,14 +33,14 @@ function validateStudentPayload(payload: {
 
 // -------------------------------------
 
-export function getStudentSearchResults(query: string): StudentSearchResult[] {
+export function getStudentSearchResults(query: string): StudentSummary[] {
   const { enrollmentSpreadsheetId } = loadConfig();
   const registrationSheet = SpreadsheetApp.openById(enrollmentSpreadsheetId);
 
   return searchStudents(registrationSheet, query);
 }
 
-interface StudentSearchDetails {
+export interface StudentSearchDetails {
   student: StudentFormPayload;
   guardianNamesFormatted: string;
   pdfHistory: ReturnType<typeof findStudentPdfHistory>;
@@ -101,6 +97,7 @@ export function submitStudentRegistration(
   withScriptLock(() => {
     const { enrollmentSpreadsheetId } = loadConfig();
     const registrationSheet = SpreadsheetApp.openById(enrollmentSpreadsheetId);
+
     newStudentId = createStudentRecord(registrationSheet, payload);
   }, "Já existe um cadastro em andamento. Tente novamente em alguns instantes.");
 
@@ -123,6 +120,7 @@ export function submitStudentEdit(
   withScriptLock(() => {
     const { enrollmentSpreadsheetId } = loadConfig();
     const registrationSheet = SpreadsheetApp.openById(enrollmentSpreadsheetId);
+
     updateStudentRecord(registrationSheet, trimmedId, payload);
   }, "Já existe uma edição em andamento. Tente novamente em alguns instantes.");
 }

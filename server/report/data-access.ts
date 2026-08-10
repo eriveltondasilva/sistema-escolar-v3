@@ -8,7 +8,7 @@ import {
   VALID_SUBJECTS,
 } from "./constants.ts";
 
-import type { AssessmentType, StudentData, Subject } from "#types.ts";
+import type { AssessmentType, StudentData, Subject } from "../types.ts";
 import type {
   ClassStudent,
   GradeRow,

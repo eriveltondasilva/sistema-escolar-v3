@@ -6,7 +6,7 @@ import {
   VALID_SUBJECTS,
 } from "#report/constants.ts";
 
-import type { AssessmentType } from "#types.ts";
+import type { AssessmentType } from "../types.ts";
 
 export const TEMPLATE_SHEET_NAME = "_Base";
 

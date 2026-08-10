@@ -1,12 +1,12 @@
 // server/web-app/do-get.ts
-import { DIALOG_NAMES } from "#config/dialog-names.ts";
+import { DIALOG_NAMES } from "#config/constants.ts";
 import { getErrorMsg } from "#utils/error.ts";
 import { verifyReportLinkToken } from "#utils/link-token.ts";
 import { renderView } from "#utils/render-view.ts";
 import { findReportPdfId } from "./pdf-lookup.ts";
 
-import type { ReportLinkParams } from "#types.ts";
-import type { ErrorInitData, ReportDownloadInitData } from "./types.ts";
+import type { ReportLinkParams } from "../types.ts";
+import type { ErrorDialogInitData, ReportDownloadInitData } from "./types.ts";
 
 interface GetParams extends ReportLinkParams {
   token: string;
@@ -24,8 +24,8 @@ const GENERIC_ERROR_MESSAGE =
   "Tente novamente mais tarde ou entre em contato com a secretaria da escola.";
 
 function renderError(errorMessage: string): GoogleAppsScript.HTML.HtmlOutput {
-  const initData: ErrorInitData = { errorMessage };
-  const htmlOutput = renderView(DIALOG_NAMES.error, initData);
+  const initData: ErrorDialogInitData = { errorMessage };
+  const htmlOutput = renderView(DIALOG_NAMES.errorDialog, initData);
 
   return htmlOutput.setTitle("Erro no Sistema");
 }

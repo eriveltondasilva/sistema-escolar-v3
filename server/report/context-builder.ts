@@ -14,7 +14,7 @@ import {
   loadStudentsMap,
 } from "./data-access.ts";
 
-import type { AssessmentType } from "#types.ts";
+import type { AssessmentType } from "../types.ts";
 import type {
   BuildReportContextParams,
   BuildSingleStudentReportContextParams,

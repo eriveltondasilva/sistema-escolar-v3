@@ -1,10 +1,8 @@
 <!-- client/dialogs/report-success.html -->
 <x-dialog-shell class="bg-slate-50 font-sans text-slate-800 antialiased">
-  <x-alpine-cdn></x-alpine-cdn>
-
   <main
     data-init="<?= initData ?>"
-    x-data="reportSuccessDialog($el)"
+    x-data="initDialog($el)"
     x-cloak
     class="flex h-full flex-col justify-between p-5"
   >
@@ -37,6 +35,7 @@
           target="_blank"
           class="inline-flex w-full items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
         >
+          <x-file-icon></x-file-icon>
           Abrir PDF
         </a>
         <a
@@ -44,6 +43,7 @@
           target="_blank"
           class="inline-flex w-full items-center justify-center rounded-md border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-100 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
         >
+          <x-folder-icon></x-folder-icon>
           Abrir pasta no Drive
         </a>
       </div>
@@ -54,9 +54,6 @@
     </footer>
   </main>
 
-  <script>
-    document.addEventListener("alpine:init", () => {
-      Alpine.data("reportSuccessDialog", (el) => JSON.parse(el.dataset.init));
-    });
-  </script>
+  <!-- Scripts -->
+  <script src="./report-success.ts"></script>
 </x-dialog-shell>

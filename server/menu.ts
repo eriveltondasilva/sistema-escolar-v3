@@ -1,6 +1,7 @@
 // server/menu.ts
 export function onOpen(): void {
   SpreadsheetApp.getUi()
+    //
     .createMenu("Sistema Escolar")
     //
     .addItem("Gerar boletim do aluno", "generateStudentReport")

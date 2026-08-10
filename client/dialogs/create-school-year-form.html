@@ -1,10 +1,8 @@
 <!-- client/dialogs/create-school-year-form.html -->
 <x-dialog-shell class="bg-white p-5 text-slate-900 antialiased">
-  <x-alpine-cdn></x-alpine-cdn>
-
   <form
     data-init="<?= initData ?>"
-    x-data="createSchoolYearForm($el)"
+    x-data="initDialog($el)"
     x-cloak
     @submit.prevent="submit()"
     class="space-y-4"
@@ -70,6 +68,6 @@
     </footer>
   </form>
 
-  <!-- -->
+  <!-- Scripts -->
   <script src="./create-school-year-form.ts"></script>
 </x-dialog-shell>

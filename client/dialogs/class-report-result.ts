@@ -1,29 +1,18 @@
 // client/dialogs/class-report-result.ts
-import { parseInitData, runServerAction } from "../utils.ts";
+import { parseInitData } from "../utils/parse-init-data.ts";
+import { runServerAction } from "../utils/run-server-action.ts";
 
-/** Dados injetados pelo server via `data-init` (renderView). */
-type ClassReportInitData = {
-  className: string;
-  errors: string[];
-  interrupted: boolean;
-  interruptedMessage: string;
-  pdfFolderUrl: string;
-  processedCount: number;
-  schoolYearLabel: string;
-  successCount: number;
-  totalStudents: number;
-  truncatedCount: number;
-};
+import type { ClassReportResultInitData } from "#server/report/types.ts";
 
-type ClassReportState = ClassReportInitData & {
+type ClassReportState = ClassReportResultInitData & {
   isLoading: boolean;
   error: string;
   continueGeneration(): void;
   cancelGeneration(): void;
 };
 
-function classReportDialog(el: HTMLElement): ClassReportState {
-  const initialState = parseInitData<ClassReportInitData>(el);
+function initDialog(el: HTMLElement): ClassReportState {
+  const initialState = parseInitData<ClassReportResultInitData>(el);
 
   return {
     ...initialState,
@@ -57,5 +46,5 @@ function classReportDialog(el: HTMLElement): ClassReportState {
 }
 
 document.addEventListener("alpine:init", () => {
-  Alpine.data("classReportDialog", classReportDialog);
+  Alpine.data(initDialog.name, initDialog);
 });

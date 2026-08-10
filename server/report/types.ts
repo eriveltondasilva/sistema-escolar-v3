@@ -4,7 +4,7 @@ import type {
   AssessmentType,
   StudentData,
   Subject,
-} from "#types.ts";
+} from "../types.ts";
 
 export interface ReportContext {
   year: string;

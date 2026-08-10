@@ -4,7 +4,7 @@ import { DEFAULT_LOCALE } from "#config/constants.ts";
 import { STUDENTS_SHEET, SUMMARY_SHEET } from "#report/constants.ts";
 
 import type { ClassStudent } from "#report/types.ts";
-import type { Issue, StudentData } from "#types.ts";
+import type { Issue, StudentData } from "../types.ts";
 
 interface ValidateClassStudents {
   classSpreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet;

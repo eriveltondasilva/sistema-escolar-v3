@@ -4,17 +4,13 @@ import { GUARDIANS_SHEET, STUDENTS_SHEET } from "#report/constants.ts";
 import { formatDate } from "#utils/formatters.ts";
 import { diffStudentFields, logStudentChanges } from "./change-log.ts";
 
-import type { GuardianData } from "#types.ts";
-import type {
-  CreateStudentPayload,
-  StudentFormPayload,
-  StudentSearchResult,
-} from "./types.ts";
+import type { GuardianData, StudentSummary } from "../types.ts";
+import type { CreateStudentPayload, StudentFormPayload } from "./types.ts";
 
 const STUDENT_ID_PADDING = 4;
 
 /** Status padrão atribuído a todo aluno recém-cadastrado. */
-const DEFAULT_STUDENT_STATUS = "Ativo";
+const DEFAULT_STUDENT_STATUS = "ativo";
 
 /** Número de colunas da aba "Alunos" (ver STUDENTS_SHEET.columns). */
 const STUDENT_COL_COUNT = Object.keys(STUDENTS_SHEET.columns).length;
@@ -35,7 +31,7 @@ function generateNextStudentId(
 
   const lastRow = studentsSheet.getLastRow();
   if (lastRow < STUDENTS_SHEET.startRow) {
-    return "1".padStart(STUDENT_ID_PADDING, "0");
+    return "1";
   }
 
   const rows = studentsSheet
@@ -48,11 +44,11 @@ function generateNextStudentId(
     .getValues();
 
   const maxId = rows.reduce((max, row) => {
-    const numeric = Number(String(row[0] ?? "").trim());
+    const numeric = Number(String(row[0]).trim());
     return Number.isFinite(numeric) && numeric > max ? numeric : max;
   }, 0);
 
-  return String(maxId + 1).padStart(STUDENT_ID_PADDING, "0");
+  return String(maxId + 1);
 }
 
 /** Formata uma data para "yyyy-MM-dd", o formato que <input type="date"> espera. */
@@ -73,7 +69,7 @@ function mapGuardianRow(row: ReadonlyArray<unknown>): GuardianData {
     name: String(row[col.name] ?? "").trim(),
     address: String(row[col.address] ?? ""),
     relationship: String(row[col.relationship] ?? ""),
-    // A célula armazena "Sim"/"Não" — comparação case-insensitive para robustez.
+    // A célula armazena "sim"/"não" — comparação case-insensitive para robustez.
     isPrimary:
       String(row[col.isPrimary] ?? "")
         .trim()
@@ -169,10 +165,10 @@ function replaceGuardians(
     const newRows = validGuardians.map((guardian) => [
       studentId,
       guardian.name.trim(),
-      guardian.address,
-      guardian.relationship,
-      guardian.isPrimary,
-      guardian.phone,
+      guardian.address.trim(),
+      guardian.relationship.trim(),
+      guardian.isPrimary ? "sim" : "não",
+      guardian.phone.trim(),
     ]);
     guardiansSheet
       .getRange(
@@ -196,7 +192,7 @@ function replaceGuardians(
 export function searchStudents(
   registrationSheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
   query: string,
-): StudentSearchResult[] {
+): StudentSummary[] {
   const studentsSheet = registrationSheet.getSheetByName(STUDENTS_SHEET.name);
   if (!studentsSheet) return [];
 
@@ -282,6 +278,7 @@ export function createStudentRecord(
   input: CreateStudentPayload,
 ): string {
   const studentsSheet = registrationSheet.getSheetByName(STUDENTS_SHEET.name);
+
   if (!studentsSheet) {
     throw new Error(
       `Cadastro Escolar: a aba "${STUDENTS_SHEET.name}" não existe.`,
@@ -289,18 +286,22 @@ export function createStudentRecord(
   }
 
   const studentId = generateNextStudentId(registrationSheet);
-  const birthDate = input.birthDate ? new Date(input.birthDate) : "";
+  const birthDate =
+    input.birthDate.trim() ? formatDate(input.birthDate.trim()) : "";
 
-  studentsSheet.appendRow([
-    studentId,
-    input.name,
-    input.address,
-    input.nationality,
-    birthDate,
-    new Date(), // enrollmentDate: sempre a data de criação, gerada aqui.
-    input.sex,
-    DEFAULT_STUDENT_STATUS,
-  ]);
+  const col = STUDENTS_SHEET.columns;
+  const row: Record<number, unknown> = {
+    [col.id]: studentId,
+    [col.name]: input.name.trim(),
+    [col.address]: input.address.trim(),
+    [col.nationality]: input.nationality.trim(),
+    [col.birthDate]: birthDate,
+    [col.enrollmentDate]: new Date(),
+    [col.sex]: input.sex.trim(),
+    [col.status]: DEFAULT_STUDENT_STATUS,
+  };
+
+  studentsSheet.appendRow(Object.entries(row).map((entry) => entry[1]));
 
   replaceGuardians(registrationSheet, studentId, input.guardians);
 

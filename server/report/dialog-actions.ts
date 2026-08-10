@@ -1,7 +1,6 @@
 // server/report/dialog-actions.ts
 import { loadConfig } from "#config/app-config.ts";
-import { MAX_ERRORS_SHOWN } from "#config/constants.ts";
-import { DIALOG_NAMES } from "#config/dialog-names.ts";
+import { DIALOG_NAMES, MAX_ERRORS_SHOWN } from "#config/constants.ts";
 import {
   getClassSpreadsheetFile,
   getSchoolYearFolder,
@@ -21,7 +20,7 @@ import {
 } from "./data-access.ts";
 import { generateReportForStudent } from "./generator.ts";
 
-import type { StudentSummary } from "#types.ts";
+import type { StudentSummary } from "../types.ts";
 import type { ClassReportsGenerationResult } from "./batch.ts";
 import type {
   ClassReportJob,

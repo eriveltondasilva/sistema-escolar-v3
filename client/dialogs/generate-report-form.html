@@ -1,10 +1,8 @@
 <!-- client/dialogs/generate-report-form.html -->
 <x-dialog-shell class="bg-white p-5 text-slate-900 antialiased">
-  <x-alpine-cdn></x-alpine-cdn>
-
   <form
     data-init="<?= initData ?>"
-    x-data="reportFormDialog($el)"
+    x-data="initDialog($el)"
     x-cloak
     @submit.prevent="submit()"
     class="space-y-4"
@@ -23,6 +21,7 @@
         @change="actionType === 'single' && fetchStudents()"
         class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
       >
+        <option value="" disabled selected>Selecione ano letivo</option>
         <template x-for="year in years" :key="year">
           <option :value="year" x-text="year"></option>
         </template>
@@ -43,6 +42,7 @@
         @change="actionType === 'single' && fetchStudents()"
         class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
       >
+        <option value="" disabled selected>Selecione turma</option>
         <template x-for="cls in classes" :key="cls">
           <option :value="cls" x-text="cls"></option>
         </template>
@@ -119,6 +119,6 @@
     </footer>
   </form>
 
-  <!-- -->
+  <!-- Scripts -->
   <script src="./generate-report-form.ts"></script>
 </x-dialog-shell>

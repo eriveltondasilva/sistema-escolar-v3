@@ -1,5 +1,5 @@
 // client/dialogs/validation-result.ts
-import { parseInitData } from "../utils.ts";
+import { parseInitData } from "../utils/parse-init-data.ts";
 
 import type { Issue, IssueType } from "#server/types.ts";
 
@@ -16,7 +16,7 @@ type DiagnosticPanelState = ValidationResultPayload & {
   readonly filteredIssues: Issue[];
 };
 
-function diagnosticPanel(el: HTMLElement): DiagnosticPanelState {
+function initDialog(el: HTMLElement): DiagnosticPanelState {
   const { issues } = parseInitData<ValidationResultPayload>(el);
 
   return {
@@ -37,5 +37,5 @@ function diagnosticPanel(el: HTMLElement): DiagnosticPanelState {
 }
 
 document.addEventListener("alpine:init", () => {
-  Alpine.data("diagnosticPanel", diagnosticPanel);
+  Alpine.data(initDialog.name, initDialog);
 });

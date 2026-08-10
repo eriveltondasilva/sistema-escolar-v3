@@ -1,5 +1,5 @@
 // server/roster/menu-actions.ts
-import { DIALOG_NAMES } from "#config/dialog-names.ts";
+import { DIALOG_NAMES } from "#config/constants.ts";
 import { renderView } from "#utils/render-view.ts";
 
 import type { StudentEditInitData } from "./types.ts";

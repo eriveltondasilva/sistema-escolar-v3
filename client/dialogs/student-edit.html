@@ -1,10 +1,8 @@
 <!-- client/dialogs/student-edit.html -->
 <x-dialog-shell class="bg-white p-5 text-slate-900 antialiased">
-  <x-alpine-cdn></x-alpine-cdn>
-
   <main
-    data-student-id="<?= studentId ?>"
-    x-data="studentEditDialog($el)"
+    data-student-id="<?= initData ?>"
+    x-data="initDialog($el)"
     x-cloak
     class="space-y-4"
   >
@@ -24,13 +22,16 @@
 
     <footer class="flex items-center justify-end space-x-2 pt-2">
       <button
+        type="button"
         @click="google.script.host.close()"
         :disabled="isLoading"
         class="inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none disabled:opacity-50"
       >
         Cancelar
       </button>
+
       <button
+        type="submit"
         @click="submit()"
         :disabled="isLoading"
         class="inline-flex items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800 focus:outline-none disabled:cursor-not-allowed disabled:opacity-70"
@@ -40,6 +41,6 @@
     </footer>
   </main>
 
-  <!-- -->
+  <!-- Scripts -->
   <script src="./student-edit.ts"></script>
 </x-dialog-shell>

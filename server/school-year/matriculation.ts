@@ -2,7 +2,7 @@
 import { DEFAULT_LOCALE } from "#config/constants.ts";
 import { SUMMARY_SHEET, VALID_CLASSES } from "#report/constants.ts";
 
-import type { Issue, StudentData } from "#types.ts";
+import type { Issue, StudentData } from "../types.ts";
 import type { ClassMatriculationInput } from "./types.ts";
 
 export function validateClassMatriculations(

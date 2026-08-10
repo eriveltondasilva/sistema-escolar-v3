@@ -1,10 +1,8 @@
 <!-- client/dialogs/create-school-year-result.html -->
 <x-dialog-shell>
-  <x-alpine-cdn></x-alpine-cdn>
-
   <main
     data-init="<?= initData ?>"
-    x-data="createSchoolYearResultDialog($el)"
+    x-data="initDialog($el)"
     x-cloak
     class="flex h-full flex-col justify-between bg-slate-50 p-5 font-sans text-slate-800 antialiased"
   >
@@ -22,6 +20,7 @@
           class="mb-2 text-xs font-medium tracking-wider text-slate-500 uppercase"
           x-text="`${createdClasses.length} turma(s) criada(s)`"
         ></p>
+
         <div class="flex flex-wrap gap-1.5">
           <template x-for="cls in createdClasses" :key="cls">
             <span
@@ -38,6 +37,7 @@
         target="_blank"
         class="inline-flex w-full items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
       >
+        <x-folder-icon></x-folder-icon>
         Abrir pasta no Drive
       </a>
     </div>
@@ -47,11 +47,6 @@
     </footer>
   </main>
 
-  <script>
-    document.addEventListener("alpine:init", () => {
-      Alpine.data("createSchoolYearResultDialog", (el) =>
-        JSON.parse(el.dataset.init),
-      );
-    });
-  </script>
+  <!-- Scripts -->
+  <script src="./create-school-year-result.ts"></script>
 </x-dialog-shell>

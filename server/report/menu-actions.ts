@@ -1,6 +1,6 @@
 // server/report/menu-actions.ts
 import { loadConfig } from "#config/app-config.ts";
-import { DIALOG_NAMES } from "#config/dialog-names.ts";
+import { DIALOG_NAMES } from "#config/constants.ts";
 import { listSchoolYears } from "#drive/drive-lookup.ts";
 import { getErrorMsg } from "#utils/error.ts";
 import { renderView } from "#utils/render-view.ts";

@@ -1,7 +1,7 @@
 // server/system-check/issue-helper.ts
 import { getErrorMsg } from "#utils/error.ts";
 
-import type { Issue } from "#types.ts";
+import type { Issue } from "../types.ts";
 
 interface IssueCreator {
   label: string;

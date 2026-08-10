@@ -1,7 +1,7 @@
 // server/utils/link-token.ts
 import { getScriptProp } from "./script-properties.ts";
 
-import type { ReportLinkParams } from "#types.ts";
+import type { ReportLinkParams } from "../types.ts";
 
 export function generateReportLinkToken({
   className,

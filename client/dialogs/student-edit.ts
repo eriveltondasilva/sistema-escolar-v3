@@ -1,7 +1,12 @@
 // client/dialogs/student-edit.ts
-import { runServerAction, validateStudentForm } from "../utils.ts";
+import { parseInitData } from "../utils/parse-init-data.ts";
+import { runServerAction } from "../utils/run-server-action.ts";
+import { validateStudentForm } from "../utils/validate.ts";
 
-import type { StudentFormPayload } from "#server/roster/types.ts";
+import type {
+  StudentEditInitData,
+  StudentFormPayload,
+} from "#server/roster/types.ts";
 import type { GuardianData } from "#server/types.ts";
 
 function emptyGuardian(): GuardianData {
@@ -34,7 +39,7 @@ type StudentEditState = {
   isSaving: boolean;
   error: string;
   form: StudentFormPayload;
-  readonly isLoading: boolean; // true durante carregamento OU salvamento — usado pelo partial de campos
+  readonly isLoading: boolean;
   readonly loadingLabel: string;
   init(): void;
   addGuardian(): void;
@@ -43,8 +48,8 @@ type StudentEditState = {
   submit(): void;
 };
 
-function studentEditDialog(el: HTMLElement): StudentEditState {
-  const studentId = el.dataset.studentId || "";
+function initDialog(el: HTMLElement): StudentEditState {
+  const { studentId } = parseInitData<StudentEditInitData>(el);
 
   return {
     studentId,
@@ -104,6 +109,7 @@ function studentEditDialog(el: HTMLElement): StudentEditState {
 
     submit() {
       const validationError = validateStudentForm(this.form);
+
       if (validationError) {
         this.error = validationError;
         return;
@@ -125,5 +131,5 @@ function studentEditDialog(el: HTMLElement): StudentEditState {
 }
 
 document.addEventListener("alpine:init", () => {
-  Alpine.data("studentEditDialog", studentEditDialog);
+  Alpine.data(initDialog.name, initDialog);
 });

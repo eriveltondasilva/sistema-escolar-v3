@@ -1,7 +1,7 @@
 // server/web-app/types.ts
 
 /** Payload de error.html. */
-export interface ErrorInitData {
+export interface ErrorDialogInitData {
   errorMessage: string;
 }
 

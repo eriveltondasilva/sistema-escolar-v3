@@ -2,22 +2,16 @@
 <x-dialog-shell
   class="flex h-screen items-center justify-center bg-slate-50 p-4 font-sans text-slate-800 antialiased"
 >
-  <x-alpine-cdn></x-alpine-cdn>
-
   <main
     data-init="<?= initData ?>"
-    x-data="errorDialog($el)"
+    x-data="initDialog($el)"
     x-cloak
     class="w-full max-w-sm rounded-lg border border-red-100 bg-white p-6 text-center shadow-sm"
   >
     <div
       class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-red-600"
     >
-      <img
-        src="../asserts/warning-triangle-icon.svg"
-        alt=""
-        aria-hidden="true"
-      />
+      <x-triangle-alert-icon></x-triangle-alert-icon>
     </div>
 
     <h1 class="mb-2 text-lg font-semibold text-slate-900">
@@ -30,9 +24,6 @@
     </footer>
   </main>
 
-  <script>
-    document.addEventListener("alpine:init", () => {
-      Alpine.data("errorDialog", (el) => JSON.parse(el.dataset.init));
-    });
-  </script>
+  <!-- Scripts -->
+  <script src="./error-dialog.ts"></script>
 </x-dialog-shell>

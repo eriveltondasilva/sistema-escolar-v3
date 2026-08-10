@@ -1,5 +1,5 @@
 // server/roster/types.ts
-import type { GuardianData, StudentData, StudentSummary } from "#types.ts";
+import type { GuardianData, StudentData } from "../types.ts";
 
 /**
  * Dados de um aluno para o formulário de cadastro/edição — estende
@@ -27,9 +27,6 @@ export type CreateStudentPayload = Omit<
   StudentFormPayload,
   "studentId" | "enrollmentDate" | "status"
 >;
-
-/** Resultado de uma busca de aluno (nome ou matrícula) — usado no autocomplete da tela de busca. */
-export type StudentSearchResult = StudentSummary;
 
 /**
  * Payload de student-edit.html. studentId vai aqui (não mais como

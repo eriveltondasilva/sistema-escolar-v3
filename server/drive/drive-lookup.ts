@@ -1,5 +1,5 @@
 // server/shared/drive-lookup.ts
-import type { AssessmentType } from "#types.ts";
+import type { AssessmentType } from "../types.ts";
 
 const SCHOOL_YEAR_REGEX = /^Ano Letivo - (\d{4})$/i;
 

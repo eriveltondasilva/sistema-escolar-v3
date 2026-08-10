@@ -1,5 +1,5 @@
 // server/system-check/checker.ts
-import { DIALOG_NAMES } from "#config/dialog-names.ts";
+import { DIALOG_NAMES } from "#config/constants.ts";
 import { renderView } from "#utils/render-view.ts";
 import {
   checkClassTemplates,
@@ -15,7 +15,7 @@ import {
   checkYear,
 } from "./structure-checks.ts";
 
-import type { Issue } from "#types.ts";
+import type { Issue } from "../types.ts";
 import type { ValidationResultInitData } from "./types.ts";
 
 /** Renderiza o dialog HTML com os resultados. */

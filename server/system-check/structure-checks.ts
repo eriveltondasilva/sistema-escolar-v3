@@ -20,7 +20,7 @@ import {
   validateClassStudents,
 } from "./validate-roster.ts";
 
-import type { AppConfig, Issue, StudentData } from "#types.ts";
+import type { AppConfig, Issue, StudentData } from "../types.ts";
 
 interface RegistrationCheckResult {
   registeredStudentsMap: Map<string, StudentData> | null;

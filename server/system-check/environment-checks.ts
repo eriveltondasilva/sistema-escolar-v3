@@ -8,7 +8,7 @@ import { VALID_CLASSES } from "#report/constants.ts";
 import { getScriptProp } from "#utils/script-properties.ts";
 import { toIssue } from "./issue-helper.ts";
 
-import type { AppConfig, Issue } from "#types.ts";
+import type { AppConfig, Issue } from "../types.ts";
 
 interface ConfigCheckResult {
   config: AppConfig | null;

@@ -1,7 +1,7 @@
 // server/report/columns.ts
 import { formatGrade, formatStatus, formatValue } from "#utils/formatters.ts";
 
-import type { AssessmentType, Subject, ValidClass } from "#types.ts";
+import type { AssessmentType, Subject, ValidClass } from "../types.ts";
 import type { PlaceholderField } from "./types.ts";
 
 interface SheetSchema {

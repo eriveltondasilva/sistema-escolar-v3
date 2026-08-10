@@ -1,21 +1,15 @@
 // client/dialogs/generate-report-form.ts
-import { parseInitData, runServerAction } from "../utils.ts";
+import { parseInitData } from "../utils/parse-init-data.ts";
+import { runServerAction } from "../utils/run-server-action.ts";
 
-import type { StudentOption } from "../types.ts";
+import type { GenerateReportFormInitData } from "#server/report/types.ts";
+import type { StudentSummary } from "#server/types.ts";
 
-type ActionType = "single" | "class";
-
-type ReportFormPayload = {
-  actionType: ActionType;
-  years: string[];
-  classes: string[];
-};
-
-type ReportFormState = ReportFormPayload & {
+type ReportFormState = GenerateReportFormInitData & {
   schoolYear: string;
   className: string;
   studentSearch: string;
-  availableStudents: StudentOption[];
+  availableStudents: StudentSummary[];
   isLoading: boolean;
   isFetchingStudents: boolean;
   error: string;
@@ -25,12 +19,12 @@ type ReportFormState = ReportFormPayload & {
   submit(): void;
 };
 
-function reportFormDialog(el: HTMLElement): ReportFormState {
-  const payload = parseInitData<ReportFormPayload>(el);
+function initDialog(el: HTMLElement): ReportFormState {
+  const payload = parseInitData<GenerateReportFormInitData>(el);
 
   return {
     ...payload,
-    schoolYear: payload.years[0] ?? "",
+    schoolYear: payload.schoolYearLabels[0] ?? "",
     className: payload.classes[0] ?? "",
     studentSearch: "",
     availableStudents: [],
@@ -54,7 +48,7 @@ function reportFormDialog(el: HTMLElement): ReportFormState {
       this.studentSearch = "";
       this.error = "";
 
-      runServerAction<StudentOption[]>((server) =>
+      runServerAction<StudentSummary[]>((server) =>
         server.getStudentsDataForClass(this.schoolYear, this.className),
       )
         .then((students) => {
@@ -106,5 +100,5 @@ function reportFormDialog(el: HTMLElement): ReportFormState {
 }
 
 document.addEventListener("alpine:init", () => {
-  Alpine.data("reportFormDialog", reportFormDialog);
+  Alpine.data(initDialog.name, initDialog);
 });

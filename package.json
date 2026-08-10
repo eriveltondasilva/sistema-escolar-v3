@@ -6,13 +6,12 @@
   "private": true,
   "license": "MIT",
   "imports": {
-    "#server": "./server/**/*.ts",
-    "#config/*.ts": "./server/config/*.ts",
-    "#drive/*.ts": "./server/drive/*.ts",
-    "#report/*.ts": "./server/report/*.ts",
-    "#roster/*.ts": "./server/roster/*.ts",
-    "#utils/*.ts": "./server/utils/*.ts",
-    "#types.ts": "./server/types.ts"
+    "#server/*": "./server/*",
+    "#config/*": "./server/config/*",
+    "#drive/*": "./server/drive/*",
+    "#report/*": "./server/report/*",
+    "#roster/*": "./server/roster/*",
+    "#utils/*": "./server/utils/*"
   },
   "scripts": {
     "build": "bun run ./scripts/build.ts",

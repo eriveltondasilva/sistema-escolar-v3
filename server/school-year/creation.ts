@@ -5,7 +5,7 @@ import { getErrorMsg } from "#utils/error.ts";
 import { insertMatriculationsIntoSummary } from "./matriculation.ts";
 import { createSubjectSheets } from "./subject-sheets.ts";
 
-import type { AppConfig, StudentData } from "#types.ts";
+import type { AppConfig, StudentData } from "../types.ts";
 import type { ClassMatriculationInput, CreateSchoolYearData } from "./types.ts";
 
 interface FillClassHeaderPlaceholders {

@@ -1,10 +1,8 @@
 <!-- client/dialogs/validation-result.html -->
 <x-dialog-shell class="h-full bg-slate-50 font-sans text-slate-900 antialiased">
-  <x-alpine-cdn></x-alpine-cdn>
-
   <main
     data-init="<?= initData ?>"
-    x-data="diagnosticPanel($el)"
+    x-data="initDialog($el)"
     x-cloak
     class="flex h-125 flex-col"
   >
@@ -16,11 +14,7 @@
         <div
           class="mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600"
         >
-          <img
-            src="../asserts/check-simple-icon.svg"
-            alt=""
-            aria-hidden="true"
-          />
+          <x-check-icon></x-check-icon>
         </div>
         <h2 class="text-xl font-bold text-slate-800">Tudo Certo!</h2>
         <p class="max-w-xs text-sm text-slate-500">
@@ -71,20 +65,10 @@
               class="flex items-start space-x-3 rounded-md border p-3 transition-colors"
             >
               <template x-if="issue.type === 'error'">
-                <img
-                  class="text-red-600"
-                  src="../asserts/error-circle-icon.svg"
-                  alt=""
-                  aria-hidden="true"
-                />
+                <x-circle-alert-icon></x-circle-alert-icon>
               </template>
               <template x-if="issue.type === 'warning'">
-                <img
-                  class="text-amber-500"
-                  src="../asserts/warning-triangle-icon.svg"
-                  alt=""
-                  aria-hidden="true"
-                />
+                <x-triangle-alert-icon></x-triangle-alert-icon>
               </template>
 
               <div class="min-w-0 flex-1">
@@ -101,12 +85,7 @@
                     class="group mt-2 inline-flex items-center text-xs font-semibold focus:underline focus:outline-none"
                   >
                     Corrigir arquivo
-                    <img
-                      class="ml-1 h-3 w-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                      src="../asserts/external-link-icon.svg"
-                      alt=""
-                      aria-hidden="true"
-                    />
+                    <x-external-link-icon></x-external-link-icon>
                   </a>
                 </template>
               </div>

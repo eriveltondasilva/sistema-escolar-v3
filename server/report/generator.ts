@@ -6,7 +6,7 @@ import { getScriptProp } from "#utils/script-properties.ts";
 import { getPlaceholderFields, VALID_CLASSES } from "./constants.ts";
 import { getGradesForStudent, getPersonalData } from "./data-access.ts";
 
-import type { AssessmentType } from "#types.ts";
+import type { AssessmentType } from "../types.ts";
 import type { GenerateReportForStudentParams, SubjectGrades } from "./types.ts";
 
 interface ReplacePlaceholderParams {

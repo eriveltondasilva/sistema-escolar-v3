@@ -1,8 +1,6 @@
 <!-- client/dialogs/student-search.html -->
 <x-dialog-shell class="bg-white p-5 text-slate-900 antialiased">
-  <x-alpine-cdn></x-alpine-cdn>
-
-  <main x-data="studentSearchDialog" x-cloak class="space-y-4">
+  <main x-data="initDialog" x-cloak class="space-y-4">
     <div>
       <label
         for="query"
@@ -21,7 +19,7 @@
     </div>
 
     <template x-if="isSearching">
-      <p class="text-xs text-slate-500">Buscando...</p>
+      <p class="animate-pulse text-xs text-slate-500">Buscando...</p>
     </template>
 
     <template
@@ -144,6 +142,6 @@
     </footer>
   </main>
 
-  <!-- -->
+  <!-- Scripts -->
   <script src="./student-search.ts"></script>
 </x-dialog-shell>

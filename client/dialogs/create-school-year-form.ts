@@ -1,5 +1,6 @@
 // client/dialogs/create-school-year-form.ts
-import { parseInitData, runServerAction } from "../utils.ts";
+import { parseInitData } from "../utils/parse-init-data.ts";
+import { runServerAction } from "../utils/run-server-action.ts";
 
 import type { MatriculationInput } from "../types.ts";
 
@@ -16,7 +17,7 @@ interface CreateSchoolYearFormState {
   submit(): void;
 }
 
-function createSchoolYearForm(el: HTMLElement): CreateSchoolYearFormState {
+function initDialog(el: HTMLElement): CreateSchoolYearFormState {
   const { classNames } = parseInitData<CreateSchoolYearFormPayload>(el);
 
   return {
@@ -65,5 +66,5 @@ function createSchoolYearForm(el: HTMLElement): CreateSchoolYearFormState {
 }
 
 document.addEventListener("alpine:init", () => {
-  Alpine.data("createSchoolYearForm", createSchoolYearForm);
+  Alpine.data(initDialog.name, initDialog);
 });
