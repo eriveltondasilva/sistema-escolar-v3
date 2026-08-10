@@ -97,7 +97,7 @@ export function createSchoolYearStructure({
     yearFolder.setTrashed(true);
     throw new Error(
       `Não foi possível criar o ano letivo "${schoolYearLabel}". ` +
-        `Nenhuma alteração foi feita.\n\n${creationErrors.join("\n")}`,
+        `As alterações foram revertidas.\n\n${creationErrors.join("\n")}`,
     );
   }
 

@@ -29,6 +29,9 @@ export function loadClassReportJob(): ClassReportJob | null {
   try {
     return JSON.parse(value) as ClassReportJob;
   } catch (error) {
+    PropertiesService.getScriptProperties().deleteProperty(
+      CLASS_REPORT_JOB_KEY,
+    );
     throw new Error(
       "O estado salvo da geração de boletins está inválido. Cancele a geração pendente e tente novamente.",
       { cause: error },

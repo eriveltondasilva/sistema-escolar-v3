@@ -113,7 +113,7 @@ export function loadStudentsMap(
   const lastRow = studentsSheet.getLastRow();
   if (lastRow < STUDENTS_SHEET.startRow) return new Map();
 
-  const colCount = Object.keys(STUDENTS_SHEET.startRow).length;
+  const colCount = Object.keys(STUDENTS_SHEET.columns).length;
   const rows = studentsSheet
     .getRange(
       STUDENTS_SHEET.startRow,
@@ -237,24 +237,21 @@ export function loadSingleStudentGuardiansMap(
   if (lastRow < GUARDIANS_SHEET.startRow) return map;
 
   const col = GUARDIANS_SHEET.columns;
+  const rowCount = lastRow - GUARDIANS_SHEET.startRow + 1;
 
-  const matches = guardiansSheet
+  // Uma única chamada para as duas colunas relevantes (studentId + name)
+  const rows = guardiansSheet
     .getRange(
       GUARDIANS_SHEET.startRow,
       col.studentId + 1,
-      lastRow - GUARDIANS_SHEET.startRow + 1,
-      1,
+      rowCount,
+      col.name + 1,
     )
-    .createTextFinder(studentId)
-    .matchEntireCell(true)
-    .findAll();
+    .getValues();
 
-  const names = matches
-    .map((cell) =>
-      String(
-        guardiansSheet.getRange(cell.getRow(), col.name + 1).getValue(),
-      ).trim(),
-    )
+  const names = rows
+    .filter((row) => String(row[0]).trim() === studentId)
+    .map((row) => String(row[1]).trim())
     .filter((name) => name.length > 0);
 
   if (names.length > 0) map.set(studentId, names);

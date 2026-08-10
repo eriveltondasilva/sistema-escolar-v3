@@ -70,7 +70,3 @@ export interface GuardianData {
   isPrimary: boolean;
   phone: string;
 }
-
-export interface StudentFormPayload extends StudentData {
-  guardians: GuardianData[];
-}

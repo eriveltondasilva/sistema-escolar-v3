@@ -1,6 +1,8 @@
 // server/roster/change-log.ts
 import { getErrorMsg } from "#utils/error.ts";
 
+import type { StudentData } from "../types.ts";
+
 interface FieldChange {
   field: string;
   oldValue: unknown;
@@ -27,7 +29,7 @@ const TRACKED_FIELDS = [
   "status",
 ] as const;
 
-type TrackedStudentData = Record<(typeof TRACKED_FIELDS)[number], string>;
+type TrackedStudentData = Pick<StudentData, (typeof TRACKED_FIELDS)[number]>;
 
 interface LogStudentChanges {
   registrationSheet: GoogleAppsScript.Spreadsheet.Spreadsheet;

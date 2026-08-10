@@ -11,10 +11,6 @@ export function validateStudentForm(form: CreateStudentPayload): string | null {
     return "Nome é obrigatório.";
   }
 
-  if (!form.birthDate.trim()) {
-    return "Data de nascimento é obrigatória.";
-  }
-
   const guardians = form.guardians.filter((guardian) => guardian.name.trim());
 
   if (guardians.length === 0) {

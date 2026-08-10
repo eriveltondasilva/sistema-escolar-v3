@@ -58,14 +58,18 @@ export function formatSex(sex: unknown): string {
 
 /** Retorna a data no formato extenso e de acordo com as opções nativas do objeto Date. */
 export function formatDate(
-  date: unknown,
+  date: string | Date,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  if (!date || !(date instanceof Date)) return "Data inválida";
+  const parsedDate = typeof date === "string" ? new Date(date) : date;
+
+  if (isNaN(parsedDate.getTime())) {
+    throw new Error("Invalid date provided");
+  }
 
   return new Intl.DateTimeFormat(DEFAULT_LOCALE, {
     dateStyle: "short",
     timeZone: DEFAULT_TIMEZONE,
     ...options,
-  }).format(date);
+  }).format(parsedDate);
 }

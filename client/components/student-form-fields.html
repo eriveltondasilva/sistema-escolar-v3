@@ -12,6 +12,7 @@
     x-model="form.name"
     :disabled="isLoading"
     class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
+    autofocus
   />
 </div>
 
@@ -135,7 +136,7 @@
 
           <datalist id="relationshipList">
             <template
-              x-for="relationship in ['Mãe', 'Pai',, 'Tio', 'Tia', 'Outro']"
+              x-for="relationship in ['Mãe', 'Pai', 'Tio', 'Tia', 'Outro']"
             >
               <option :value="relationship" x-text="relationship"></option>
             </template>

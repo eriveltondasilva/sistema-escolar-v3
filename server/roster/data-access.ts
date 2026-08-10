@@ -7,8 +7,6 @@ import { diffStudentFields, logStudentChanges } from "./change-log.ts";
 import type { GuardianData, StudentSummary } from "../types.ts";
 import type { CreateStudentPayload, StudentFormPayload } from "./types.ts";
 
-const STUDENT_ID_PADDING = 4;
-
 /** Status padrão atribuído a todo aluno recém-cadastrado. */
 const DEFAULT_STUDENT_STATUS = "ativo";
 
@@ -45,6 +43,8 @@ function generateNextStudentId(
 
   const maxId = rows.reduce((max, row) => {
     const numeric = Number(String(row[0]).trim());
+    // IDs não-numéricos são ignorados; se não houver nenhum numérico,
+    // maxId fica 0 e a próxima matrícula gerada será "1".
     return Number.isFinite(numeric) && numeric > max ? numeric : max;
   }, 0);
 
@@ -93,25 +93,15 @@ function loadStudentGuardians(
   const lastRow = guardiansSheet.getLastRow();
   if (lastRow < GUARDIANS_SHEET.startRow) return [];
 
-  const matches = guardiansSheet
-    .getRange(
-      GUARDIANS_SHEET.startRow,
-      GUARDIANS_SHEET.columns.studentId + 1,
-      lastRow - GUARDIANS_SHEET.startRow + 1,
-      1,
-    )
-    .createTextFinder(studentId)
-    .matchEntireCell(true)
-    .findAll();
+  const col = GUARDIANS_SHEET.columns;
+  const rowCount = lastRow - GUARDIANS_SHEET.startRow + 1;
 
-  return matches
-    .map(
-      (cell) =>
-        guardiansSheet
-          .getRange(cell.getRow(), 1, 1, GUARDIAN_COL_COUNT)
-          .getValues()[0],
-    )
-    .filter((row): row is unknown[] => row !== undefined)
+  const rows = guardiansSheet
+    .getRange(GUARDIANS_SHEET.startRow, 1, rowCount, GUARDIAN_COL_COUNT)
+    .getValues();
+
+  return rows
+    .filter((row) => String(row[col.studentId]).trim() === studentId)
     .map(mapGuardianRow)
     .filter((guardian) => guardian.name.length > 0);
 }
@@ -263,12 +253,12 @@ export function getStudentForEdit(
   return {
     studentId,
     name: String(row[col.name] ?? "").trim(),
-    address: String(row[col.address] ?? ""),
-    nationality: String(row[col.nationality] ?? ""),
+    address: String(row[col.address] ?? "").trim(),
+    nationality: String(row[col.nationality] ?? "").trim(),
     birthDate: toIsoDateString(row[col.birthDate]),
     enrollmentDate: formatDate(row[col.enrollmentDate]),
-    sex: String(row[col.sex] ?? ""),
-    status: String(row[col.status] ?? ""),
+    sex: String(row[col.sex] ?? "").trim(),
+    status: String(row[col.status] ?? "").trim(),
     guardians: loadStudentGuardians(registrationSheet, studentId),
   };
 }
@@ -287,7 +277,7 @@ export function createStudentRecord(
 
   const studentId = generateNextStudentId(registrationSheet);
   const birthDate =
-    input.birthDate.trim() ? formatDate(input.birthDate.trim()) : "";
+    input.birthDate.trim() ? formatDate(new Date(input.birthDate.trim())) : "";
 
   const col = STUDENTS_SHEET.columns;
   const row: Record<number, unknown> = {
@@ -348,14 +338,15 @@ export function updateStudentRecord(
 
   const oldData = {
     name: String(currentRow[col.name] ?? "").trim(),
-    address: String(currentRow[col.address] ?? ""),
-    nationality: String(currentRow[col.nationality] ?? ""),
-    birthDate: toIsoDateString(currentRow[col.birthDate]),
-    sex: String(currentRow[col.sex] ?? ""),
-    status: String(currentRow[col.status] ?? ""),
+    address: String(currentRow[col.address] ?? "").trim(),
+    nationality: String(currentRow[col.nationality] ?? "").trim(),
+    birthDate: toIsoDateString(currentRow[col.birthDate]).trim(),
+    sex: String(currentRow[col.sex] ?? "").trim(),
+    status: String(currentRow[col.status] ?? "").trim(),
   };
 
-  const birthDate = input.birthDate ? new Date(input.birthDate) : "";
+  const birthDate =
+    input.birthDate.trim() ? formatDate(new Date(input.birthDate)) : "";
 
   studentsSheet
     .getRange(match.getRow(), col.name + 1, 1, 4)
@@ -373,5 +364,6 @@ export function updateStudentRecord(
     sex: input.sex,
     status: input.status,
   });
+
   logStudentChanges({ registrationSheet, studentId, changes });
 }

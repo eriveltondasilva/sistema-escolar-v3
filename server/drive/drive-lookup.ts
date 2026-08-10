@@ -173,7 +173,7 @@ export function findStudentPdfInFolder(
   folder: GoogleAppsScript.Drive.Folder,
   studentId: string,
 ): GoogleAppsScript.Drive.File | null {
-  const prefix = `${studentId}_`;
+  const prefix = `${studentId.replace(/\D/g, "")}_`;
   const searchQuery =
     `title contains '${prefix}' ` +
     "and mimeType = 'application/pdf' " +

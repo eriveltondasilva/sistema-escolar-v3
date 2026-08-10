@@ -122,9 +122,9 @@ function trashPreviousPdfVersions({
   studentId,
   keepFileId,
 }: TrashPreviousPdfVersionsParams): void {
-  const prefix = `${studentId}_`;
+  const prefix = `${studentId.replace(/\D/g, "")}_`;
   const searchQuery =
-    `title contains "${prefix}" ` +
+    `title contains '${prefix}' ` +
     "and mimeType = 'application/pdf' " +
     "and trashed = false";
   const existingFiles = pdfFolder.searchFiles(searchQuery);

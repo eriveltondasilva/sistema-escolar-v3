@@ -110,14 +110,25 @@ export function findDuplicateStudentIds(
   const studentsSheet = registrationSheet.getSheetByName(STUDENTS_SHEET.name);
   if (!studentsSheet) return [];
 
-  const rows = studentsSheet.getDataRange().getValues().slice(1);
+  const lastRow = studentsSheet.getLastRow();
+  if (lastRow < STUDENTS_SHEET.startRow) return [];
+
+  const rows = studentsSheet
+    .getRange(
+      STUDENTS_SHEET.startRow,
+      STUDENTS_SHEET.columns.id + 1,
+      lastRow - STUDENTS_SHEET.startRow + 1,
+      1,
+    )
+    .getValues();
+
   const rowsByStudentId = new Map<string, number[]>();
 
   rows.forEach((row, index) => {
     const studentId = String(row[STUDENTS_SHEET.columns.id]).trim();
     if (!studentId) return;
 
-    const dataRow = index + 2;
+    const dataRow = STUDENTS_SHEET.startRow + index;
     const existingRows = rowsByStudentId.get(studentId) ?? [];
     existingRows.push(dataRow);
     rowsByStudentId.set(studentId, existingRows);
