@@ -1,4 +1,5 @@
 // client/dialogs/student-edit.ts
+import { getErrorMsg } from "#server/utils/error.ts";
 import { parseInitData } from "../utils/parse-init-data.ts";
 import { runServerAction } from "../utils/run-server-action.ts";
 import { validateStudentForm } from "../utils/validate.ts";
@@ -78,8 +79,8 @@ function initDialog(el: HTMLElement): StudentEditState {
             this.form.guardians.push({ ...emptyGuardian(), isPrimary: true });
           }
         })
-        .catch((err: Error) => {
-          this.error = "Erro ao carregar aluno: " + err.message;
+        .catch((error: unknown) => {
+          this.error = "Erro ao carregar aluno: " + getErrorMsg(error);
         })
         .finally(() => {
           this.isLoadingStudent = false;
@@ -122,8 +123,8 @@ function initDialog(el: HTMLElement): StudentEditState {
         server.submitStudentEdit(this.studentId, this.form),
       )
         .then(() => google.script.host.close())
-        .catch((err: Error) => {
-          this.error = err.message;
+        .catch((error: unknown) => {
+          this.error = getErrorMsg(error);
           this.isSaving = false;
         });
     },

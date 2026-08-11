@@ -6,39 +6,56 @@
     x-cloak
     class="space-y-4"
   >
-    <div>
-      <label
-        class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
+    <!-- Loading inicial -->
+    <template x-if="isLoadingStudent">
+      <div
+        class="flex items-center justify-center gap-2 py-6 text-xs text-slate-400"
       >
-        Matrícula
-      </label>
-      <p
-        class="rounded-md border border-slate-200 bg-slate-100 px-3 py-2 font-mono text-sm text-slate-600"
-        x-text="studentId"
-      ></p>
-    </div>
+        <div
+          class="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-slate-500"
+        ></div>
+        Carregando aluno...
+      </div>
+    </template>
 
-    <x-student-form-fields></x-student-form-fields>
+    <!-- Conteúdo -->
+    <template x-if="!isLoadingStudent">
+      <div class="space-y-4">
+        <div>
+          <label
+            class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
+          >
+            Matrícula
+          </label>
+          <p
+            class="rounded-md border border-slate-200 bg-slate-100 px-3 py-2 font-mono text-sm text-slate-600"
+            x-text="studentId"
+          ></p>
+        </div>
 
-    <footer class="flex items-center justify-end space-x-2 pt-2">
-      <button
-        type="button"
-        @click="google.script.host.close()"
-        :disabled="isLoading"
-        class="inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none disabled:opacity-50"
-      >
-        Cancelar
-      </button>
+        <x-student-form-fields></x-student-form-fields>
 
-      <button
-        type="submit"
-        @click="submit()"
-        :disabled="isLoading"
-        class="inline-flex items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800 focus:outline-none disabled:cursor-not-allowed disabled:opacity-70"
-      >
-        <span x-text="isLoading ? loadingLabel : 'Salvar'"></span>
-      </button>
-    </footer>
+        <footer class="flex items-center justify-end space-x-2 pt-2">
+          <button
+            type="button"
+            @click="google.script.host.close()"
+            :disabled="isLoading"
+            class="inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none disabled:opacity-50"
+          >
+            Cancelar
+          </button>
+
+          <button
+            type="submit"
+            @click="submit()"
+            :disabled="isLoading"
+            class="inline-flex items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800 focus:outline-none disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            <span x-text="isLoading ? loadingLabel : 'Salvar'"></span>
+          </button>
+        </footer>
+      </div>
+    </template>
   </main>
 
   <!-- Scripts -->

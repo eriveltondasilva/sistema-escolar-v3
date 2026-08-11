@@ -1,39 +1,54 @@
 // client/dialogs/create-school-year-form.ts
+import { getErrorMsg } from "#server/utils/error.ts";
 import { parseInitData } from "../utils/parse-init-data.ts";
 import { runServerAction } from "../utils/run-server-action.ts";
 
+import type { CreateSchoolYearFormInitData } from "#server/school-year/types.ts";
 import type { MatriculationInput } from "../types.ts";
 
-type CreateSchoolYearFormPayload = {
-  classNames: string[];
-};
-
-interface CreateSchoolYearFormState {
-  classNames: string[];
+type CreateSchoolYearFormState = CreateSchoolYearFormInitData & {
   year: string;
   matriculationsByClass: Record<string, string>;
+  expanded: Record<string, boolean>;
   isLoading: boolean;
   error: string;
+  matriculationCount(className: string): number;
   submit(): void;
+};
+
+function parseStudentIds(text: string): string[] {
+  return text
+    .split("\n")
+    .map((id) => id.trim())
+    .filter((id) => id.length > 0);
+}
+
+function isValidYear(value: string): boolean {
+  return /^\d{4}$/.test(value.trim());
 }
 
 function initDialog(el: HTMLElement): CreateSchoolYearFormState {
-  const { classNames } = parseInitData<CreateSchoolYearFormPayload>(el);
+  const { classNames } = parseInitData<CreateSchoolYearFormInitData>(el);
 
   return {
     classNames,
     year: "",
     matriculationsByClass: Object.fromEntries(
       classNames.map((name) => [name, ""]),
-    ) as Record<string, string>,
+    ),
+    expanded: Object.fromEntries(classNames.map((name) => [name, false])),
     isLoading: false,
     error: "",
+
+    matriculationCount(className: string): number {
+      return parseStudentIds(this.matriculationsByClass[className] ?? "")
+        .length;
+    },
 
     submit() {
       this.error = "";
 
-      const isValid = /^\d{4}$/.test(this.year.trim());
-      if (!isValid) {
+      if (!isValidYear(this.year)) {
         this.error = "Digite um ano com 4 dígitos, ex: 2026.";
         return;
       }
@@ -42,23 +57,17 @@ function initDialog(el: HTMLElement): CreateSchoolYearFormState {
         this.matriculationsByClass,
       ).map(([className, text]) => ({
         className,
-        studentIds: text
-          .split("\n")
-          .map((id) => id.trim())
-          .filter((id) => id.length > 0),
+        studentIds: parseStudentIds(text),
       }));
 
       this.isLoading = true;
 
-      // valida tudo antes de escrever (tudo ou nada); em caso de sucesso,
-      // o próprio servidor já abre a dialog de resultado
-      // (CreateSchoolYearResultDialog.html, já existente)
       runServerAction((server) =>
         server.submitSchoolYearCreation(this.year.trim(), matriculations),
       )
         .then(() => google.script.host.close())
-        .catch((err: Error) => {
-          this.error = err.message;
+        .catch((error: unknown) => {
+          this.error = getErrorMsg(error);
           this.isLoading = false;
         });
     },

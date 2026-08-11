@@ -1,4 +1,5 @@
 // client/dialogs/student-search.ts
+import { getErrorMsg } from "#server/utils/error.ts";
 import { runServerAction } from "../utils/run-server-action.ts";
 
 import type { StudentOption, StudentSearchDetails } from "../types.ts";
@@ -6,6 +7,7 @@ import type { StudentOption, StudentSearchDetails } from "../types.ts";
 type StudentSearchState = {
   query: string;
   isSearching: boolean;
+  isLoadingDetails: boolean;
   isOpeningEdit: boolean;
   results: StudentOption[];
   selectedStudent: StudentSearchDetails | null;
@@ -20,6 +22,7 @@ function initDialog(): StudentSearchState {
   return {
     query: "",
     isSearching: false,
+    isLoadingDetails: false,
     isOpeningEdit: false,
     results: [],
     selectedStudent: null,
@@ -42,8 +45,8 @@ function initDialog(): StudentSearchState {
         .then((results) => {
           this.results = results;
         })
-        .catch((err: Error) => {
-          this.error = err.message;
+        .catch((error: unknown) => {
+          this.error = getErrorMsg(error);
         })
         .finally(() => {
           this.isSearching = false;
@@ -52,6 +55,7 @@ function initDialog(): StudentSearchState {
 
     selectStudent(studentId: string) {
       this.error = "";
+      this.isLoadingDetails = true;
 
       runServerAction<StudentSearchDetails>((server) =>
         server.getStudentDetailsForSearch(studentId),
@@ -59,8 +63,11 @@ function initDialog(): StudentSearchState {
         .then((details) => {
           this.selectedStudent = details;
         })
-        .catch((err: Error) => {
-          this.error = err.message;
+        .catch((error: unknown) => {
+          this.error = getErrorMsg(error);
+        })
+        .finally(() => {
+          this.isLoadingDetails = false;
         });
     },
 
@@ -81,8 +88,8 @@ function initDialog(): StudentSearchState {
         server.openStudentEditDialog(selectedStudent.student.studentId),
       )
         .then(() => google.script.host.close())
-        .catch((err: Error) => {
-          this.error = err.message;
+        .catch((error: unknown) => {
+          this.error = getErrorMsg(error);
           this.isOpeningEdit = false;
         });
     },

@@ -1,6 +1,7 @@
 <!-- client/dialogs/student-search.html -->
 <x-dialog-shell class="bg-white p-5 text-slate-900 antialiased">
   <main x-data="initDialog" x-cloak class="space-y-4">
+    <!-- Campo de busca com spinner inline -->
     <div>
       <label
         for="query"
@@ -8,22 +9,29 @@
       >
         Nome ou Matrícula
       </label>
-      <input
-        id="query"
-        type="text"
-        x-model="query"
-        @input.debounce.300ms="search()"
-        placeholder="Comece a digitar..."
-        class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none"
-      />
+      <div class="relative">
+        <input
+          id="query"
+          type="text"
+          x-model="query"
+          @input.debounce.300ms="search()"
+          placeholder="Comece a digitar..."
+          class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 pr-8 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none"
+        />
+        <div
+          x-show="isSearching"
+          class="absolute top-1/2 right-2.5 -translate-y-1/2"
+        >
+          <div
+            class="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-slate-500"
+          ></div>
+        </div>
+      </div>
     </div>
 
-    <template x-if="isSearching">
-      <p class="animate-pulse text-xs text-slate-500">Buscando...</p>
-    </template>
-
+    <!-- Sem resultados -->
     <template
-      x-if="!isSearching && query.trim() && results.length === 0 && !selectedStudent"
+      x-if="!isSearching && query.trim() && results.length === 0 && !selectedStudent && !isLoadingDetails"
     >
       <p
         class="rounded-md border border-amber-200 bg-amber-50 p-2.5 text-xs font-medium text-amber-700"
@@ -32,23 +40,41 @@
       </p>
     </template>
 
-    <template x-if="!selectedStudent && results.length > 0">
+    <!-- Lista de resultados -->
+    <template
+      x-if="!selectedStudent && !isLoadingDetails && results.length > 0"
+    >
       <ul
         class="max-h-48 divide-y divide-slate-100 overflow-y-auto rounded-md border"
       >
         <template x-for="result in results" :key="result.studentId">
           <li
             @click="selectStudent(result.studentId)"
-            class="cursor-pointer px-3 py-2 text-sm transition-colors hover:bg-slate-50"
+            class="flex cursor-pointer items-center justify-between px-3 py-2.5 transition-colors hover:bg-slate-50"
           >
-            <span x-text="result.name"></span>
             <span
-              class="text-slate-400"
-              x-text="'— ' + result.studentId"
+              class="text-sm font-medium text-slate-800"
+              x-text="result.name"
+            ></span>
+            <span
+              class="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-xs text-slate-500"
+              x-text="result.studentId"
             ></span>
           </li>
         </template>
       </ul>
+    </template>
+
+    <!-- Loading dos detalhes -->
+    <template x-if="isLoadingDetails">
+      <div
+        class="flex items-center justify-center gap-2 py-6 text-xs text-slate-400"
+      >
+        <div
+          class="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-slate-500"
+        ></div>
+        Carregando aluno...
+      </div>
     </template>
 
     <!-- Detalhes do aluno selecionado -->
@@ -57,51 +83,67 @@
         <button
           type="button"
           @click="clearSelection()"
-          class="text-xs font-semibold text-slate-500 hover:text-slate-800 focus:outline-none"
+          class="flex items-center gap-1 text-xs font-semibold text-slate-400 hover:text-slate-700 focus:outline-none"
         >
-          &larr; Voltar à busca
+          ← Voltar à busca
         </button>
 
+        <!-- Card principal -->
         <div
-          class="space-y-1 rounded-md border border-slate-200 bg-white p-4 text-sm shadow-sm"
+          class="space-y-3 rounded-md border border-slate-200 bg-slate-50 p-4"
         >
-          <p>
-            <span class="font-medium text-slate-500">Matrícula:</span>
-            <span
-              class="font-mono font-medium text-slate-900"
-              x-text="selectedStudent.student.studentId"
-            ></span>
-          </p>
-          <p>
-            <span class="font-medium text-slate-500">Nome:</span>
-            <span
-              class="font-medium text-slate-900"
+          <!-- Nome + matrícula -->
+          <div>
+            <p
+              class="leading-tight font-semibold text-slate-900"
               x-text="selectedStudent.student.name"
-            ></span>
-          </p>
-          <p>
-            <span class="font-medium text-slate-500">Endereço:</span>
-            <span x-text="selectedStudent.student.address || '--'"></span>
-          </p>
-          <p>
-            <span class="font-medium text-slate-500">Nascimento:</span>
-            <span x-text="selectedStudent.student.birthDate || '--'"></span>
-          </p>
-          <p>
-            <span class="font-medium text-slate-500">Responsáveis:</span>
-            <span x-text="selectedStudent.guardianNamesFormatted"></span>
-          </p>
+            ></p>
+            <p
+              class="mt-0.5 font-mono text-xs text-slate-400"
+              x-text="selectedStudent.student.studentId"
+            ></p>
+          </div>
+
+          <div class="h-px bg-slate-200"></div>
+
+          <!-- Detalhes -->
+          <dl class="grid grid-cols-2 gap-x-4 gap-y-2.5 text-xs">
+            <div>
+              <dt class="text-slate-400">Nascimento</dt>
+              <dd
+                class="font-medium text-slate-700"
+                x-text="selectedStudent.student.birthDate || '—'"
+              ></dd>
+            </div>
+            <div>
+              <dt class="text-slate-400">Endereço</dt>
+              <dd
+                class="font-medium text-slate-700"
+                x-text="selectedStudent.student.address || '—'"
+              ></dd>
+            </div>
+            <div class="col-span-2">
+              <dt class="text-slate-400">Responsáveis</dt>
+              <dd
+                class="font-medium text-slate-700"
+                x-text="selectedStudent.guardianNamesFormatted"
+              ></dd>
+            </div>
+          </dl>
         </div>
 
+        <!-- Boletins -->
         <div>
           <p
-            class="mb-1 text-xs font-medium tracking-wider text-slate-500 uppercase"
+            class="mb-1.5 text-xs font-medium tracking-wider text-slate-400 uppercase"
           >
-            Boletins anteriores
+            Boletins
           </p>
 
           <template x-if="selectedStudent.pdfHistory.length === 0">
-            <p class="text-xs text-slate-500">Nenhum boletim encontrado.</p>
+            <p class="text-xs text-slate-400 italic">
+              Nenhum boletim encontrado.
+            </p>
           </template>
 
           <ul class="space-y-1">
@@ -113,10 +155,11 @@
                 <a
                   :href="entry.pdfUrl"
                   target="_blank"
-                  class="inline-flex items-center text-xs font-semibold text-blue-700 hover:text-blue-800 focus:underline focus:outline-none"
+                  class="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-800 focus:underline focus:outline-none"
                 >
+                  <x-file-icon></x-file-icon>
                   <span x-text="entry.yearLabel"></span>
-                  <span class="mx-1 text-slate-300">·</span>
+                  <span class="text-slate-300">·</span>
                   <span x-text="entry.className"></span>
                 </a>
               </li>

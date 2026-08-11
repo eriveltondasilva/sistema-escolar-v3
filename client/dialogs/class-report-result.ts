@@ -1,8 +1,10 @@
 // client/dialogs/class-report-result.ts
+import { getErrorMsg } from "#server/utils/error.ts";
 import { parseInitData } from "../utils/parse-init-data.ts";
 import { runServerAction } from "../utils/run-server-action.ts";
 
 import type { ClassReportResultInitData } from "#server/report/types.ts";
+import type { GasServerFunctions } from "../utils/run-server-action.ts";
 
 type ClassReportState = ClassReportResultInitData & {
   isLoading: boolean;
@@ -11,36 +13,39 @@ type ClassReportState = ClassReportResultInitData & {
   cancelGeneration(): void;
 };
 
+function handleGenerationAction(
+  this: ClassReportState,
+  action: (server: GasServerFunctions) => void,
+): void {
+  this.error = "";
+  this.isLoading = true;
+
+  runServerAction(action)
+    .then(() => google.script.host.close())
+    .catch((error: unknown) => {
+      this.error = getErrorMsg(error);
+      this.isLoading = false;
+    });
+}
+
 function initDialog(el: HTMLElement): ClassReportState {
-  const initialState = parseInitData<ClassReportResultInitData>(el);
+  const initData = parseInitData<ClassReportResultInitData>(el);
 
   return {
-    ...initialState,
+    ...initData,
     isLoading: false,
     error: "",
 
     continueGeneration() {
-      this.error = "";
-      this.isLoading = true;
-
-      runServerAction((server) => server.continueClassReportsGeneration())
-        .then(() => google.script.host.close())
-        .catch((err: Error) => {
-          this.error = err.message;
-          this.isLoading = false;
-        });
+      handleGenerationAction.call(this, (server) =>
+        server.continueClassReportsGeneration(),
+      );
     },
 
     cancelGeneration() {
-      this.error = "";
-      this.isLoading = true;
-
-      runServerAction((server) => server.cancelClassReportsGeneration())
-        .then(() => google.script.host.close())
-        .catch((err: Error) => {
-          this.error = err.message;
-          this.isLoading = false;
-        });
+      handleGenerationAction.call(this, (server) =>
+        server.cancelClassReportsGeneration(),
+      );
     },
   };
 }

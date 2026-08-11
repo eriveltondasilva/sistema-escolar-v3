@@ -22,7 +22,7 @@
         class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
       >
         <option value="" disabled selected>Selecione ano letivo</option>
-        <template x-for="year in years" :key="year">
+        <template x-for="year in schoolYearLabels" :key="year">
           <option :value="year" x-text="year"></option>
         </template>
       </select>

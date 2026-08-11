@@ -1,59 +1,59 @@
 <!-- client/dialogs/student-create.html -->
 <x-dialog-shell class="bg-white p-5 text-slate-900 antialiased">
   <main x-data="initDialog" x-cloak class="space-y-4">
-    <!-- Estado: sucesso do cadastro -->
-    <template x-if="view === 'success'">
-      <div class="space-y-4 text-center">
-        <div
-          class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 text-emerald-600"
-        >
-          <circle-check-big-icon></circle-check-big-icon>
-        </div>
-
-        <h2 class="text-lg font-semibold text-slate-900">
-          Aluno cadastrado com sucesso!
-        </h2>
-
-        <p class="text-sm text-slate-600">
-          Matrícula:
-          <span class="font-mono font-semibold" x-text="studentId"></span>
-        </p>
-
+    <!-- Banner de sucesso -->
+    <div
+      x-show="lastStudentId"
+      x-transition
+      class="flex items-center justify-between rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs"
+    >
+      <span class="text-emerald-700">
+        Aluno cadastrado —
+        <span
+          class="font-mono font-semibold text-emerald-900"
+          x-text="lastStudentId"
+        ></span>
+      </span>
+      <div class="flex items-center gap-2">
         <button
-          @click="google.script.host.close()"
-          class="w-full rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800 focus:outline-none"
+          type="button"
+          @click="editStudent()"
+          :disabled="isOpeningEdit"
+          class="font-semibold text-emerald-700 hover:text-emerald-900 focus:outline-none disabled:opacity-50"
         >
-          Fechar
+          <span x-text="isOpeningEdit ? 'Abrindo...' : 'Ver aluno'"></span>
+        </button>
+        <button
+          type="button"
+          @click="lastStudentId = ''"
+          class="text-emerald-500 hover:text-emerald-700 focus:outline-none"
+        >
+          <x-close-icon></x-close-icon>
         </button>
       </div>
-    </template>
+    </div>
 
-    <!-- Estado: formulário -->
-    <template x-if="view === 'form'">
-      <div class="space-y-4">
-        <x-student-form-fields></x-student-form-fields>
+    <x-student-form-fields></x-student-form-fields>
 
-        <footer class="flex items-center justify-end space-x-2 pt-2">
-          <button
-            type="button"
-            @click="google.script.host.close()"
-            :disabled="isLoading"
-            class="inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none disabled:opacity-50"
-          >
-            Cancelar
-          </button>
+    <footer class="flex items-center justify-end space-x-2 pt-2">
+      <button
+        type="button"
+        @click="google.script.host.close()"
+        :disabled="isLoading"
+        class="inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none disabled:opacity-50"
+      >
+        Fechar
+      </button>
 
-          <button
-            type="submit"
-            @click="submit()"
-            :disabled="isLoading"
-            class="inline-flex items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800 focus:outline-none disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            <span x-text="isLoading ? 'Salvando...' : 'Cadastrar'"></span>
-          </button>
-        </footer>
-      </div>
-    </template>
+      <button
+        type="submit"
+        @click="submit()"
+        :disabled="isLoading"
+        class="inline-flex items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800 focus:outline-none disabled:cursor-not-allowed disabled:opacity-70"
+      >
+        <span x-text="isLoading ? 'Salvando...' : 'Cadastrar'"></span>
+      </button>
+    </footer>
   </main>
 
   <!-- Scripts -->

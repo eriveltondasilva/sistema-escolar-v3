@@ -1,4 +1,5 @@
 // client/dialogs/generate-report-form.ts
+import { getErrorMsg } from "#server/utils/error.ts";
 import { parseInitData } from "../utils/parse-init-data.ts";
 import { runServerAction } from "../utils/run-server-action.ts";
 
@@ -53,10 +54,11 @@ function initDialog(el: HTMLElement): ReportFormState {
       )
         .then((students) => {
           this.availableStudents = students;
-          this.isFetchingStudents = false;
         })
-        .catch((err: Error) => {
-          this.error = "Erro ao buscar alunos: " + err.message;
+        .catch((error: unknown) => {
+          this.error = "Erro ao buscar alunos: " + getErrorMsg(error);
+        })
+        .finally(() => {
           this.isFetchingStudents = false;
         });
     },
@@ -81,8 +83,8 @@ function initDialog(el: HTMLElement): ReportFormState {
           ),
         )
           .then(() => google.script.host.close())
-          .catch((err: Error) => {
-            this.error = err.message;
+          .catch((error: unknown) => {
+            this.error = getErrorMsg(error);
             this.isLoading = false;
           });
       } else {
@@ -90,8 +92,8 @@ function initDialog(el: HTMLElement): ReportFormState {
           server.executeClassReportsGeneration(this.schoolYear, this.className),
         )
           .then(() => google.script.host.close())
-          .catch((err: Error) => {
-            this.error = err.message;
+          .catch((error: unknown) => {
+            this.error = getErrorMsg(error);
             this.isLoading = false;
           });
       }

@@ -25,26 +25,75 @@
       />
     </div>
 
-    <template x-for="className in classNames" :key="className">
-      <div>
-        <label
-          class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
-          x-text="`${className} — matrículas (uma por linha)`"
-        ></label>
-        <textarea
-          x-model="matriculationsByClass[className]"
-          :disabled="isLoading"
-          rows="4"
-          placeholder="0001&#10;0002&#10;0003"
-          class="w-full resize-y rounded-md border border-slate-200 bg-white px-3 py-2 font-mono text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
-        ></textarea>
-      </div>
-    </template>
+    <!-- Matrículas por turma — accordion, opcional -->
+    <div class="space-y-2">
+      <p class="text-xs font-medium tracking-wider text-slate-500 uppercase">
+        Matrículas por turma
+        <span class="ml-1 font-normal text-slate-400 normal-case"
+          >(opcional)</span
+        >
+      </p>
+
+      <template x-for="className in classNames" :key="className">
+        <div class="overflow-hidden rounded-md border border-slate-200">
+          <button
+            type="button"
+            @click="expanded[className] = !expanded[className]"
+            :disabled="isLoading"
+            class="flex w-full items-center justify-between bg-white px-3 py-2.5 text-left transition-colors hover:bg-slate-50 disabled:opacity-50"
+          >
+            <span
+              class="text-sm font-medium text-slate-700"
+              x-text="className"
+            ></span>
+            <div class="flex items-center gap-2">
+              <span
+                x-show="matriculationCount(className) > 0"
+                x-text="`${matriculationCount(className)} aluno(s)`"
+                class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500"
+              ></span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                :class="expanded[className] ? 'rotate-180' : ''"
+                class="text-slate-400 transition-transform"
+              >
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </div>
+          </button>
+
+          <div
+            x-show="expanded[className]"
+            x-transition
+            class="border-t border-slate-200 p-3"
+          >
+            <textarea
+              x-model="matriculationsByClass[className]"
+              :disabled="isLoading"
+              rows="3"
+              placeholder="0001&#10;0002&#10;0003"
+              class="w-full resize-y rounded-md border border-slate-200 bg-white px-3 py-2 font-mono text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
+            ></textarea>
+            <p class="mt-1.5 text-xs text-slate-400">
+              Uma matrícula por linha.
+            </p>
+          </div>
+        </div>
+      </template>
+    </div>
 
     <p class="text-xs text-slate-500">
-      A turma é criada com os alunos já matriculados, em ordem alfabética. Todas
-      as matrículas são validadas antes de qualquer alteração — se alguma
-      estiver errada, nada é criado.
+      Matrículas são opcionais — você pode criar o ano letivo agora e adicionar
+      alunos depois. Se informadas, todas são validadas antes de qualquer
+      alteração (tudo ou nada).
     </p>
 
     <x-error-alert></x-error-alert>

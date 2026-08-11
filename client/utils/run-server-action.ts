@@ -8,7 +8,7 @@ import type { ClassMatriculationInput } from "#server/school-year/types.ts";
 import type { StudentSummary } from "#server/types.ts";
 
 /** Funções expostas pelo server via google.script.run (ver server/main.ts). */
-interface GasServerFunctions {
+export interface GasServerFunctions {
   // --- Boletim ---
   getStudentsDataForClass(
     schoolYearLabel: string,

@@ -1,11 +1,10 @@
 // client/dialogs/student-create.ts
+import { getErrorMsg } from "#server/utils/error.ts";
 import { runServerAction } from "../utils/run-server-action.ts";
 import { validateStudentForm } from "../utils/validate";
 
 import type { CreateStudentPayload } from "#server/roster/types.ts";
 import type { GuardianData } from "#server/types.ts";
-
-type StudentCreateView = "form" | "success";
 
 function emptyGuardian(): GuardianData {
   return {
@@ -29,22 +28,23 @@ function emptyForm(): CreateStudentPayload {
 }
 
 type StudentCreateState = {
-  view: StudentCreateView;
-  studentId: string;
+  lastStudentId: string;
   isLoading: boolean;
+  isOpeningEdit: boolean;
   error: string;
   form: CreateStudentPayload;
   addGuardian(): void;
   removeGuardian(index: number): void;
   setPrimaryGuardian(index: number): void;
+  editStudent(): void;
   submit(): void;
 };
 
 function initDialog(): StudentCreateState {
   return {
-    view: "form",
-    studentId: "",
+    lastStudentId: "",
     isLoading: false,
+    isOpeningEdit: false,
     error: "",
     form: emptyForm(),
 
@@ -69,6 +69,20 @@ function initDialog(): StudentCreateState {
       });
     },
 
+    editStudent() {
+      this.isOpeningEdit = true;
+      this.error = "";
+
+      runServerAction((server) =>
+        server.openStudentEditDialog(this.lastStudentId),
+      )
+        .then(() => google.script.host.close())
+        .catch((error: unknown) => {
+          this.error = getErrorMsg(error);
+          this.isOpeningEdit = false;
+        });
+    },
+
     submit() {
       const validationError = validateStudentForm(this.form);
 
@@ -84,15 +98,14 @@ function initDialog(): StudentCreateState {
         server.submitStudentRegistration(this.form),
       )
         .then((newStudentId) => {
-          this.studentId = newStudentId;
-          this.view = "success";
+          this.lastStudentId = newStudentId;
+          this.form = emptyForm();
         })
-        .catch((err: Error) => {
-          this.error = err.message;
+        .catch((error: unknown) => {
+          this.error = getErrorMsg(error);
         })
         .finally(() => {
           this.isLoading = false;
-          this.form = emptyForm();
         });
     },
   };
