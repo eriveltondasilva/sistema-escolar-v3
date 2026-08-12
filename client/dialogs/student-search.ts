@@ -2,16 +2,19 @@
 import { getErrorMsg } from "#server/utils/error.ts";
 import { runServerAction } from "../utils/run-server-action.ts";
 
+import type { StudentStatus } from "#server/types.ts";
 import type { StudentOption, StudentSearchDetails } from "../types.ts";
 
 type StudentSearchState = {
   query: string;
+  status: StudentStatus;
   isSearching: boolean;
   isLoadingDetails: boolean;
   isOpeningEdit: boolean;
   results: StudentOption[];
   selectedStudent: StudentSearchDetails | null;
   error: string;
+  // Funções
   search(): void;
   selectStudent(studentId: string): void;
   clearSelection(): void;
@@ -21,6 +24,7 @@ type StudentSearchState = {
 function initDialog(): StudentSearchState {
   return {
     query: "",
+    status: "ativo",
     isSearching: false,
     isLoadingDetails: false,
     isOpeningEdit: false,
@@ -40,7 +44,7 @@ function initDialog(): StudentSearchState {
       this.isSearching = true;
 
       runServerAction<StudentOption[]>((server) =>
-        server.getStudentSearchResults(this.query),
+        server.getStudentSearchResults(this.query, this.status),
       )
         .then((results) => {
           this.results = results;

@@ -1,6 +1,10 @@
 <!-- client/dialogs/student-create.html -->
-<x-dialog-shell class="bg-white p-5 text-slate-900 antialiased">
-  <main x-data="initDialog" x-cloak class="space-y-4">
+<x-dialog-shell>
+  <main
+    x-data="initDialog"
+    x-cloak
+    class="space-y-4 bg-white p-5 text-slate-900"
+  >
     <!-- Banner de sucesso -->
     <div
       x-show="lastStudentId"
@@ -8,7 +12,7 @@
       class="flex items-center justify-between rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs"
     >
       <span class="text-emerald-700">
-        Aluno cadastrado —
+        Aluno cadastrado -
         <span
           class="font-mono font-semibold text-emerald-900"
           x-text="lastStudentId"
@@ -19,7 +23,7 @@
           type="button"
           @click="editStudent()"
           :disabled="isOpeningEdit"
-          class="font-semibold text-emerald-700 hover:text-emerald-900 focus:outline-none disabled:opacity-50"
+          class="cursor-pointer font-semibold text-emerald-700 hover:text-emerald-900 focus:outline-none disabled:opacity-50"
         >
           <span x-text="isOpeningEdit ? 'Abrindo...' : 'Ver aluno'"></span>
         </button>
@@ -28,7 +32,7 @@
           @click="lastStudentId = ''"
           class="text-emerald-500 hover:text-emerald-700 focus:outline-none"
         >
-          <x-close-icon></x-close-icon>
+          <x-icons.close></x-icons.close>
         </button>
       </div>
     </div>

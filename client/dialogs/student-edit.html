@@ -1,10 +1,10 @@
 <!-- client/dialogs/student-edit.html -->
-<x-dialog-shell class="bg-white p-5 text-slate-900 antialiased">
+<x-dialog-shell>
   <main
     data-init="<?= initData ?>"
     x-data="initDialog($el)"
     x-cloak
-    class="space-y-4"
+    class="space-y-4 bg-white p-5 text-slate-900"
   >
     <!-- Loading inicial -->
     <template x-if="isLoadingStudent">

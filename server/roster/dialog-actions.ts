@@ -10,7 +10,7 @@ import {
 } from "./data-access.ts";
 import { findStudentPdfHistory } from "./pdf-history.ts";
 
-import type { GuardianData, StudentSummary } from "../types.ts";
+import type { GuardianData, StudentStatus, StudentSummary } from "../types.ts";
 import type { CreateStudentPayload, StudentFormPayload } from "./types.ts";
 
 function validateStudentPayload(payload: {
@@ -33,11 +33,14 @@ function validateStudentPayload(payload: {
 
 // -------------------------------------
 
-export function getStudentSearchResults(query: string): StudentSummary[] {
+export function getStudentSearchResults(
+  query: string,
+  status?: StudentStatus,
+): StudentSummary[] {
   const { enrollmentSpreadsheetId } = loadConfig();
   const registrationSheet = SpreadsheetApp.openById(enrollmentSpreadsheetId);
 
-  return searchStudents(registrationSheet, query);
+  return searchStudents(registrationSheet, query, status);
 }
 
 export interface StudentSearchDetails {

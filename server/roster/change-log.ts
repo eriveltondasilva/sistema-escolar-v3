@@ -11,6 +11,7 @@ interface FieldChange {
 
 const LOG_SHEET = {
   name: "Log",
+  startRow: 3,
   columns: {
     timestamp: 1,
     studentId: 2,
@@ -50,7 +51,7 @@ export function logStudentChanges({
 
   try {
     const logSheet = registrationSheet.getSheetByName(LOG_SHEET.name);
-    if (!logSheet) return; // aba opcional: se não existe, não loga e não quebra o fluxo.
+    if (!logSheet) return;
 
     const timestamp = new Date();
     const rows = changes.map(({ field, oldValue, newValue }) => [
@@ -60,10 +61,11 @@ export function logStudentChanges({
       String(oldValue).trim(),
       String(newValue).trim(),
     ]);
-
-    const startRow = logSheet.getLastRow() + 1;
     const colCount = Object.keys(LOG_SHEET.columns).length;
-    logSheet.getRange(startRow, 1, rows.length, colCount).setValues(rows);
+
+    logSheet
+      .getRange(logSheet.getLastRow() + 1, 1, rows.length, colCount)
+      .setValues(rows);
   } catch (error) {
     console.warn(
       `logStudentChanges: falha ao registrar log para ${studentId} — ${getErrorMsg(error)}`,

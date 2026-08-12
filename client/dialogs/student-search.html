@@ -1,31 +1,58 @@
 <!-- client/dialogs/student-search.html -->
-<x-dialog-shell class="bg-white p-5 text-slate-900 antialiased">
-  <main x-data="initDialog" x-cloak class="space-y-4">
-    <!-- Campo de busca com spinner inline -->
-    <div>
-      <label
-        for="query"
-        class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
-      >
-        Nome ou Matrícula
-      </label>
-      <div class="relative">
-        <input
-          id="query"
-          type="text"
-          x-model="query"
-          @input.debounce.300ms="search()"
-          placeholder="Comece a digitar..."
-          class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 pr-8 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none"
-        />
-        <div
-          x-show="isSearching"
-          class="absolute top-1/2 right-2.5 -translate-y-1/2"
+<x-dialog-shell>
+  <main
+    x-data="initDialog"
+    x-cloak
+    class="space-y-4 bg-white p-5 text-slate-900"
+  >
+    <!-- Filtros: busca + status -->
+    <div class="flex gap-2">
+      <div class="flex-1">
+        <label
+          for="query"
+          class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
         >
+          Nome ou Matrícula
+        </label>
+        <div class="relative">
+          <input
+            id="query"
+            type="text"
+            x-model="query"
+            @input.debounce.300ms="search()"
+            placeholder="Comece a digitar..."
+            class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 pr-8 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none"
+          />
           <div
-            class="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-slate-500"
-          ></div>
+            x-show="isSearching"
+            class="absolute top-1/2 right-2.5 -translate-y-1/2"
+          >
+            <div
+              class="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-slate-500"
+            ></div>
+          </div>
         </div>
+      </div>
+
+      <div class="w-36 shrink-0">
+        <label
+          for="status-filter"
+          class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
+        >
+          Status
+        </label>
+        <select
+          id="status-filter"
+          x-model="status"
+          @change="search()"
+          class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none"
+        >
+          <option value="ativo">Ativo</option>
+          <option value="inativo">Inativo</option>
+          <option value="transferido">Transferido</option>
+          <option value="formado">Formado</option>
+          <option value="evadido">Evadido</option>
+        </select>
       </div>
     </div>
 
@@ -83,9 +110,10 @@
         <button
           type="button"
           @click="clearSelection()"
-          class="flex items-center gap-1 text-xs font-semibold text-slate-400 hover:text-slate-700 focus:outline-none"
+          class="flex items-center justify-center gap-2 text-xs font-semibold text-slate-400 hover:text-slate-700 focus:outline-none"
         >
-          ← Voltar à busca
+          <x-icons.arrow-left></x-icons.arrow-left>
+          Voltar à busca
         </button>
 
         <!-- Card principal -->
@@ -157,7 +185,7 @@
                   target="_blank"
                   class="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-800 focus:underline focus:outline-none"
                 >
-                  <x-file-icon></x-file-icon>
+                  <x-icons.file></x-icons.file>
                   <span x-text="entry.yearLabel"></span>
                   <span class="text-slate-300">·</span>
                   <span x-text="entry.className"></span>
@@ -171,8 +199,9 @@
           type="button"
           @click="editStudent()"
           :disabled="isOpeningEdit"
-          class="inline-flex w-full items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800 focus:outline-none disabled:cursor-not-allowed disabled:opacity-70"
+          class="inline-flex w-full items-center justify-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800 focus:outline-none disabled:cursor-not-allowed disabled:opacity-70"
         >
+          <x-icons.square-pen></x-icons.square-pen>
           <span x-text="isOpeningEdit ? 'Abrindo...' : 'Editar aluno'"></span>
         </button>
       </div>

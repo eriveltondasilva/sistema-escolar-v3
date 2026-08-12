@@ -43,7 +43,7 @@ function showClassReportsResult_({
 }: ShowClassReportsResult): void {
   const errorsToShow = result.errors.slice(0, MAX_ERRORS_SHOWN);
   const truncatedCount = result.errorCount - errorsToShow.length;
-  const height = result.errorCount > 0 || result.interrupted ? 600 : 240;
+  const height = result.errorCount > 0 || result.interrupted ? 600 : 260;
 
   const initData: ClassReportResultInitData = {
     ...result,

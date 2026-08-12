@@ -4,7 +4,7 @@
     data-init="<?= initData ?>"
     x-data="initDialog($el)"
     x-cloak
-    class="flex h-full flex-col justify-between bg-slate-50 p-5 font-sans text-slate-800 antialiased"
+    class="flex h-full flex-col justify-between p-5"
   >
     <div class="space-y-3">
       <x-success-header>
@@ -23,7 +23,7 @@
         <div
           class="flex items-start space-x-3 rounded-md border border-amber-200 bg-amber-50 p-3"
         >
-          <x-clock-icon></x-clock-icon>
+          <x-icons.clock></x-icons.clock>
           <div class="text-sm">
             <p class="font-semibold text-amber-900">
               Execução interrompida por tempo
@@ -41,7 +41,7 @@
       <template x-if="errors.length > 0">
         <div class="space-y-2 rounded-md border border-red-200 bg-red-50 p-3">
           <div class="flex items-center space-x-2 text-red-600">
-            <x-circle-alert-icon></x-circle-alert-icon>
+            <x-icons.circle-alert></x-icons.circle-alert>
             <h2 class="text-sm font-semibold text-red-900">
               <span x-text="errors.length"></span> erro(s) na geração:
             </h2>

@@ -5,7 +5,7 @@ import type {
   StudentFormPayload,
 } from "#server/roster/types.ts";
 import type { ClassMatriculationInput } from "#server/school-year/types.ts";
-import type { StudentSummary } from "#server/types.ts";
+import type { StudentStatus, StudentSummary } from "#server/types.ts";
 
 /** Funções expostas pelo server via google.script.run (ver server/main.ts). */
 export interface GasServerFunctions {
@@ -28,7 +28,10 @@ export interface GasServerFunctions {
 
   // --- Aluno ---
   openStudentEditDialog(studentId: string): void;
-  getStudentSearchResults(query: string): StudentSummary[];
+  getStudentSearchResults(
+    query: string,
+    status: StudentStatus,
+  ): StudentSummary[];
   getStudentDetailsForSearch(studentId: string): StudentSearchDetails;
   getStudentForEditForm(studentId: string): StudentFormPayload;
   submitStudentRegistration(payload: CreateStudentPayload): string;

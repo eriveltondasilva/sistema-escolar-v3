@@ -1,6 +1,10 @@
 // server/types.ts
 export type IssueType = "warning" | "error";
 export type AssessmentType = "numeric" | "concept";
+export type StageType = "Ensino Fundamental I" | "Ensino Fundamental II";
+export type ShiftType = "Matutino" | "Vespertino";
+export type StudentStatus =
+  "ativo" | "inativo" | "transferido" | "formado" | "evadido";
 
 export interface AppConfig {
   readonly schoolYearsFolderId: string;
@@ -27,8 +31,8 @@ export interface Issue {
 
 export interface ValidClass {
   name: string;
-  stage: `Ensino Fundamental ${"I" | "II"}`;
-  shift: "Matutino" | "Vespertino";
+  stage: StageType;
+  shift: ShiftType;
   assessmentType: AssessmentType;
 }
 
@@ -44,7 +48,7 @@ export interface StudentData {
   birthDate: string;
   enrollmentDate: string;
   sex: string;
-  status: string;
+  status: StudentStatus;
 }
 
 /**

@@ -1,123 +1,127 @@
 <!-- client/dialogs/generate-report-form.html -->
-<x-dialog-shell class="bg-white p-5 text-slate-900 antialiased">
-  <form
-    data-init="<?= initData ?>"
-    x-data="initDialog($el)"
-    x-cloak
-    @submit.prevent="submit()"
-    class="space-y-4"
-  >
-    <div>
-      <label
-        for="schoolYear"
-        class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
-      >
-        Ano Letivo
-      </label>
-      <select
-        id="schoolYear"
-        x-model="schoolYear"
-        :disabled="isLoading"
-        @change="actionType === 'single' && fetchStudents()"
-        class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
-      >
-        <option value="" disabled selected>Selecione ano letivo</option>
-        <template x-for="year in schoolYearLabels" :key="year">
-          <option :value="year" x-text="year"></option>
-        </template>
-      </select>
-    </div>
-
-    <div>
-      <label
-        for="className"
-        class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
-      >
-        Turma
-      </label>
-      <select
-        id="className"
-        x-model="className"
-        :disabled="isLoading"
-        @change="actionType === 'single' && fetchStudents()"
-        class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
-      >
-        <option value="" disabled selected>Selecione turma</option>
-        <template x-for="cls in classes" :key="cls">
-          <option :value="cls" x-text="cls"></option>
-        </template>
-      </select>
-    </div>
-
-    <!-- Campo de aluno — apenas no modo "single" -->
-    <template x-if="actionType === 'single'">
+<x-dialog-shell>
+  <main class="bg-white p-5 text-slate-900">
+    <form
+      data-init="<?= initData ?>"
+      x-data="initDialog($el)"
+      x-cloak
+      @submit.prevent="submit()"
+      class="space-y-4"
+    >
       <div>
         <label
-          for="studentSearch"
-          class="mb-1 flex items-center text-xs font-medium tracking-wider text-slate-500 uppercase"
+          for="schoolYear"
+          class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
         >
-          Aluno (Nome ou Matrícula)
-          <span
-            x-show="isFetchingStudents"
-            class="ml-2 inline-block h-3 w-3 animate-spin rounded-full border-2 border-slate-300 border-t-slate-600"
-          ></span>
+          Ano Letivo
         </label>
-
-        <template x-if="!isFetchingStudents && availableStudents.length === 0">
-          <p
-            class="rounded-md border border-amber-200 bg-amber-50 p-2.5 text-xs font-medium text-amber-700"
-          >
-            Nenhum aluno cadastrado nesta turma.
-          </p>
-        </template>
-
-        <template x-if="availableStudents.length > 0">
-          <div>
-            <input
-              id="studentSearch"
-              type="text"
-              x-model="studentSearch"
-              list="studentsList"
-              :disabled="isLoading || isFetchingStudents"
-              placeholder="Comece a digitar o nome do estudante..."
-              class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
-            />
-            <datalist id="studentsList">
-              <template
-                x-for="student in availableStudents"
-                :key="student.studentId"
-              >
-                <option
-                  :value="student.studentId"
-                  x-text="student.name"
-                ></option>
-              </template>
-            </datalist>
-          </div>
-        </template>
+        <select
+          id="schoolYear"
+          x-model="schoolYear"
+          :disabled="isLoading"
+          @change="actionType === 'single' && fetchStudents()"
+          class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
+        >
+          <option value="" disabled selected>Selecione ano letivo</option>
+          <template x-for="year in schoolYearLabels" :key="year">
+            <option :value="year" x-text="year"></option>
+          </template>
+        </select>
       </div>
-    </template>
 
-    <x-error-alert x-transition></x-error-alert>
+      <div>
+        <label
+          for="className"
+          class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
+        >
+          Turma
+        </label>
+        <select
+          id="className"
+          x-model="className"
+          :disabled="isLoading"
+          @change="actionType === 'single' && fetchStudents()"
+          class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
+        >
+          <option value="" disabled selected>Selecione turma</option>
+          <template x-for="cls in classes" :key="cls">
+            <option :value="cls" x-text="cls"></option>
+          </template>
+        </select>
+      </div>
 
-    <footer class="flex items-center justify-end space-x-2 pt-2">
-      <button
-        type="button"
-        @click="google.script.host.close()"
-        :disabled="isLoading"
-        class="inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none disabled:opacity-50"
-      >
-        Cancelar
-      </button>
-      <button
-        type="submit"
-        :disabled="isLoading || (actionType === 'single' && (isFetchingStudents || noStudents))"
-        class="inline-flex items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800 focus:outline-none disabled:cursor-not-allowed disabled:opacity-70"
-      >
-        <span x-text="isLoading ? 'Processando...' : 'Confirmar'"></span>
-      </button>
-    </footer>
-  </form>
+      <!-- Campo de aluno — apenas no modo "single" -->
+      <template x-if="actionType === 'single'">
+        <div>
+          <label
+            for="studentSearch"
+            class="mb-1 flex items-center text-xs font-medium tracking-wider text-slate-500 uppercase"
+          >
+            Aluno (Nome ou Matrícula)
+            <span
+              x-show="isFetchingStudents"
+              class="ml-2 inline-block h-3 w-3 animate-spin rounded-full border-2 border-slate-300 border-t-slate-600"
+            ></span>
+          </label>
+
+          <template
+            x-if="!isFetchingStudents && availableStudents.length === 0"
+          >
+            <p
+              class="rounded-md border border-amber-200 bg-amber-50 p-2.5 text-xs font-medium text-amber-700"
+            >
+              Nenhum aluno cadastrado nesta turma.
+            </p>
+          </template>
+
+          <template x-if="availableStudents.length > 0">
+            <div>
+              <input
+                id="studentSearch"
+                type="text"
+                x-model="studentSearch"
+                list="studentsList"
+                :disabled="isLoading || isFetchingStudents"
+                placeholder="Comece a digitar o nome do estudante..."
+                class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
+              />
+              <datalist id="studentsList">
+                <template
+                  x-for="student in availableStudents"
+                  :key="student.studentId"
+                >
+                  <option
+                    :value="student.studentId"
+                    x-text="student.name"
+                  ></option>
+                </template>
+              </datalist>
+            </div>
+          </template>
+        </div>
+      </template>
+
+      <x-error-alert x-transition></x-error-alert>
+
+      <footer class="flex items-center justify-end space-x-2 pt-2">
+        <button
+          type="button"
+          @click="google.script.host.close()"
+          :disabled="isLoading"
+          class="inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none disabled:opacity-50"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          :disabled="isLoading || (actionType === 'single' && (isFetchingStudents || noStudents))"
+          class="inline-flex items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800 focus:outline-none disabled:cursor-not-allowed disabled:opacity-70"
+        >
+          <span x-text="isLoading ? 'Processando...' : 'Confirmar'"></span>
+        </button>
+      </footer>
+    </form>
+  </main>
 
   <!-- Scripts -->
   <script src="./generate-report-form.ts"></script>

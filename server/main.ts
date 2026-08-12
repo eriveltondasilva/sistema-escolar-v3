@@ -39,7 +39,7 @@ export {
   openStudentSearchDialog,
 } from "./roster/menu-actions.ts";
 export { submitSchoolYearCreation } from "./school-year/dialog-actions.ts";
-export { openCreateSchoolYearFormDialog } from "./school-year/menu-actions.ts";
+export { openCreateSchoolYearDialog } from "./school-year/menu-actions.ts";
 export { checkSystem } from "./system-check/checker.ts";
 export { doGet } from "./web-app/do-get.ts";
 

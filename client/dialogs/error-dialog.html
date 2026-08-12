@@ -1,27 +1,27 @@
 <!-- client/dialogs/error.html -->
-<x-dialog-shell
-  class="flex h-screen items-center justify-center bg-slate-50 p-4 font-sans text-slate-800 antialiased"
->
-  <main
-    data-init="<?= initData ?>"
-    x-data="initDialog($el)"
-    x-cloak
-    class="w-full max-w-sm rounded-lg border border-red-100 bg-white p-6 text-center shadow-sm"
-  >
+<x-dialog-shell>
+  <main class="flex h-screen items-center justify-center p-4">
     <div
-      class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-red-600"
+      data-init="<?= initData ?>"
+      x-data="initDialog($el)"
+      x-cloak
+      class="w-full max-w-sm rounded-lg border border-red-100 bg-white p-6 text-center shadow-sm"
     >
-      <x-triangle-alert-icon></x-triangle-alert-icon>
+      <div
+        class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-red-600"
+      >
+        <x-icons.triangle-alert></x-icons.triangle-alert>
+      </div>
+
+      <h1 class="mb-2 text-lg font-semibold text-slate-900">
+        Ops! Algo deu errado
+      </h1>
+      <p class="mb-6 text-sm text-slate-600" x-text="errorMessage"></p>
+
+      <footer>
+        <x-close-button></x-close-button>
+      </footer>
     </div>
-
-    <h1 class="mb-2 text-lg font-semibold text-slate-900">
-      Ops! Algo deu errado
-    </h1>
-    <p class="mb-6 text-sm text-slate-600" x-text="errorMessage"></p>
-
-    <footer>
-      <x-close-button></x-close-button>
-    </footer>
   </main>
 
   <!-- Scripts -->

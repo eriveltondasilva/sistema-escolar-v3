@@ -17,8 +17,8 @@ const CONFIG_SHEET = {
     PASTA_TEMP_ID: "tempFolderId",
     MODELO_BOLETIM_CONCEITO_ID: "conceptReportId",
     MODELO_BOLETIM_NOTA_ID: "gradeReportId",
-    MODELO_LANCAMENTO_CONCEITO_ID: "conceptSpreadsheetId",
-    MODELO_LANCAMENTO_NOTA_ID: "gradeSpreadsheetId",
+    MODELO_DIARIO_CONCEITO_ID: "conceptSpreadsheetId",
+    MODELO_DIARIO_NOTA_ID: "gradeSpreadsheetId",
     CADASTRO_ESCOLAR_ID: "enrollmentSpreadsheetId",
   },
 } as const satisfies ConfigSheet;

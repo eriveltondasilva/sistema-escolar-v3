@@ -67,7 +67,7 @@ export function submitSchoolYearCreation(
       DIALOG_NAMES.createSchoolYearResult,
       initData,
     );
-    htmlOutput.setWidth(400).setHeight(340);
+    htmlOutput.setWidth(400).setHeight(380);
 
     ui.showModalDialog(htmlOutput, "Ano Letivo Criado");
   }, "Já existe uma criação de ano letivo em andamento. Tente novamente em alguns instantes.");

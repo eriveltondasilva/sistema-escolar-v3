@@ -4,23 +4,16 @@ import { GUARDIANS_SHEET, STUDENTS_SHEET } from "#report/constants.ts";
 import { formatDate } from "#utils/formatters.ts";
 import { diffStudentFields, logStudentChanges } from "./change-log.ts";
 
-import type { GuardianData, StudentSummary } from "../types.ts";
+import type { GuardianData, StudentStatus, StudentSummary } from "../types.ts";
 import type { CreateStudentPayload, StudentFormPayload } from "./types.ts";
 
-/** Status padrão atribuído a todo aluno recém-cadastrado. */
-const DEFAULT_STUDENT_STATUS = "ativo";
-
-/** Número de colunas da aba "Alunos" (ver STUDENTS_SHEET.columns). */
 const STUDENT_COL_COUNT = Object.keys(STUDENTS_SHEET.columns).length;
-
-/** Número de colunas da aba "Responsáveis" (ver GUARDIANS_SHEET.columns). */
 const GUARDIAN_COL_COUNT = Object.keys(GUARDIANS_SHEET.columns).length;
 
 function generateNextStudentId(
   registrationSheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
 ): string {
   const studentsSheet = registrationSheet.getSheetByName(STUDENTS_SHEET.name);
-
   if (!studentsSheet) {
     throw new Error(
       `Cadastro Escolar: a aba "${STUDENTS_SHEET.name}" não existe.`,
@@ -42,9 +35,7 @@ function generateNextStudentId(
     .getValues();
 
   const maxId = rows.reduce((max, row) => {
-    const numeric = Number(String(row[0]).trim());
-    // IDs não-numéricos são ignorados; se não houver nenhum numérico,
-    // maxId fica 0 e a próxima matrícula gerada será "1".
+    const numeric = Number(String(row[0] ?? "").trim());
     return Number.isFinite(numeric) && numeric > max ? numeric : max;
   }, 0);
 
@@ -65,16 +56,16 @@ function toIsoDateString(date: unknown): string {
 /** Monta um GuardianData completo a partir de uma linha da aba "Responsáveis". */
 function mapGuardianRow(row: ReadonlyArray<unknown>): GuardianData {
   const col = GUARDIANS_SHEET.columns;
+
   return {
     name: String(row[col.name] ?? "").trim(),
-    address: String(row[col.address] ?? ""),
-    relationship: String(row[col.relationship] ?? ""),
-    // A célula armazena "sim"/"não" — comparação case-insensitive para robustez.
+    address: String(row[col.address] ?? "").trim(),
+    relationship: String(row[col.relationship] ?? "").trim(),
     isPrimary:
       String(row[col.isPrimary] ?? "")
         .trim()
         .toLowerCase() === "sim",
-    phone: String(row[col.phone] ?? ""),
+    phone: String(row[col.phone] ?? "").trim(),
   };
 }
 
@@ -101,7 +92,7 @@ function loadStudentGuardians(
     .getValues();
 
   return rows
-    .filter((row) => String(row[col.studentId]).trim() === studentId)
+    .filter((row) => String(row[col.studentId] ?? "").trim() === studentId)
     .map(mapGuardianRow)
     .filter((guardian) => guardian.name.length > 0);
 }
@@ -117,6 +108,7 @@ function replaceGuardians(
   guardians: GuardianData[],
 ): void {
   const guardiansSheet = registrationSheet.getSheetByName(GUARDIANS_SHEET.name);
+
   if (!guardiansSheet) {
     throw new Error(
       `Cadastro Escolar: a aba "${GUARDIANS_SHEET.name}" não existe.`,
@@ -153,7 +145,7 @@ function replaceGuardians(
   // aluno não fica sem nenhum responsável cadastrado.
   if (validGuardians.length > 0) {
     const newRows = validGuardians.map((guardian) => [
-      studentId,
+      studentId.trim(),
       guardian.name.trim(),
       guardian.address.trim(),
       guardian.relationship.trim(),
@@ -179,9 +171,16 @@ function replaceGuardians(
 
 // -------------------------------------
 
+/**
+ * Busca alunos por nome ou matrícula.
+ *
+ * @param status - Quando informado, filtra apenas alunos com esse status
+ *   (comparação case-insensitive). String vazia ou omitido = sem filtro.
+ */
 export function searchStudents(
   registrationSheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
   query: string,
+  status?: StudentStatus,
 ): StudentSummary[] {
   const studentsSheet = registrationSheet.getSheetByName(STUDENTS_SHEET.name);
   if (!studentsSheet) return [];
@@ -190,6 +189,7 @@ export function searchStudents(
   if (!trimmedQuery) return [];
 
   const normalizedQuery = trimmedQuery.toLocaleLowerCase(DEFAULT_LOCALE);
+  const normalizedStatus = status?.trim().toLowerCase() ?? "";
 
   const lastRow = studentsSheet.getLastRow();
   if (lastRow < STUDENTS_SHEET.startRow) return [];
@@ -207,9 +207,13 @@ export function searchStudents(
     .map((row) => ({
       studentId: String(row[STUDENTS_SHEET.columns.id] ?? "").trim(),
       name: String(row[STUDENTS_SHEET.columns.name] ?? "").trim(),
+      status: String(row[STUDENTS_SHEET.columns.status] ?? "")
+        .trim()
+        .toLowerCase(),
     }))
-    .filter(({ studentId, name }) => {
+    .filter(({ studentId, name, status }) => {
       if (!studentId) return false;
+      if (normalizedStatus && status !== normalizedStatus) return false;
       if (studentId === trimmedQuery) return true;
       return name.toLocaleLowerCase(DEFAULT_LOCALE).includes(normalizedQuery);
     });
@@ -230,7 +234,6 @@ export function getStudentForEdit(
   if (lastRow < STUDENTS_SHEET.startRow) return null;
 
   const col = STUDENTS_SHEET.columns;
-
   const match = studentsSheet
     .getRange(
       STUDENTS_SHEET.startRow,
@@ -258,7 +261,7 @@ export function getStudentForEdit(
     birthDate: toIsoDateString(row[col.birthDate]),
     enrollmentDate: formatDate(row[col.enrollmentDate]),
     sex: String(row[col.sex] ?? "").trim(),
-    status: String(row[col.status] ?? "").trim(),
+    status: String(row[col.status] ?? "").trim() as StudentStatus,
     guardians: loadStudentGuardians(registrationSheet, studentId),
   };
 }
@@ -277,22 +280,21 @@ export function createStudentRecord(
 
   const studentId = generateNextStudentId(registrationSheet);
   const birthDate =
-    input.birthDate.trim() ? formatDate(new Date(input.birthDate.trim())) : "";
+    input.birthDate.trim() ? formatDate(input.birthDate.trim()) : "";
 
   const col = STUDENTS_SHEET.columns;
   const row: Record<number, unknown> = {
-    [col.id]: studentId,
+    [col.id]: studentId.trim(),
     [col.name]: input.name.trim(),
     [col.address]: input.address.trim(),
     [col.nationality]: input.nationality.trim(),
     [col.birthDate]: birthDate,
     [col.enrollmentDate]: new Date(),
     [col.sex]: input.sex.trim(),
-    [col.status]: DEFAULT_STUDENT_STATUS,
+    [col.status]: "ativo",
   };
 
   studentsSheet.appendRow(Object.entries(row).map((entry) => entry[1]));
-
   replaceGuardians(registrationSheet, studentId, input.guardians);
 
   return studentId;
@@ -342,7 +344,7 @@ export function updateStudentRecord(
     nationality: String(currentRow[col.nationality] ?? "").trim(),
     birthDate: toIsoDateString(currentRow[col.birthDate]).trim(),
     sex: String(currentRow[col.sex] ?? "").trim(),
-    status: String(currentRow[col.status] ?? "").trim(),
+    status: String(currentRow[col.status] ?? "").trim() as StudentStatus,
   };
 
   const birthDate =

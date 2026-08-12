@@ -4,15 +4,15 @@ export function onOpen(): void {
     //
     .createMenu("Sistema Escolar")
     //
-    .addItem("Gerar boletim do aluno", "generateStudentReport")
-    .addItem("Gerar boletins da turma", "generateClassReports")
-    //
     .addSeparator()
     .addItem("Buscar aluno", "openStudentSearchDialog")
     .addItem("Cadastrar aluno", "openStudentCreationDialog")
     //
+    .addItem("Gerar boletim do aluno", "generateStudentReport")
+    .addItem("Gerar boletins da turma", "generateClassReports")
+    //
     .addSeparator()
-    .addItem("Criar ano letivo", "openCreateSchoolYearFormDialog")
+    .addItem("Criar ano letivo", "openCreateSchoolYearDialog")
     .addItem("Verificar sistema", "checkSystem")
     //
     .addToUi();
