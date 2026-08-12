@@ -1,5 +1,6 @@
 // server/roster/pdf-history.ts
 import { findStudentPdfInFolder } from "#drive/drive-lookup.ts";
+import { DEFAULT_LOCALE } from "#server/config/constants.ts";
 
 interface StudentPdfHistoryEntry {
   schoolYearLabel: string;
@@ -33,7 +34,9 @@ export function findStudentPdfHistory(
     }
   }
 
-  return results.sort(
-    (a, b) => Number(b.schoolYearLabel) - Number(a.schoolYearLabel),
+  return results.sort((a, b) =>
+    b.schoolYearLabel.localeCompare(a.schoolYearLabel, DEFAULT_LOCALE, {
+      numeric: true,
+    }),
   );
 }

@@ -10,6 +10,10 @@ import { toIssue } from "./issue-helper.ts";
 
 import type { AppConfig, Issue } from "../types.ts";
 
+const ASSESSMENT_TYPES = new Set(
+  VALID_CLASSES.map((validClass) => validClass.assessmentType),
+);
+
 interface ConfigCheckResult {
   config: AppConfig | null;
   issues: Issue[];
@@ -40,11 +44,8 @@ export function checkConfig(): ConfigCheckResult {
 export function checkReportTemplates(config: AppConfig): Issue[] {
   const { conceptReportId, gradeReportId } = config;
   const issues: Issue[] = [];
-  const assessmentTypes = new Set(
-    VALID_CLASSES.map((validClass) => validClass.assessmentType),
-  );
 
-  for (const assessmentType of assessmentTypes) {
+  for (const assessmentType of ASSESSMENT_TYPES) {
     const label =
       assessmentType === "numeric" ?
         "Modelo de boletim (nota)"
@@ -68,11 +69,8 @@ export function checkReportTemplates(config: AppConfig): Issue[] {
 export function checkClassTemplates(config: AppConfig): Issue[] {
   const { conceptSpreadsheetId, gradeSpreadsheetId } = config;
   const issues: Issue[] = [];
-  const assessmentTypes = new Set(
-    VALID_CLASSES.map((validClass) => validClass.assessmentType),
-  );
 
-  for (const assessmentType of assessmentTypes) {
+  for (const assessmentType of ASSESSMENT_TYPES) {
     const label =
       assessmentType === "numeric" ?
         "Modelo de planilha de turma (nota)"

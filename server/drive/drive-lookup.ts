@@ -1,4 +1,6 @@
 // server/shared/drive-lookup.ts
+import { GoogleMimeType } from "#server/config/constants.ts";
+
 import type { AssessmentType } from "../types.ts";
 
 const SCHOOL_YEAR_REGEX = /^Ano Letivo - (\d{4})$/i;
@@ -74,7 +76,7 @@ export function getClassSpreadsheetFile(
 
   const file = files.next();
 
-  if (file.getMimeType() !== MimeType.GOOGLE_SHEETS) {
+  if (file.getMimeType() !== GoogleMimeType.SHEETS) {
     throw new Error(
       `O arquivo "${className}" em "Anos Letivos/${schoolYearLabel}" não é uma planilha do Google Sheets.`,
     );
@@ -101,7 +103,7 @@ export function getReportTemplateFile({
     assessmentType === "numeric" ? gradeReportId : conceptReportId;
   const file = DriveApp.getFileById(templateId);
 
-  if (file.getMimeType() !== MimeType.GOOGLE_DOCS) {
+  if (file.getMimeType() !== GoogleMimeType.DOCS) {
     throw new Error(
       `O arquivo de template de boletim (ID: ${templateId}) não é um Google Docs.`,
     );
@@ -128,7 +130,7 @@ export function getClassTemplateFile({
     assessmentType === "numeric" ? gradeSpreadsheetId : conceptSpreadsheetId;
   const file = DriveApp.getFileById(templateId);
 
-  if (file.getMimeType() !== MimeType.GOOGLE_SHEETS) {
+  if (file.getMimeType() !== GoogleMimeType.SHEETS) {
     throw new Error(
       `O modelo de planilha de turma (ID: ${templateId}) não é uma planilha do Google Sheets.`,
     );

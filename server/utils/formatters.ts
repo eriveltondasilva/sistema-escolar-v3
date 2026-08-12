@@ -3,6 +3,10 @@ import { DEFAULT_LOCALE } from "#config/constants.ts";
 
 const DEFAULT_TIMEZONE = "America/Sao_Paulo";
 
+export function formatStr(value: unknown): string {
+  return String(value ?? "").trim();
+}
+
 /** Formata os nomes dos responsáveis concatenando-os corretamente. */
 export function formatGuardianNames(names: string[]): string {
   if (names.length === 0) return "--";
@@ -64,7 +68,7 @@ export function formatDate(
   const parsedDate = typeof date === "string" ? new Date(date) : date;
 
   if (isNaN(parsedDate.getTime())) {
-    throw new Error("Invalid date provided");
+    throw new Error("Invalid date.");
   }
 
   return new Intl.DateTimeFormat(DEFAULT_LOCALE, {

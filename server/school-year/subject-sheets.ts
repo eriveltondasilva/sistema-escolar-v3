@@ -28,10 +28,15 @@ function unprotectManualColumns(
   const lastRow = sheet.getMaxRows();
   const rowCount = lastRow - firstDataRow + 1;
 
-  const unprotectedRanges = getPlaceholderFields(assessmentType)
-    .map((field, index) => ({ field, column: FIRST_FIELD_COLUMN + index }))
-    .filter(({ field }) => manualSuffixes.has(field.suffix))
-    .map(({ column }) => sheet.getRange(firstDataRow, column, rowCount, 1));
+  const fields = getPlaceholderFields(assessmentType);
+  const unprotectedRanges: GoogleAppsScript.Spreadsheet.Range[] = [];
+
+  for (let i = 0; i < fields.length; i++) {
+    if (!manualSuffixes.has(fields[i]!.suffix)) continue;
+    unprotectedRanges.push(
+      sheet.getRange(firstDataRow, FIRST_FIELD_COLUMN + i, rowCount, 1),
+    );
+  }
 
   protection.setUnprotectedRanges(unprotectedRanges);
 }

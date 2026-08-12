@@ -90,17 +90,24 @@ export function findDuplicateSummaryIds({
   const rowsByStudentId = new Map<string, number[]>();
 
   for (const { studentId, row } of students) {
-    const existingRows = rowsByStudentId.get(studentId) ?? [];
-    existingRows.push(row);
-    rowsByStudentId.set(studentId, existingRows);
+    const existingRows = rowsByStudentId.get(studentId);
+    if (existingRows) {
+      existingRows.push(row);
+    } else {
+      rowsByStudentId.set(studentId, [row]);
+    }
   }
 
-  return [...rowsByStudentId.entries()]
-    .filter(([, rows]) => rows.length > 1)
-    .map(
-      ([studentId, rows]) =>
+  const messages: string[] = [];
+  for (const [studentId, rows] of rowsByStudentId) {
+    if (rows.length > 1) {
+      messages.push(
         `[${schoolYearLabel} / ${className} / Resumo] Matrícula ${studentId} duplicada nas linhas ${rows.join(", ")}.`,
-    );
+      );
+    }
+  }
+
+  return messages;
 }
 
 /** Verifica se há matrículas duplicadas na aba "Alunos". */
@@ -124,20 +131,26 @@ export function findDuplicateStudentIds(
 
   const rowsByStudentId = new Map<string, number[]>();
 
-  rows.forEach((row, index) => {
-    const studentId = String(row[STUDENTS_SHEET.columns.id]).trim();
-    if (!studentId) return;
+  for (const [index, row] of rows.entries()) {
+    const studentId = String(row[0]).trim();
+    if (!studentId) continue;
 
     const dataRow = STUDENTS_SHEET.startRow + index;
-    const existingRows = rowsByStudentId.get(studentId) ?? [];
-    existingRows.push(dataRow);
-    rowsByStudentId.set(studentId, existingRows);
-  });
+    const existingRows = rowsByStudentId.get(studentId);
+    if (existingRows) {
+      existingRows.push(dataRow);
+    } else {
+      rowsByStudentId.set(studentId, [dataRow]);
+    }
+  }
 
-  return [...rowsByStudentId.entries()]
-    .filter(([, dataRows]) => dataRows.length > 1)
-    .map(
-      ([studentId, dataRows]) =>
+  const messages: string[] = [];
+  for (const [studentId, dataRows] of rowsByStudentId) {
+    if (dataRows.length > 1) {
+      messages.push(
         `Cadastro Escolar: matrícula ${studentId} duplicada nas linhas ${dataRows.join(", ")}.`,
-    );
+      );
+    }
+  }
+  return messages;
 }

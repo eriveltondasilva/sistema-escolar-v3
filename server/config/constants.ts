@@ -17,3 +17,10 @@ export const DIALOG_NAMES = {
   studentSearch: "student-search",
   validationResult: "validation-result",
 } as const;
+
+export const GoogleMimeType = {
+  SHEETS: "application/vnd.google-apps.spreadsheet",
+  DOCS: "application/vnd.google-apps.document",
+  FOLDER: "application/vnd.google-apps.folder",
+  PDF: "application/pdf",
+} as const;

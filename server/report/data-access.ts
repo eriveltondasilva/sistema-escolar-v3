@@ -8,7 +8,12 @@ import {
   VALID_SUBJECTS,
 } from "./constants.ts";
 
-import type { AssessmentType, StudentData, Subject } from "../types.ts";
+import type {
+  AssessmentType,
+  StudentData,
+  StudentStatus,
+  Subject,
+} from "../types.ts";
 import type {
   ClassStudent,
   GradeRow,
@@ -89,13 +94,13 @@ function mapStudentRow(row: ReadonlyArray<unknown>): StudentData {
   const col = STUDENTS_SHEET.columns;
 
   return {
-    name: String(row[col.name]).trim(),
-    address: String(row[col.address]).trim(),
-    nationality: String(row[col.nationality]).trim(),
-    birthDate: formatDate(row[col.birthDate]),
-    enrollmentDate: formatDate(row[col.enrollmentDate]),
-    sex: String(row[col.sex]).trim(),
-    status: String(row[col.status]).trim(),
+    name: String(row[col.name] ?? "").trim(),
+    address: String(row[col.address] ?? "").trim(),
+    nationality: String(row[col.nationality] ?? "").trim(),
+    birthDate: formatDate(String(row[col.birthDate] ?? "").trim()),
+    enrollmentDate: formatDate(String(row[col.enrollmentDate] ?? "").trim()),
+    sex: String(row[col.sex] ?? "").trim(),
+    status: String(row[col.status] ?? "").trim() as StudentStatus,
   };
 }
 
@@ -208,18 +213,23 @@ export function loadGuardiansMap(
     )
     .getValues();
 
-  const validRows = rows
-    .map((row) => ({
-      studentId: String(row[col.studentId]).trim(),
-      name: String(row[col.name]).trim(),
-    }))
-    .filter(({ studentId, name }) => studentId.length > 0 && name.length > 0);
+  const map = new Map<string, string[]>();
 
-  return validRows.reduce((map, { studentId, name }) => {
-    const names = map.get(studentId) ?? [];
-    map.set(studentId, [...names, name]);
-    return map;
-  }, new Map<string, string[]>());
+  for (const row of rows) {
+    const studentId = String(row[col.studentId]).trim();
+    const name = String(row[col.name]).trim();
+
+    if (!studentId || !name) continue;
+
+    const names = map.get(studentId);
+    if (names) {
+      names.push(name);
+    } else {
+      map.set(studentId, [name]);
+    }
+  }
+
+  return map;
 }
 
 /**
@@ -249,10 +259,13 @@ export function loadSingleStudentGuardiansMap(
     )
     .getValues();
 
-  const names = rows
-    .filter((row) => String(row[0]).trim() === studentId)
-    .map((row) => String(row[1]).trim())
-    .filter((name) => name.length > 0);
+  const names: string[] = [];
+
+  for (const row of rows) {
+    if (String(row[0]).trim() !== studentId) continue;
+    const name = String(row[1]).trim();
+    if (name) names.push(name);
+  }
 
   if (names.length > 0) map.set(studentId, names);
   return map;
@@ -358,6 +371,7 @@ export function getGradesForStudent({
 }: GetGradesForStudent): Record<string, SubjectGrades | null> {
   const result: Record<string, SubjectGrades | null> = {};
   const gradeColumns = getGradeColumns(context.assessmentType).columns;
+  const gradeEntries = Object.entries(gradeColumns); // calculado uma vez
 
   for (const subject of foundSubjects) {
     const rowValues = context.gradesBySubject.get(subject.name)?.get(studentId);
@@ -365,10 +379,7 @@ export function getGradesForStudent({
     result[subject.name] =
       rowValues ?
         Object.fromEntries(
-          Object.entries(gradeColumns).map(([field, index]) => [
-            field,
-            rowValues[index],
-          ]),
+          gradeEntries.map(([field, index]) => [field, rowValues[index]]),
         )
       : null;
   }

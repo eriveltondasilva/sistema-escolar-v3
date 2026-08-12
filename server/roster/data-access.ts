@@ -91,10 +91,15 @@ function loadStudentGuardians(
     .getRange(GUARDIANS_SHEET.startRow, 1, rowCount, GUARDIAN_COL_COUNT)
     .getValues();
 
-  return rows
-    .filter((row) => String(row[col.studentId] ?? "").trim() === studentId)
-    .map(mapGuardianRow)
-    .filter((guardian) => guardian.name.length > 0);
+  const guardians: GuardianData[] = [];
+
+  for (const row of rows) {
+    if (String(row[col.studentId] ?? "").trim() !== studentId) continue;
+    if (!String(row[col.name] ?? "").trim()) continue;
+    guardians.push(mapGuardianRow(row));
+  }
+
+  return guardians;
 }
 
 /**
@@ -203,20 +208,26 @@ export function searchStudents(
     )
     .getValues();
 
-  return rows
-    .map((row) => ({
-      studentId: String(row[STUDENTS_SHEET.columns.id] ?? "").trim(),
-      name: String(row[STUDENTS_SHEET.columns.name] ?? "").trim(),
-      status: String(row[STUDENTS_SHEET.columns.status] ?? "")
-        .trim()
-        .toLowerCase(),
-    }))
-    .filter(({ studentId, name, status }) => {
-      if (!studentId) return false;
-      if (normalizedStatus && status !== normalizedStatus) return false;
-      if (studentId === trimmedQuery) return true;
-      return name.toLocaleLowerCase(DEFAULT_LOCALE).includes(normalizedQuery);
-    });
+  const results: StudentSummary[] = [];
+
+  for (const row of rows) {
+    const studentId = String(row[STUDENTS_SHEET.columns.id] ?? "").trim();
+    if (!studentId) continue;
+
+    const statusRow = String(row[STUDENTS_SHEET.columns.status] ?? "")
+      .trim()
+      .toLowerCase();
+    if (normalizedStatus && statusRow !== normalizedStatus) continue;
+
+    const name = String(row[STUDENTS_SHEET.columns.name] ?? "").trim();
+    const matchesQuery =
+      studentId === trimmedQuery ||
+      name.toLocaleLowerCase(DEFAULT_LOCALE).includes(normalizedQuery);
+
+    if (matchesQuery) results.push({ studentId, name });
+  }
+
+  return results;
 }
 
 export function getStudentForEdit(
@@ -294,7 +305,7 @@ export function createStudentRecord(
     [col.status]: "ativo",
   };
 
-  studentsSheet.appendRow(Object.entries(row).map((entry) => entry[1]));
+  studentsSheet.appendRow(Object.values(row));
   replaceGuardians(registrationSheet, studentId, input.guardians);
 
   return studentId;
@@ -353,8 +364,9 @@ export function updateStudentRecord(
   studentsSheet
     .getRange(match.getRow(), col.name + 1, 1, 4)
     .setValues([[input.name, input.address, input.nationality, birthDate]]);
-  studentsSheet.getRange(match.getRow(), col.sex + 1).setValue(input.sex);
-  studentsSheet.getRange(match.getRow(), col.status + 1).setValue(input.status);
+  studentsSheet
+    .getRange(match.getRow(), col.sex + 1, 1, 2)
+    .setValues([[input.sex, input.status]]);
 
   replaceGuardians(registrationSheet, studentId, input.guardians);
 

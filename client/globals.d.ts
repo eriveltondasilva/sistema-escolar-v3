@@ -1,9 +1,20 @@
-// client/globals.d.ts
+/// <reference types="google-apps-script" />
 import type { Alpine as AlpineType } from "alpinejs";
 
 declare global {
-  const Alpine: AlpineType;
-  const google: GoogleAppsScript.Host;
+  var Alpine: AlpineType;
+
+  var google: {
+    script: {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      run: Record<string, any>;
+      host: {
+        close(): void;
+        setHeight(height: number): void;
+        setWidth(width: number): void;
+      };
+    };
+  };
 }
 
 export {};

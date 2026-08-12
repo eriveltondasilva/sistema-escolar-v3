@@ -29,13 +29,14 @@ function emptyForm(): StudentFormPayload {
     sex: "",
     birthDate: "",
     enrollmentDate: "",
-    status: "",
+    status: "ativo",
     guardians: [],
   };
 }
 
 type StudentEditState = {
   studentId: string;
+  isEditMode: true;
   isLoadingStudent: boolean;
   isSaving: boolean;
   error: string;
@@ -55,6 +56,7 @@ function initDialog(el: HTMLElement): StudentEditState {
   return {
     studentId,
     isLoadingStudent: false,
+    isEditMode: true,
     isSaving: false,
     error: "",
     form: emptyForm(),

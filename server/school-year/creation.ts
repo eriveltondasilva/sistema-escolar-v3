@@ -58,6 +58,10 @@ export function createSchoolYearStructure({
   const createdClasses: string[] = [];
   const creationErrors: string[] = [];
 
+  const matriculationByClass = new Map(
+    matriculationsByClass.map((m) => [m.className, m]),
+  );
+
   for (const { name: className, assessmentType } of VALID_CLASSES) {
     try {
       const classTemplateFile = getClassTemplateFile({
@@ -68,17 +72,10 @@ export function createSchoolYearStructure({
       const classFile = classTemplateFile.makeCopy(className, yearFolder);
       const classSpreadsheet = SpreadsheetApp.openById(classFile.getId());
 
-      // A ordem importa: as abas de disciplina são cópias da "_Base", então
-      // preencher {{school_class}}/{{school_year}} antes de duplicar já
-      // resolve o placeholder em todas as cópias de uma vez. Só
-      // {{subject_name}}/{{subject_code}} precisam ser tratados por cópia,
-      // já que variam entre elas.
       fillClassHeaderPlaceholders({ classSpreadsheet, className, yearInput });
       createSubjectSheets(classSpreadsheet, assessmentType);
 
-      const matriculation = matriculationsByClass.find(
-        (m) => m.className === className,
-      );
+      const matriculation = matriculationByClass.get(className);
       if (matriculation) {
         insertMatriculationsIntoSummary({
           classSpreadsheet,

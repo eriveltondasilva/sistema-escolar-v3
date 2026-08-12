@@ -1,6 +1,6 @@
 // server/report/dialog-actions.ts
 import { loadConfig } from "#config/app-config.ts";
-import { DIALOG_NAMES, MAX_ERRORS_SHOWN } from "#config/constants.ts";
+import { DIALOG_NAMES } from "#config/constants.ts";
 import {
   getClassSpreadsheetFile,
   getSchoolYearFolder,
@@ -41,7 +41,7 @@ function showClassReportsResult_({
   schoolYearLabel,
   className,
 }: ShowClassReportsResult): void {
-  const errorsToShow = result.errors.slice(0, MAX_ERRORS_SHOWN);
+  const errorsToShow = result.errors;
   const truncatedCount = result.errorCount - errorsToShow.length;
   const height = result.errorCount > 0 || result.interrupted ? 600 : 260;
 

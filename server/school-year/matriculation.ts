@@ -98,18 +98,19 @@ export function insertMatriculationsIntoSummary({
     throw new Error(`A aba "${SUMMARY_SHEET.name}" não existe nesta turma.`);
   }
 
-  const rows = studentIds
-    .map((studentId) => {
-      const trimmedId = studentId.trim();
-      const student = registeredStudentsMap.get(trimmedId);
-      return student ? ([trimmedId, student.name] as const) : null;
-    })
-    .filter((row): row is readonly [string, string] => row !== null)
-    .sort((a, b) => a[1].localeCompare(b[1], DEFAULT_LOCALE));
+  const rows: [string, string][] = [];
+
+  for (const studentId of studentIds) {
+    const trimmedId = studentId.trim();
+    const student = registeredStudentsMap.get(trimmedId);
+    if (student) rows.push([trimmedId, student.name]);
+  }
+
+  rows.sort((a, b) => a[1].localeCompare(b[1], DEFAULT_LOCALE));
 
   if (rows.length === 0) return;
 
   summarySheet
     .getRange(SUMMARY_SHEET.startRow, 1, rows.length, 2)
-    .setValues(rows.map((row) => [...row]));
+    .setValues(rows);
 }

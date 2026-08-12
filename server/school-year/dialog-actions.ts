@@ -39,14 +39,15 @@ export function submitSchoolYearCreation(
       config.enrollmentSpreadsheetId,
     );
     const registeredStudentsMap = loadStudentsMap(registrationSheet);
-
     const validationIssues = validateClassMatriculations(
       matriculationsByClass,
       registeredStudentsMap,
     );
-    const errorMessages = validationIssues
-      .filter((issue) => issue.type === "error")
-      .map((issue) => issue.text);
+
+    const errorMessages: string[] = [];
+    for (const issue of validationIssues) {
+      if (issue.type === "error") errorMessages.push(issue.text);
+    }
 
     if (errorMessages.length > 0) {
       throw new Error(

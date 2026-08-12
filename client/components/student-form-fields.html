@@ -86,7 +86,7 @@
 
 <!-- Campo status: visível apenas no formulário de edição (form.status existe).
      No cadastro, o status é sempre "ativo" e definido pelo servidor. -->
-<template x-if="form.status !== undefined">
+<template x-if="isEditMode">
   <div>
     <label
       for="student-status"

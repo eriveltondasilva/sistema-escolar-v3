@@ -1,5 +1,5 @@
 // client/dialogs/validation-result.ts
-import { parseInitData } from "../utils/parse-init-data.ts";
+import { parseInitData } from "#client/utils/parse-init-data.ts";
 
 import type { ValidationResultInitData } from "#server/system-check/types.ts";
 import type { Issue, IssueType } from "#server/types.ts";

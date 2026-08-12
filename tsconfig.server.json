@@ -2,9 +2,8 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
     "lib": ["ESNext"],
-    "types": ["bun", "google-apps-script"]
+    "types": ["google-apps-script"]
   },
   "include": ["server/**/*.ts"]
 }

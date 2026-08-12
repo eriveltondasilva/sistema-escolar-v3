@@ -29,6 +29,7 @@ function emptyForm(): CreateStudentPayload {
 
 type StudentCreateState = {
   lastStudentId: string;
+  isEditMode: false;
   isLoading: boolean;
   isOpeningEdit: boolean;
   error: string;
@@ -43,6 +44,7 @@ type StudentCreateState = {
 function initDialog(): StudentCreateState {
   return {
     lastStudentId: "",
+    isEditMode: false,
     isLoading: false,
     isOpeningEdit: false,
     error: "",
