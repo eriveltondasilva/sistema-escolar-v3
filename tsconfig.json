@@ -5,6 +5,15 @@
     "target": "ESNext",
     "module": "Preserve",
     "moduleDetection": "force",
+    "lib": [
+      "ESNext",
+      "DOM"
+    ],
+    "types": [
+      "bun",
+      "alpinejs",
+      "google-apps-script"
+    ],
     // "jsx": "react-jsx",
     // "allowJs": true,
     // # Bundler mode
@@ -22,8 +31,12 @@
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     // # Some stricter flags (disabled by default)
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noPropertyAccessFromIndexSignature": false
-  }
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
+  },
+  "include": [
+    "client/**/*.ts",
+    "server/**/*.ts",
+    "scripts/**/*.ts"
+  ]
 }

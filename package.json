@@ -26,7 +26,7 @@
     "lint": "bunx --bun eslint .",
     "lint:fix": "bunx --bun eslint . --fix",
     "2###": "",
-    "types": "tsc -p tsconfig.client.json && tsc -p tsconfig.server.json && tsc -p tsconfig.scripts.json",
+    "types": "tsc --noEmit",
     "check": "bun run types && bun run lint && bun run fmt",
     "fix": "bun run types && bun run lint:fix && bun run fmt:fix"
   },

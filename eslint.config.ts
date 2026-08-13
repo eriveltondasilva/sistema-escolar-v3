@@ -1,7 +1,7 @@
 import js from "@eslint/js";
-import { defineConfig, globalIgnores } from "eslint/config";
 import prettier from "eslint-config-prettier";
 import importX from "eslint-plugin-import-x";
+import { defineConfig, globalIgnores } from "eslint/config";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
@@ -27,7 +27,7 @@ const gasGlobals = {
 } as const;
 
 export default defineConfig([
-  globalIgnores(["node_modules", "dist", "!old-server"]),
+  globalIgnores(["node_modules", "dist"]),
   // Eslint configs recomendadas para JavaScript.
   {
     files: ["**/*.{js,mjs,cjs,ts,mts,cts}"],
@@ -72,7 +72,7 @@ export default defineConfig([
 
   // Server: roda no runtime V8 do Apps Script, com seus próprios globais.
   {
-    files: ["server/**/*.ts", "server-new/**/*.ts"],
+    files: ["server/**/*.ts"],
     languageOptions: { globals: gasGlobals },
   },
 
