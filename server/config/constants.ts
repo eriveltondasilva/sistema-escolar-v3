@@ -1,6 +1,7 @@
 // server/constants.ts
 
 export const DEFAULT_LOCALE = "pt-BR";
+export const SCHOOL_YEAR_LABEL_PREFIX = "Ano Letivo - ";
 
 export const MAX_ERRORS_SHOWN = 15;
 
@@ -10,7 +11,6 @@ export const DIALOG_NAMES = {
   createSchoolYearResult: "create-school-year-result",
   errorDialog: "error-dialog",
   generateReportForm: "generate-report-form",
-  reportDownload: "report-download",
   reportSuccess: "report-success",
   studentCreate: "student-create",
   studentEdit: "student-edit",

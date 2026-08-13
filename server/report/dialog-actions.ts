@@ -170,7 +170,7 @@ function executeStudentReport_({
   };
 
   const htmlOutput = renderView(DIALOG_NAMES.reportSuccess, initData);
-  htmlOutput.setWidth(400).setHeight(360);
+  htmlOutput.setWidth(400).setHeight(370);
 
   ui.showModalDialog(htmlOutput, "Boletim Gerado");
 }

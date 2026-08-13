@@ -1,6 +1,6 @@
 // server/school-year/dialog-actions.ts
 import { loadConfig } from "#config/app-config.ts";
-import { DIALOG_NAMES } from "#config/constants.ts";
+import { DIALOG_NAMES, SCHOOL_YEAR_LABEL_PREFIX } from "#config/constants.ts";
 import { loadStudentsMap } from "#report/data-access.ts";
 import { renderView } from "#utils/render-view.ts";
 import { withScriptLock } from "#utils/script-lock.ts";
@@ -11,8 +11,6 @@ import type {
   ClassMatriculationInput,
   CreateSchoolYearResultInitData,
 } from "./types.ts";
-
-const SCHOOL_YEAR_LABEL_PREFIX = "Ano Letivo - ";
 
 export function submitSchoolYearCreation(
   yearInput: string,

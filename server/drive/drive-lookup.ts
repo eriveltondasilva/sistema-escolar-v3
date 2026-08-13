@@ -1,9 +1,15 @@
 // server/shared/drive-lookup.ts
-import { GoogleMimeType } from "#server/config/constants.ts";
+import {
+  GoogleMimeType,
+  SCHOOL_YEAR_LABEL_PREFIX,
+} from "#server/config/constants.ts";
 
 import type { AssessmentType } from "../types.ts";
 
-const SCHOOL_YEAR_REGEX = /^Ano Letivo - (\d{4})$/i;
+const SCHOOL_YEAR_REGEX = new RegExp(
+  `^${SCHOOL_YEAR_LABEL_PREFIX}(\\d{4})$`,
+  "i",
+);
 
 /**
  * Retorna uma lista decrescente de anos letivos cadastrados na pasta "Anos Letivos".
@@ -175,7 +181,7 @@ export function findStudentPdfInFolder(
   folder: GoogleAppsScript.Drive.Folder,
   studentId: string,
 ): GoogleAppsScript.Drive.File | null {
-  const prefix = `${studentId.replace(/\D/g, "")}_`;
+  const prefix = `${studentId}_`;
   const searchQuery =
     `title contains '${prefix}' ` +
     "and mimeType = 'application/pdf' " +

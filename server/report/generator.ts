@@ -1,8 +1,6 @@
 // server/report/generator.ts
 import { getErrorMsg } from "#utils/error.ts";
 import { formatDate, formatSex } from "#utils/formatters.ts";
-import { generateReportLinkToken } from "#utils/link-token.ts";
-import { getScriptProp } from "#utils/script-properties.ts";
 import { getPlaceholderFields, VALID_CLASSES } from "./constants.ts";
 import { getGradesForStudent, getPersonalData } from "./data-access.ts";
 
@@ -80,12 +78,12 @@ function insertQRCode({
   if (!element) return;
 
   try {
-    const webAppId = getScriptProp("WEB_APP_ID");
-    const token = generateReportLinkToken({
-      studentId,
-      className,
-      year,
-    });
+    // const webAppId = getScriptProp("WEB_APP_ID");
+    // const token = generateReportLinkToken({
+    //   studentId,
+    //   className,
+    //   year,
+    // });
 
     const validationUrl =
       `https://script.google.com/macros/s/${encodeURIComponent(webAppId)}/exec` +
@@ -93,8 +91,9 @@ function insertQRCode({
       `&className=${encodeURIComponent(className)}` +
       `&year=${encodeURIComponent(year)}` +
       `&token=${encodeURIComponent(token)}`;
+    console.log("validationUrl:", validationUrl);
 
-    const qrApiUrl = `https://quickchart.io/qr?text=${validationUrl}&size=80`;
+    const qrApiUrl = `https://quickchart.io/qr?text=${encodeURIComponent(validationUrl)}&size=140`;
 
     const imageBlob = UrlFetchApp.fetch(qrApiUrl).getBlob();
     const textElement = element.getElement();
@@ -122,7 +121,7 @@ function trashPreviousPdfVersions({
   studentId,
   keepFileId,
 }: TrashPreviousPdfVersionsParams): void {
-  const prefix = `${studentId.replace(/\D/g, "")}_`;
+  const prefix = `${studentId}_`;
   const searchQuery =
     `title contains '${prefix}' ` +
     "and mimeType = 'application/pdf' " +

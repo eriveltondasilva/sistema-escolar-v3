@@ -17,12 +17,6 @@ export interface AppConfig {
   readonly enrollmentSpreadsheetId: string;
 }
 
-export interface ReportLinkParams {
-  studentId: string;
-  className: string;
-  year: string;
-}
-
 export interface Issue {
   type: IssueType;
   text: string;

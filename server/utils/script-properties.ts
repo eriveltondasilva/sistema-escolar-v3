@@ -2,7 +2,7 @@
 import type { ClassReportJob } from "../report/types.ts";
 
 /** Chaves válidas de Script Properties usadas no projeto. */
-type ScriptPropertyKey = "WEB_APP_ID" | "REPORT_LINK_SECRET";
+type ScriptPropertyKey = "REPORT_LINK_SECRET";
 const CLASS_REPORT_JOB_KEY = "CLASS_REPORT_JOB";
 
 export function getScriptProp(key: ScriptPropertyKey): string {
