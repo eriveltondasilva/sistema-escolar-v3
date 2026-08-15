@@ -1,5 +1,9 @@
 // server/report/data-access.ts
-import { formatDate, formatGuardianNames } from "#utils/formatters.ts";
+import {
+  formatDate,
+  formatGuardianNames,
+  formatStr,
+} from "#utils/formatters.ts";
 import {
   getGradeColumns,
   GUARDIANS_SHEET,
@@ -70,8 +74,8 @@ export function getClassStudentsFromSummary(
 
   return values
     .map(([studentId, name], index) => ({
-      studentId: String(studentId).trim(),
-      name: String(name).trim(),
+      studentId: formatStr(studentId),
+      name: formatStr(name),
       row: SUMMARY_SHEET.startRow + index,
     }))
     .filter((s) => s.studentId.length > 0);
@@ -94,13 +98,13 @@ function mapStudentRow(row: ReadonlyArray<unknown>): StudentData {
   const col = STUDENTS_SHEET.columns;
 
   return {
-    name: String(row[col.name] ?? "").trim(),
-    address: String(row[col.address] ?? "").trim(),
-    nationality: String(row[col.nationality] ?? "").trim(),
-    birthDate: formatDate(String(row[col.birthDate] ?? "").trim()),
-    enrollmentDate: formatDate(String(row[col.enrollmentDate] ?? "").trim()),
-    sex: String(row[col.sex] ?? "").trim(),
-    status: String(row[col.status] ?? "").trim() as StudentStatus,
+    name: formatStr(row[col.name]),
+    address: formatStr(row[col.address]),
+    nationality: formatStr(row[col.nationality]),
+    birthDate: formatDate(formatStr(row[col.birthDate])),
+    enrollmentDate: formatDate(formatStr(row[col.enrollmentDate])),
+    sex: formatStr(row[col.sex]),
+    status: formatStr(row[col.status]) as StudentStatus,
   };
 }
 
@@ -130,7 +134,7 @@ export function loadStudentsMap(
 
   const map = new Map<string, StudentData>();
   for (const row of rows) {
-    const studentId = String(row[STUDENTS_SHEET.columns.id]).trim();
+    const studentId = formatStr(row[STUDENTS_SHEET.columns.id]);
     if (!studentId) continue;
 
     map.set(studentId, mapStudentRow(row));
@@ -216,8 +220,8 @@ export function loadGuardiansMap(
   const map = new Map<string, string[]>();
 
   for (const row of rows) {
-    const studentId = String(row[col.studentId]).trim();
-    const name = String(row[col.name]).trim();
+    const studentId = formatStr(row[col.studentId]);
+    const name = formatStr(row[col.name]);
 
     if (!studentId || !name) continue;
 
@@ -262,8 +266,8 @@ export function loadSingleStudentGuardiansMap(
   const names: string[] = [];
 
   for (const row of rows) {
-    if (String(row[0]).trim() !== studentId) continue;
-    const name = String(row[1]).trim();
+    if (formatStr(row[0]) !== studentId) continue;
+    const name = formatStr(row[1]);
     if (name) names.push(name);
   }
 
@@ -305,7 +309,7 @@ export function loadGradesBySubject({
 
     const byStudentId = new Map<string, GradeRow>(
       rows
-        .map((row): [string, GradeRow] => [String(row[0]).trim(), row])
+        .map((row): [string, GradeRow] => [formatStr(row[0]), row])
         .filter(([studentId]) => studentId.length > 0),
     );
 

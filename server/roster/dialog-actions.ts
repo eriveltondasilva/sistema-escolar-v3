@@ -1,6 +1,6 @@
 // server/roster/dialog-actions.ts
 import { loadConfig } from "#config/app-config.ts";
-import { formatGuardianNames } from "#utils/formatters.ts";
+import { formatGuardianNames, formatStr } from "#utils/formatters.ts";
 import { withScriptLock } from "#utils/script-lock.ts";
 import {
   createStudentRecord,
@@ -52,7 +52,7 @@ export interface StudentSearchDetails {
 export function getStudentDetailsForSearch(
   studentId: string,
 ): StudentSearchDetails {
-  const trimmedId = String(studentId ?? "").trim();
+  const trimmedId = formatStr(studentId);
   if (!trimmedId) throw new Error("Matrícula não pode ser vazia.");
 
   const { enrollmentSpreadsheetId, pdfsFolderId } = loadConfig();
@@ -73,7 +73,7 @@ export function getStudentDetailsForSearch(
 }
 
 export function getStudentForEditForm(studentId: string): StudentFormPayload {
-  const trimmedId = String(studentId ?? "").trim();
+  const trimmedId = formatStr(studentId);
   if (!trimmedId) throw new Error("Matrícula não pode ser vazia.");
 
   const { enrollmentSpreadsheetId } = loadConfig();
@@ -115,7 +115,7 @@ export function submitStudentEdit(
   studentId: string,
   payload: Omit<StudentFormPayload, "studentId" | "enrollmentDate">,
 ): void {
-  const trimmedId = String(studentId ?? "").trim();
+  const trimmedId = formatStr(studentId);
   if (!trimmedId) throw new Error("Matrícula não pode ser vazia.");
 
   validateStudentPayload(payload);

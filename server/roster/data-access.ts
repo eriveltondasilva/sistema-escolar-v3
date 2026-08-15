@@ -1,7 +1,7 @@
 // server/roster/data-access.ts
 import { DEFAULT_LOCALE } from "#config/constants.ts";
 import { GUARDIANS_SHEET, STUDENTS_SHEET } from "#report/constants.ts";
-import { formatDate } from "#utils/formatters.ts";
+import { formatDate, formatStr } from "#utils/formatters.ts";
 import { diffStudentFields, logStudentChanges } from "./change-log.ts";
 
 import type { GuardianData, StudentStatus, StudentSummary } from "../types.ts";
@@ -35,7 +35,7 @@ function generateNextStudentId(
     .getValues();
 
   const maxId = rows.reduce((max, row) => {
-    const numeric = Number(String(row[0] ?? "").trim());
+    const numeric = Number(formatStr(row[0]));
     return Number.isFinite(numeric) && numeric > max ? numeric : max;
   }, 0);
 
@@ -58,14 +58,11 @@ function mapGuardianRow(row: ReadonlyArray<unknown>): GuardianData {
   const col = GUARDIANS_SHEET.columns;
 
   return {
-    name: String(row[col.name] ?? "").trim(),
-    address: String(row[col.address] ?? "").trim(),
-    relationship: String(row[col.relationship] ?? "").trim(),
-    isPrimary:
-      String(row[col.isPrimary] ?? "")
-        .trim()
-        .toLowerCase() === "sim",
-    phone: String(row[col.phone] ?? "").trim(),
+    name: formatStr(row[col.name]),
+    address: formatStr(row[col.address]),
+    relationship: formatStr(row[col.relationship]),
+    isPrimary: formatStr(row[col.isPrimary]).toLowerCase() === "sim",
+    phone: formatStr(row[col.phone]),
   };
 }
 
@@ -94,8 +91,8 @@ function loadStudentGuardians(
   const guardians: GuardianData[] = [];
 
   for (const row of rows) {
-    if (String(row[col.studentId] ?? "").trim() !== studentId) continue;
-    if (!String(row[col.name] ?? "").trim()) continue;
+    if (formatStr(row[col.studentId]) !== studentId) continue;
+    if (!formatStr(row[col.name])) continue;
     guardians.push(mapGuardianRow(row));
   }
 
@@ -139,7 +136,7 @@ function replaceGuardians(
       .getValues();
 
     existingIds.forEach((row, i) => {
-      if (String(row[0] ?? "").trim() === studentId) {
+      if (formatStr(row[0]) === studentId) {
         existingRows.push(GUARDIANS_SHEET.startRow + i);
       }
     });
@@ -211,15 +208,15 @@ export function searchStudents(
   const results: StudentSummary[] = [];
 
   for (const row of rows) {
-    const studentId = String(row[STUDENTS_SHEET.columns.id] ?? "").trim();
+    const studentId = formatStr(row[STUDENTS_SHEET.columns.id]);
     if (!studentId) continue;
 
-    const statusRow = String(row[STUDENTS_SHEET.columns.status] ?? "")
-      .trim()
-      .toLowerCase();
+    const statusRow = formatStr(
+      row[STUDENTS_SHEET.columns.status],
+    ).toLowerCase();
     if (normalizedStatus && statusRow !== normalizedStatus) continue;
 
-    const name = String(row[STUDENTS_SHEET.columns.name] ?? "").trim();
+    const name = formatStr(row[STUDENTS_SHEET.columns.name]);
     const matchesQuery =
       studentId === trimmedQuery ||
       name.toLocaleLowerCase(DEFAULT_LOCALE).includes(normalizedQuery);
@@ -266,13 +263,13 @@ export function getStudentForEdit(
 
   return {
     studentId,
-    name: String(row[col.name] ?? "").trim(),
-    address: String(row[col.address] ?? "").trim(),
-    nationality: String(row[col.nationality] ?? "").trim(),
+    name: formatStr(row[col.name]),
+    address: formatStr(row[col.address]),
+    nationality: formatStr(row[col.nationality]),
     birthDate: toIsoDateString(row[col.birthDate]),
     enrollmentDate: formatDate(row[col.enrollmentDate]),
-    sex: String(row[col.sex] ?? "").trim(),
-    status: String(row[col.status] ?? "").trim() as StudentStatus,
+    sex: formatStr(row[col.sex]),
+    status: formatStr(row[col.status]) as StudentStatus,
     guardians: loadStudentGuardians(registrationSheet, studentId),
   };
 }
@@ -350,12 +347,12 @@ export function updateStudentRecord(
     .getValues()[0]!;
 
   const oldData = {
-    name: String(currentRow[col.name] ?? "").trim(),
-    address: String(currentRow[col.address] ?? "").trim(),
-    nationality: String(currentRow[col.nationality] ?? "").trim(),
-    birthDate: toIsoDateString(currentRow[col.birthDate]).trim(),
-    sex: String(currentRow[col.sex] ?? "").trim(),
-    status: String(currentRow[col.status] ?? "").trim() as StudentStatus,
+    name: formatStr(currentRow[col.name]),
+    address: formatStr(currentRow[col.address]),
+    nationality: formatStr(currentRow[col.nationality]),
+    birthDate: toIsoDateString(currentRow[col.birthDate]),
+    sex: formatStr(currentRow[col.sex]),
+    status: formatStr(currentRow[col.status]) as StudentStatus,
   };
 
   const birthDate =

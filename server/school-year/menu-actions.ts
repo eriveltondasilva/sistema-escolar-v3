@@ -5,7 +5,7 @@ import { renderView } from "#utils/render-view.ts";
 
 import type { CreateSchoolYearFormInitData } from "./types.ts";
 
-export function openCreateSchoolYearDialog(): void {
+export function openCreateSchoolYearFormDialog(): void {
   const ui = SpreadsheetApp.getUi();
 
   const initData: CreateSchoolYearFormInitData = {

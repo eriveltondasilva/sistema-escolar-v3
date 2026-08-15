@@ -27,21 +27,22 @@ function emptyForm(): CreateStudentPayload {
   };
 }
 
-type StudentCreateState = {
+interface InitDialog {
   lastStudentId: string;
   isEditMode: false;
   isLoading: boolean;
   isOpeningEdit: boolean;
   error: string;
   form: CreateStudentPayload;
+  // Funções
   addGuardian(): void;
   removeGuardian(index: number): void;
   setPrimaryGuardian(index: number): void;
-  editStudent(): void;
-  submit(): void;
-};
+  editStudent(): Promise<void>;
+  submit(): Promise<void>;
+}
 
-function initDialog(): StudentCreateState {
+function initDialog(): InitDialog {
   return {
     lastStudentId: "",
     isEditMode: false,
@@ -71,21 +72,23 @@ function initDialog(): StudentCreateState {
       });
     },
 
-    editStudent() {
+    async editStudent() {
       this.isOpeningEdit = true;
       this.error = "";
 
-      runServerAction((server) =>
-        server.openStudentEditDialog(this.lastStudentId),
-      )
-        .then(() => google.script.host.close())
-        .catch((error: unknown) => {
-          this.error = getErrorMsg(error);
-          this.isOpeningEdit = false;
-        });
+      try {
+        await runServerAction((server) =>
+          server.openStudentEditDialog(this.lastStudentId),
+        );
+
+        google.script.host.close();
+      } catch (error: unknown) {
+        this.error = getErrorMsg(error);
+        this.isOpeningEdit = false;
+      }
     },
 
-    submit() {
+    async submit() {
       const validationError = validateStudentForm(this.form);
 
       if (validationError) {
@@ -96,23 +99,22 @@ function initDialog(): StudentCreateState {
       this.error = "";
       this.isLoading = true;
 
-      runServerAction<string>((server) =>
-        server.submitStudentRegistration(this.form),
-      )
-        .then((newStudentId) => {
-          this.lastStudentId = newStudentId;
-          this.form = emptyForm();
-        })
-        .catch((error: unknown) => {
-          this.error = getErrorMsg(error);
-        })
-        .finally(() => {
-          this.isLoading = false;
-        });
+      try {
+        const newStudentId = await runServerAction<string>((server) =>
+          server.submitStudentRegistration(this.form),
+        );
+
+        this.lastStudentId = newStudentId;
+        this.form = emptyForm();
+      } catch (error: unknown) {
+        this.error = getErrorMsg(error);
+      } finally {
+        this.isLoading = false;
+      }
     },
   };
 }
 
 document.addEventListener("alpine:init", () => {
-  Alpine.data(initDialog.name, initDialog);
+  Alpine.data("initDialog", initDialog);
 });

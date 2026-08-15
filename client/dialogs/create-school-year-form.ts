@@ -6,15 +6,16 @@ import { runServerAction } from "../utils/run-server-action.ts";
 import type { CreateSchoolYearFormInitData } from "#server/school-year/types.ts";
 import type { MatriculationInput } from "../types.ts";
 
-type CreateSchoolYearFormState = CreateSchoolYearFormInitData & {
+interface InitDialog extends CreateSchoolYearFormInitData {
   year: string;
   matriculationsByClass: Record<string, string>;
   expanded: Record<string, boolean>;
   isLoading: boolean;
   error: string;
+  // Funções
   matriculationCount(className: string): number;
-  submit(): void;
-};
+  submit(): Promise<void>;
+}
 
 function parseStudentIds(text: string): string[] {
   return text
@@ -27,7 +28,7 @@ function isValidYear(value: string): boolean {
   return /^\d{4}$/.test(value.trim());
 }
 
-function initDialog(el: HTMLElement): CreateSchoolYearFormState {
+function initDialog(el: HTMLElement): InitDialog {
   const { classNames } = parseInitData<CreateSchoolYearFormInitData>(el);
 
   return {
@@ -45,7 +46,7 @@ function initDialog(el: HTMLElement): CreateSchoolYearFormState {
         .length;
     },
 
-    submit() {
+    async submit() {
       this.error = "";
 
       if (!isValidYear(this.year)) {
@@ -62,18 +63,20 @@ function initDialog(el: HTMLElement): CreateSchoolYearFormState {
 
       this.isLoading = true;
 
-      runServerAction((server) =>
-        server.submitSchoolYearCreation(this.year.trim(), matriculations),
-      )
-        .then(() => google.script.host.close())
-        .catch((error: unknown) => {
-          this.error = getErrorMsg(error);
-          this.isLoading = false;
-        });
+      try {
+        await runServerAction((server) =>
+          server.submitSchoolYearCreation(this.year.trim(), matriculations),
+        );
+
+        google.script.host.close();
+      } catch (error: unknown) {
+        this.error = getErrorMsg(error);
+        this.isLoading = false;
+      }
     },
   };
 }
 
 document.addEventListener("alpine:init", () => {
-  Alpine.data(initDialog.name, initDialog);
+  Alpine.data("initDialog", initDialog);
 });

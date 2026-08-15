@@ -1,4 +1,6 @@
 // server/config.ts
+import { formatStr } from "#server/utils/formatters.ts";
+
 import type { AppConfig } from "../types.ts";
 
 interface ConfigSheet {
@@ -61,9 +63,7 @@ export function loadConfig(): AppConfig {
 
   const rawConfig = new Map(
     rows
-      .map(
-        ([key, value]) => [String(key).trim(), String(value).trim()] as const,
-      )
+      .map(([key, value]) => [formatStr(key), formatStr(value)] as const)
       .filter(([key]) => key !== ""),
   );
 

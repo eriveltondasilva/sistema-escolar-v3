@@ -4,31 +4,16 @@ import { parseInitData } from "../utils/parse-init-data.ts";
 import { runServerAction } from "../utils/run-server-action.ts";
 
 import type { ClassReportResultInitData } from "#server/report/types.ts";
-import type { GasServerFunctions } from "../utils/run-server-action.ts";
 
-type ClassReportState = ClassReportResultInitData & {
+interface InitDialog extends ClassReportResultInitData {
   isLoading: boolean;
   error: string;
-  continueGeneration(): void;
-  cancelGeneration(): void;
-};
-
-function handleGenerationAction(
-  this: ClassReportState,
-  action: (server: GasServerFunctions) => void,
-): void {
-  this.error = "";
-  this.isLoading = true;
-
-  runServerAction(action)
-    .then(() => google.script.host.close())
-    .catch((error: unknown) => {
-      this.error = getErrorMsg(error);
-      this.isLoading = false;
-    });
+  // Funções
+  continueGeneration(): Promise<void>;
+  cancelGeneration(): Promise<void>;
 }
 
-function initDialog(el: HTMLElement): ClassReportState {
+function initDialog(el: HTMLElement): InitDialog {
   const initData = parseInitData<ClassReportResultInitData>(el);
 
   return {
@@ -36,20 +21,39 @@ function initDialog(el: HTMLElement): ClassReportState {
     isLoading: false,
     error: "",
 
-    continueGeneration() {
-      handleGenerationAction.call(this, (server) =>
-        server.continueClassReportsGeneration(),
-      );
+    async continueGeneration() {
+      this.error = "";
+      this.isLoading = true;
+
+      try {
+        await runServerAction((server) =>
+          server.continueClassReportsGeneration(),
+        );
+
+        google.script.host.close();
+      } catch (error: unknown) {
+        this.error = getErrorMsg(error);
+        this.isLoading = false;
+      }
     },
 
-    cancelGeneration() {
-      handleGenerationAction.call(this, (server) =>
-        server.cancelClassReportsGeneration(),
-      );
+    async cancelGeneration() {
+      this.error = "";
+      this.isLoading = true;
+
+      try {
+        await runServerAction((server) =>
+          server.cancelClassReportsGeneration(),
+        );
+        google.script.host.close();
+      } catch (error: unknown) {
+        this.error = getErrorMsg(error);
+        this.isLoading = false;
+      }
     },
   };
 }
 
 document.addEventListener("alpine:init", () => {
-  Alpine.data(initDialog.name, initDialog);
+  Alpine.data("initDialog", initDialog);
 });

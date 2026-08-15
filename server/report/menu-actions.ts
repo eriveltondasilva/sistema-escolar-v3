@@ -6,6 +6,7 @@ import { getErrorMsg } from "#utils/error.ts";
 import { renderView } from "#utils/render-view.ts";
 import { VALID_CLASSES } from "./constants.ts";
 
+import type { ErrorDialogInitData } from "#server/types.ts";
 import type {
   GenerateReportFormInitData,
   YearClassSelectionType,
@@ -22,7 +23,15 @@ function openSelectYearClassDialog(actionType: YearClassSelectionType): void {
     const schoolYearLabels = listSchoolYears(schoolYearsFolderId);
 
     if (schoolYearLabels.length === 0) {
-      ui.alert('Nenhum ano letivo encontrado dentro da pasta "Anos Letivos".');
+      const errorInitData: ErrorDialogInitData = {
+        errorMessage:
+          "Nenhum ano letivo encontrado dentro da pasta 'Anos Letivos'.",
+      };
+      const errorHtmlOutput = renderView(
+        DIALOG_NAMES.errorDialog,
+        errorInitData,
+      );
+      ui.showModalDialog(errorHtmlOutput, "Erro");
       return;
     }
 
@@ -33,7 +42,7 @@ function openSelectYearClassDialog(actionType: YearClassSelectionType): void {
       classes,
     };
     const htmlOutput = renderView(DIALOG_NAMES.generateReportForm, initData);
-    htmlOutput.setWidth(400).setHeight(actionType === "single" ? 320 : 240);
+    htmlOutput.setWidth(520).setHeight(actionType === "single" ? 320 : 240);
 
     const dialogTitle =
       actionType === "single" ?
@@ -42,7 +51,11 @@ function openSelectYearClassDialog(actionType: YearClassSelectionType): void {
 
     ui.showModalDialog(htmlOutput, dialogTitle);
   } catch (error) {
-    ui.alert(`Erro ao abrir seleção: ${getErrorMsg(error)}`);
+    const errorInitData: ErrorDialogInitData = {
+      errorMessage: getErrorMsg(error),
+    };
+    const errorHtmlOutput = renderView(DIALOG_NAMES.errorDialog, errorInitData);
+    ui.showModalDialog(errorHtmlOutput, "Erro");
   }
 }
 

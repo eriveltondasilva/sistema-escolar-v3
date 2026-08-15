@@ -3,6 +3,7 @@ import {
   GoogleMimeType,
   SCHOOL_YEAR_LABEL_PREFIX,
 } from "#server/config/constants.ts";
+import { padStudentId } from "#server/utils/formatters.ts";
 
 import type { AssessmentType } from "../types.ts";
 
@@ -181,10 +182,10 @@ export function findStudentPdfInFolder(
   folder: GoogleAppsScript.Drive.Folder,
   studentId: string,
 ): GoogleAppsScript.Drive.File | null {
-  const prefix = `${studentId}_`;
+  const prefix = `${padStudentId(studentId)}_`;
   const searchQuery =
     `title contains '${prefix}' ` +
-    "and mimeType = 'application/pdf' " +
+    `and mimeType = '${GoogleMimeType.PDF}' ` +
     "and trashed = false";
 
   const files = folder.searchFiles(searchQuery);

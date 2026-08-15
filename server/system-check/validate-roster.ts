@@ -2,6 +2,7 @@
 
 import { DEFAULT_LOCALE } from "#config/constants.ts";
 import { STUDENTS_SHEET, SUMMARY_SHEET } from "#report/constants.ts";
+import { formatStr } from "#server/utils/formatters.ts";
 
 import type { ClassStudent } from "#report/types.ts";
 import type { Issue, StudentData } from "../types.ts";
@@ -132,7 +133,7 @@ export function findDuplicateStudentIds(
   const rowsByStudentId = new Map<string, number[]>();
 
   for (const [index, row] of rows.entries()) {
-    const studentId = String(row[0]).trim();
+    const studentId = formatStr(row[0]);
     if (!studentId) continue;
 
     const dataRow = STUDENTS_SHEET.startRow + index;

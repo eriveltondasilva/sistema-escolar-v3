@@ -1,130 +1,93 @@
 // server/report/generator.ts
+import { GoogleMimeType } from "#server/config/constants.ts";
 import { getErrorMsg } from "#utils/error.ts";
-import { formatDate, formatSex } from "#utils/formatters.ts";
+import { formatDate, formatSex, padStudentId } from "#utils/formatters.ts";
 import { getPlaceholderFields, VALID_CLASSES } from "./constants.ts";
 import { getGradesForStudent, getPersonalData } from "./data-access.ts";
 
 import type { AssessmentType } from "../types.ts";
 import type { GenerateReportForStudentParams, SubjectGrades } from "./types.ts";
 
-interface ReplacePlaceholderParams {
+interface ReplacePlaceholder {
   body: GoogleAppsScript.Document.Body;
   key: string;
   value: string | null | undefined;
 }
 
-function replacePlaceholder({
-  body,
-  key,
-  value,
-}: ReplacePlaceholderParams): void {
-  const safeValue = String(value ?? "").replace(/\$/g, "$$$$");
-  body.replaceText("{{" + key + "}}", safeValue);
-}
-
-interface ReplaceStatusPlaceholderParams {
-  body: GoogleAppsScript.Document.Body;
-  subjectCode: string;
-  rawValue: unknown;
-  format: (value: unknown) => string;
-}
-
-function replaceStatusPlaceholder({
-  body,
-  subjectCode,
-  rawValue,
-  format,
-}: ReplaceStatusPlaceholderParams): void {
-  const placeholder = `{{${subjectCode.toLowerCase()}_sf}}`;
-  const found = body.findText(placeholder);
-  if (!found) return;
-
-  const formattedValue = format(rawValue);
-  const textElement = found.getElement().asText();
-  const startOffset = found.getStartOffset();
-  const endOffsetInclusive = found.getEndOffsetInclusive();
-
-  textElement.deleteText(startOffset, endOffsetInclusive);
-  textElement.insertText(startOffset, formattedValue);
-
-  const status = String(rawValue ?? "")
-    .trim()
-    .toLowerCase();
-
-  if (!["aprovado", "reprovado"].includes(status)) return;
-
-  const color = status === "aprovado" ? "#16a34a" : "#dc2626";
-  textElement.setForegroundColor(
-    startOffset,
-    startOffset + formattedValue.length - 1,
-    color,
+function replacePlaceholder({ body, key, value }: ReplacePlaceholder): void {
+  body.replaceText(
+    "{{" + key + "}}",
+    String(value ?? "").replace(/\$/g, "$$$$"),
   );
 }
 
-interface InsertQRCodeParams {
+interface FillSubjectPlaceholders {
   body: GoogleAppsScript.Document.Body;
-  studentId: string;
-  className: string;
-  year: string;
+  assessmentType: AssessmentType;
+  grades: SubjectGrades;
+  subjectCode: string;
 }
 
-function insertQRCode({
+function fillSubjectPlaceholders({
   body,
-  studentId,
-  year,
-  className,
-}: InsertQRCodeParams): void {
+  assessmentType,
+  subjectCode,
+  grades,
+}: FillSubjectPlaceholders): void {
+  const placeholderFields = getPlaceholderFields(assessmentType);
+
+  for (const { suffix, field, format } of placeholderFields) {
+    replacePlaceholder({
+      body,
+      key: `${subjectCode}_${suffix}`.toLowerCase(),
+      value: format(grades[field]),
+    });
+  }
+}
+
+interface InsertQRCode {
+  body: GoogleAppsScript.Document.Body;
+  pdfUrl: string;
+}
+
+function insertQRCode({ body, pdfUrl }: InsertQRCode): void {
   const element = body.findText("{{qr_code}}");
   if (!element) return;
 
   try {
-    // const webAppId = getScriptProp("WEB_APP_ID");
-    // const token = generateReportLinkToken({
-    //   studentId,
-    //   className,
-    //   year,
-    // });
+    const qrApiUrl = `https://quickchart.io/qr?text=${encodeURIComponent(pdfUrl)}&size=140`;
+    const response = UrlFetchApp.fetch(qrApiUrl, { muteHttpExceptions: true });
 
-    const validationUrl =
-      `https://script.google.com/macros/s/${encodeURIComponent(webAppId)}/exec` +
-      `?studentId=${encodeURIComponent(studentId)}` +
-      `&className=${encodeURIComponent(className)}` +
-      `&year=${encodeURIComponent(year)}` +
-      `&token=${encodeURIComponent(token)}`;
-    console.log("validationUrl:", validationUrl);
+    if (response.getResponseCode() !== 200) {
+      throw new Error(`QR API retornou ${response.getResponseCode()}`);
+    }
 
-    const qrApiUrl = `https://quickchart.io/qr?text=${encodeURIComponent(validationUrl)}&size=140`;
-
-    const imageBlob = UrlFetchApp.fetch(qrApiUrl).getBlob();
+    const imageBlob = response.getBlob();
     const textElement = element.getElement();
     const parent = textElement.getParent().asParagraph();
-    const childIndex = parent.getChildIndex(textElement);
-
-    parent.insertInlineImage(childIndex, imageBlob);
+    parent.insertInlineImage(parent.getChildIndex(textElement), imageBlob);
   } catch (error) {
-    console.warn(
-      `insertQRCode: falha ao gerar QR para matrícula ${studentId} — ${getErrorMsg(error)}`,
-    );
+    console.warn(`[insertQRCode] falha — ${getErrorMsg(error)}`);
   } finally {
     element.getElement().removeFromParent();
   }
 }
 
-interface TrashPreviousPdfVersionsParams {
+interface TrashPreviousPdfVersions {
   pdfFolder: GoogleAppsScript.Drive.Folder;
-  studentId: string;
+  paddedStudentId: string;
   keepFileId: string;
 }
 
 function trashPreviousPdfVersions({
   pdfFolder,
-  studentId,
+  paddedStudentId,
   keepFileId,
-}: TrashPreviousPdfVersionsParams): void {
-  const prefix = `${studentId}_`;
+}: TrashPreviousPdfVersions): void {
+  const prefix = `${paddedStudentId}_`;
   const searchQuery =
     `title contains '${prefix}' ` +
-    "and mimeType = 'application/pdf' " +
+    `and mimeType = '${GoogleMimeType.PDF}' ` +
     "and trashed = false";
   const existingFiles = pdfFolder.searchFiles(searchQuery);
 
@@ -137,40 +100,12 @@ function trashPreviousPdfVersions({
   }
 }
 
-interface FillSubjectPlaceholdersParams {
-  body: GoogleAppsScript.Document.Body;
-  assessmentType: AssessmentType;
-  grades: SubjectGrades;
-  subjectCode: string;
-}
-
-function fillSubjectPlaceholders({
-  body,
-  assessmentType,
-  subjectCode,
-  grades,
-}: FillSubjectPlaceholdersParams): void {
-  const placeholderFields = getPlaceholderFields(assessmentType);
-  const statusField = placeholderFields.find((f) => f.suffix === "sf");
-
-  for (const { suffix, field, format } of placeholderFields) {
-    if (suffix === "sf") continue;
-
-    replacePlaceholder({
-      body,
-      key: `${subjectCode}_${suffix}`.toLowerCase(),
-      value: format(grades[field]),
-    });
-  }
-
-  if (statusField) {
-    replaceStatusPlaceholder({
-      body,
-      subjectCode,
-      rawValue: grades[statusField.field],
-      format: statusField.format,
-    });
-  }
+function updateDriveFileContent(
+  fileId: string,
+  blob: GoogleAppsScript.Base.Blob,
+): void {
+  // @ts-expect-error: false positive
+  Drive.Files.update(null, fileId, blob);
 }
 
 // -------------------------------------
@@ -186,20 +121,36 @@ export function generateReportForStudent({
 }: GenerateReportForStudentParams): string {
   const personalData = getPersonalData(context, studentId);
   const gradesData = getGradesForStudent({ studentId, foundSubjects, context });
-  const classInfo = VALID_CLASSES.find(
-    (validClass) => validClass.name === className,
-  );
+  const classInfo = VALID_CLASSES.find((c) => c.name === className);
 
-  const fileName = `${studentId}_${personalData.name.replace(/\s+/g, "_").toLowerCase()}`;
+  const paddedId = padStudentId(studentId);
+  const safeName = personalData.name.replace(/\s+/g, "_").toLowerCase();
+  const fileName = `${paddedId}_${safeName}`;
+
   const docCopy = context.templateFile.makeCopy(fileName, context.tempFolder);
 
   const date = new Date();
 
   try {
+    // Cria o arquivo vazio na tempFolder para obter o ID antes de gerar o
+    // PDF, permitindo que o QR code aponte para a URL final do arquivo.
+    const emptyBlob = Utilities.newBlob(
+      [],
+      GoogleMimeType.PDF,
+      `${fileName}.pdf`,
+    );
+    const pdfFile = context.tempFolder.createFile(emptyBlob);
+
+    pdfFile.setSharing(
+      DriveApp.Access.ANYONE_WITH_LINK,
+      DriveApp.Permission.VIEW,
+    );
+
+    const pdfUrl = `https://drive.google.com/file/d/${pdfFile.getId()}/view`;
+
     const doc = DocumentApp.openById(docCopy.getId());
     const body = doc.getBody();
 
-    // dados pessoais do aluno
     replacePlaceholder({ body, key: "nome", value: personalData.name });
     replacePlaceholder({ body, key: "matricula", value: studentId });
     replacePlaceholder({
@@ -223,19 +174,15 @@ export function generateReportForStudent({
       key: "sexo",
       value: formatSex(personalData.sex),
     });
-
-    // dados da turma e ano letivo
     replacePlaceholder({ body, key: "etapa", value: classInfo?.stage });
     replacePlaceholder({ body, key: "serie", value: classInfo?.name });
     replacePlaceholder({ body, key: "turma", value: "Única" });
     replacePlaceholder({ body, key: "turno", value: classInfo?.shift });
     replacePlaceholder({ body, key: "ano_letivo", value: context.year });
-
-    // data e hora de emissão
     replacePlaceholder({
       body,
       key: "data_emissao",
-      value: formatDate(date, { dateStyle: "long" }),
+      value: formatDate(date),
     });
     replacePlaceholder({
       body,
@@ -243,7 +190,6 @@ export function generateReportForStudent({
       value: date.toLocaleTimeString(),
     });
 
-    // notas por disciplina
     for (const subject of foundSubjects) {
       const grades = gradesData[subject.name] ?? {};
       fillSubjectPlaceholders({
@@ -254,24 +200,20 @@ export function generateReportForStudent({
       });
     }
 
-    insertQRCode({ body, studentId, className, year: context.year });
+    insertQRCode({ body, pdfUrl });
 
     doc.saveAndClose();
 
-    const pdfBlob = docCopy.getAs("application/pdf");
-    const pdfFile = context.pdfFolder
-      .createFile(pdfBlob)
-      .setName(`${fileName}.pdf`);
+    const pdfBlob = docCopy.getAs(GoogleMimeType.PDF);
+    updateDriveFileContent(pdfFile.getId(), pdfBlob);
 
-    pdfFile.setSharing(
-      DriveApp.Access.ANYONE_WITH_LINK,
-      DriveApp.Permission.VIEW,
-    );
+    context.pdfFolder.addFile(pdfFile);
+    context.tempFolder.removeFile(pdfFile);
 
     trashPreviousPdfVersions({
       pdfFolder: context.pdfFolder,
       keepFileId: pdfFile.getId(),
-      studentId,
+      paddedStudentId: paddedId,
     });
 
     return pdfFile.getUrl();

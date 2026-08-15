@@ -5,7 +5,7 @@ import { runServerAction } from "../utils/run-server-action.ts";
 import type { StudentStatus } from "#server/types.ts";
 import type { StudentOption, StudentSearchDetails } from "../types.ts";
 
-type StudentSearchState = {
+interface InitDialog {
   query: string;
   status: StudentStatus;
   isSearching: boolean;
@@ -15,13 +15,13 @@ type StudentSearchState = {
   selectedStudent: StudentSearchDetails | null;
   error: string;
   // Funções
-  search(): void;
-  selectStudent(studentId: string): void;
+  search(): Promise<void>;
+  selectStudent(studentId: string): Promise<void>;
+  editStudent(): Promise<void>;
   clearSelection(): void;
-  editStudent(): void;
-};
+}
 
-function initDialog(): StudentSearchState {
+function initDialog(): InitDialog {
   return {
     query: "",
     status: "ativo",
@@ -32,7 +32,7 @@ function initDialog(): StudentSearchState {
     selectedStudent: null,
     error: "",
 
-    search() {
+    async search() {
       this.error = "";
       this.selectedStudent = null;
 
@@ -43,63 +43,60 @@ function initDialog(): StudentSearchState {
 
       this.isSearching = true;
 
-      runServerAction<StudentOption[]>((server) =>
-        server.getStudentSearchResults(this.query, this.status),
-      )
-        .then((results) => {
-          this.results = results;
-        })
-        .catch((error: unknown) => {
-          this.error = getErrorMsg(error);
-        })
-        .finally(() => {
-          this.isSearching = false;
-        });
+      try {
+        this.results = await runServerAction<StudentOption[]>((server) =>
+          server.getStudentSearchResults(this.query, this.status),
+        );
+      } catch (error: unknown) {
+        this.error = getErrorMsg(error);
+      } finally {
+        this.isSearching = false;
+      }
     },
 
-    selectStudent(studentId: string) {
+    async selectStudent(studentId: string) {
       this.error = "";
       this.isLoadingDetails = true;
 
-      runServerAction<StudentSearchDetails>((server) =>
-        server.getStudentDetailsForSearch(studentId),
-      )
-        .then((details) => {
-          this.selectedStudent = details;
-        })
-        .catch((error: unknown) => {
-          this.error = getErrorMsg(error);
-        })
-        .finally(() => {
-          this.isLoadingDetails = false;
-        });
+      try {
+        this.selectedStudent = await runServerAction<StudentSearchDetails>(
+          (server) => server.getStudentDetailsForSearch(studentId),
+        );
+      } catch (error: unknown) {
+        this.error = getErrorMsg(error);
+      } finally {
+        this.isLoadingDetails = false;
+      }
+    },
+
+    async editStudent() {
+      if (!this.selectedStudent) return;
+
+      this.isOpeningEdit = true;
+      this.error = "";
+
+      const studentId = this.selectedStudent.student.studentId;
+
+      try {
+        await runServerAction((server) =>
+          server.openStudentEditDialog(studentId),
+        );
+        // Fecha a modal no sucesso. Não precisamos do finally para resetar o loading
+        // porque a janela inteira será destruída.
+        google.script.host.close();
+      } catch (error: unknown) {
+        this.error = getErrorMsg(error);
+        this.isOpeningEdit = false;
+      }
     },
 
     clearSelection() {
       this.selectedStudent = null;
       this.error = "";
     },
-
-    editStudent() {
-      const selectedStudent = this.selectedStudent;
-      if (!selectedStudent) return;
-
-      this.isOpeningEdit = true;
-      this.error = "";
-
-      // abre uma nova modal e, no sucesso, fechamos esta
-      runServerAction((server) =>
-        server.openStudentEditDialog(selectedStudent.student.studentId),
-      )
-        .then(() => google.script.host.close())
-        .catch((error: unknown) => {
-          this.error = getErrorMsg(error);
-          this.isOpeningEdit = false;
-        });
-    },
   };
 }
 
 document.addEventListener("alpine:init", () => {
-  Alpine.data(initDialog.name, initDialog);
+  Alpine.data("initDialog", initDialog);
 });

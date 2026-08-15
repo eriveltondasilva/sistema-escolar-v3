@@ -1,4 +1,4 @@
-<!-- client/dialogs/error.html -->
+<!-- client/dialogs/error-dialog.html -->
 <x-dialog-shell>
   <main class="flex h-screen items-center justify-center p-4">
     <div
@@ -18,12 +18,9 @@
       </h1>
       <p class="mb-6 text-sm text-slate-600" x-text="errorMessage"></p>
 
-      <footer>
-        <x-close-button></x-close-button>
-      </footer>
+      <x-buttons.close></x-buttons.close>
     </div>
   </main>
 
-  <!-- Scripts -->
   <script src="./error-dialog.ts"></script>
 </x-dialog-shell>

@@ -8,5 +8,5 @@ function initDialog(el: HTMLElement): CreateSchoolYearResultInitData {
 }
 
 document.addEventListener("alpine:init", () => {
-  Alpine.data(initDialog.name, initDialog);
+  Alpine.data("initDialog", initDialog);
 });

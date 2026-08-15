@@ -15,10 +15,10 @@ import { generateReportForStudent } from "./generator.ts";
 import type { AppConfig } from "../types.ts";
 import type { ClassReportJob } from "./types.ts";
 
-const MAX_RUNTIME_MS = 5 * 60 * 1000; // 5 minutos
+const MAX_RUNTIME_MS = 1000 * 60 * 5; // 5 minutos
 
 /** Reserva tempo para persistir o cursor antes do limite da execução. */
-const SAFE_RUNTIME_MS = MAX_RUNTIME_MS - 30 * 1000;
+const SAFE_RUNTIME_MS = MAX_RUNTIME_MS - 1000 * 30;
 
 export interface ClassReportsGenerationResult {
   successCount: number;

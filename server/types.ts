@@ -68,3 +68,7 @@ export interface GuardianData {
   isPrimary: boolean;
   phone: string;
 }
+
+export interface ErrorDialogInitData {
+  errorMessage: string;
+}

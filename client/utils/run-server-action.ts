@@ -48,15 +48,29 @@ export interface GasServerFunctions {
   ): void;
 }
 
+const TIMEOUT_MS = 1000 * 50;
+
 export function runServerAction<TReturn = void, TServer = GasServerFunctions>(
-  actionCallback: (server: TServer) => void,
+  action: (server: TServer) => void,
+  timeoutMs = TIMEOUT_MS,
 ): Promise<TReturn> {
-  return new Promise<TReturn>((resolve, reject) => {
+  const serverActionPromise = new Promise<TReturn>((resolve, reject) => {
     const runner = google.script.run
       .withSuccessHandler(resolve)
       .withFailureHandler(reject);
 
-    // Fazemos um cast para a interface do servidor para habilitar o autocomplete
-    actionCallback(runner as unknown as TServer);
+    action(runner as unknown as TServer);
   });
+
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    setTimeout(() => {
+      reject(
+        new Error(
+          `A requisição excedeu o tempo limite de ${timeoutMs / 1000} segundos.`,
+        ),
+      );
+    }, timeoutMs);
+  });
+
+  return Promise.race([serverActionPromise, timeoutPromise]);
 }

@@ -1,5 +1,6 @@
 // server/roster/menu-actions.ts
 import { DIALOG_NAMES } from "#config/constants.ts";
+import { formatStr } from "#server/utils/formatters.ts";
 import { renderView } from "#utils/render-view.ts";
 
 import type { StudentEditInitData } from "./types.ts";
@@ -23,7 +24,7 @@ export function openStudentCreationDialog(): void {
 }
 
 export function openStudentEditDialog(studentId: string): void {
-  const trimmedId = String(studentId ?? "").trim();
+  const trimmedId = formatStr(studentId);
   if (!trimmedId) throw new Error("Matrícula não pode ser vazia.");
 
   const ui = SpreadsheetApp.getUi();

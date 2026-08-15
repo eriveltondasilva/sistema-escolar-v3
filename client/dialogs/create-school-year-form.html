@@ -26,7 +26,6 @@
         />
       </div>
 
-      <!-- Matrículas por turma — accordion, opcional -->
       <div class="space-y-2">
         <p class="text-xs font-medium tracking-wider text-slate-500 uppercase">
           Matrículas por turma
@@ -53,10 +52,6 @@
                   x-text="`${matriculationCount(className)} aluno(s)`"
                   class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500"
                 ></span>
-                <x-icons.check
-                  :class="expanded[className] ? 'rotate-180' : ''"
-                  class="size-3 text-slate-400 transition-transform"
-                ></x-icons.check>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="14"
@@ -103,26 +98,16 @@
 
       <x-error-alert></x-error-alert>
 
-      <footer class="flex items-center justify-end space-x-2 pt-2">
-        <button
-          type="button"
-          @click="google.script.host.close()"
-          :disabled="isLoading"
-          class="inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none disabled:opacity-50"
+      <x-footers.actions>
+        <x-buttons.secondary :disabled="isLoading"
+          >Cancelar</x-buttons.secondary
         >
-          Cancelar
-        </button>
-        <button
-          type="submit"
-          :disabled="isLoading"
-          class="inline-flex items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800 focus:outline-none disabled:cursor-not-allowed disabled:opacity-70"
-        >
+        <x-buttons.primary type="submit" :disabled="isLoading">
           <span x-text="isLoading ? 'Criando...' : 'Criar'"></span>
-        </button>
-      </footer>
+        </x-buttons.primary>
+      </x-footers.actions>
     </form>
   </main>
 
-  <!-- Scripts -->
   <script src="./create-school-year-form.ts"></script>
 </x-dialog-shell>

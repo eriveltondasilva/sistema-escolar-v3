@@ -14,13 +14,11 @@
         <p class="text-emerald-700" x-text="schoolYearLabel"></p>
       </x-success-header>
 
-      <!-- Turmas criadas -->
       <div class="rounded-md border border-slate-200 bg-white p-3 shadow-sm">
         <p
           class="mb-2 text-xs font-medium tracking-wider text-slate-500 uppercase"
           x-text="`${createdClasses.length} turma(s) criada(s)`"
         ></p>
-
         <div class="flex flex-wrap gap-1.5">
           <template x-for="cls in createdClasses" :key="cls">
             <span
@@ -31,22 +29,16 @@
         </div>
       </div>
 
-      <!-- Ação -->
-      <a
-        :href="folderUrl"
-        target="_blank"
-        class="inline-flex w-full items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
-      >
+      <x-links.primary :href="folderUrl">
         <x-icons.folder></x-icons.folder>
         Abrir pasta
-      </a>
+      </x-links.primary>
     </div>
 
-    <footer class="mt-5 border-t border-slate-200 pt-4">
-      <x-close-button></x-close-button>
-    </footer>
+    <x-footers.base>
+      <x-buttons.close></x-buttons.close>
+    </x-footers.base>
   </main>
 
-  <!-- Scripts -->
   <script src="./create-school-year-result.ts"></script>
 </x-dialog-shell>

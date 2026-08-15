@@ -120,7 +120,6 @@ export function checkTempFolder(config: AppConfig): Issue[] {
  */
 export function checkScriptProperties(): Issue[] {
   const checks: Array<[label: string, getter: () => string]> = [
-    ["QR code do boletim (WEB_APP_ID)", () => getScriptProp("WEB_APP_ID")],
     [
       "Link do boletim (REPORT_LINK_SECRET)",
       () => getScriptProp("REPORT_LINK_SECRET"),

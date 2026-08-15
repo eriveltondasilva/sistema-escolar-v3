@@ -34,7 +34,7 @@ function emptyForm(): StudentFormPayload {
   };
 }
 
-type StudentEditState = {
+interface InitDialog {
   studentId: string;
   isEditMode: true;
   isLoadingStudent: boolean;
@@ -43,14 +43,15 @@ type StudentEditState = {
   form: StudentFormPayload;
   readonly isLoading: boolean;
   readonly loadingLabel: string;
-  init(): void;
+  // Funções
+  init(): Promise<void>;
   addGuardian(): void;
   removeGuardian(index: number): void;
   setPrimaryGuardian(index: number): void;
-  submit(): void;
-};
+  submit(): Promise<void>;
+}
 
-function initDialog(el: HTMLElement): StudentEditState {
+function initDialog(el: HTMLElement): InitDialog {
   const { studentId } = parseInitData<StudentEditInitData>(el);
 
   return {
@@ -69,24 +70,25 @@ function initDialog(el: HTMLElement): StudentEditState {
       return this.isLoadingStudent ? "Carregando..." : "Salvando...";
     },
 
-    init() {
+    async init() {
       this.isLoadingStudent = true;
+      this.error = "";
 
-      runServerAction<StudentFormPayload>((server) =>
-        server.getStudentForEditForm(this.studentId),
-      )
-        .then((student) => {
-          this.form = student;
-          if (this.form.guardians.length === 0) {
-            this.form.guardians.push({ ...emptyGuardian(), isPrimary: true });
-          }
-        })
-        .catch((error: unknown) => {
-          this.error = "Erro ao carregar aluno: " + getErrorMsg(error);
-        })
-        .finally(() => {
-          this.isLoadingStudent = false;
-        });
+      try {
+        const student = await runServerAction<StudentFormPayload>((server) =>
+          server.getStudentForEditForm(this.studentId),
+        );
+
+        this.form = student;
+
+        if (this.form.guardians.length === 0) {
+          this.form.guardians.push({ ...emptyGuardian(), isPrimary: true });
+        }
+      } catch (error: unknown) {
+        this.error = "Erro ao carregar aluno: " + getErrorMsg(error);
+      } finally {
+        this.isLoadingStudent = false;
+      }
     },
 
     addGuardian() {
@@ -110,7 +112,7 @@ function initDialog(el: HTMLElement): StudentEditState {
       });
     },
 
-    submit() {
+    async submit() {
       const validationError = validateStudentForm(this.form);
 
       if (validationError) {
@@ -121,18 +123,20 @@ function initDialog(el: HTMLElement): StudentEditState {
       this.error = "";
       this.isSaving = true;
 
-      runServerAction((server) =>
-        server.submitStudentEdit(this.studentId, this.form),
-      )
-        .then(() => google.script.host.close())
-        .catch((error: unknown) => {
-          this.error = getErrorMsg(error);
-          this.isSaving = false;
-        });
+      try {
+        await runServerAction((server) =>
+          server.submitStudentEdit(this.studentId, this.form),
+        );
+
+        google.script.host.close();
+      } catch (error: unknown) {
+        this.error = getErrorMsg(error);
+        this.isSaving = false;
+      }
     },
   };
 }
 
 document.addEventListener("alpine:init", () => {
-  Alpine.data(initDialog.name, initDialog);
+  Alpine.data("initDialog", initDialog);
 });

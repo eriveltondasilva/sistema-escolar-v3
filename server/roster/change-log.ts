@@ -1,4 +1,5 @@
 // server/roster/change-log.ts
+import { formatStr } from "#server/utils/formatters.ts";
 import { getErrorMsg } from "#utils/error.ts";
 
 import type { StudentData } from "../types.ts";
@@ -58,8 +59,8 @@ export function logStudentChanges({
       timestamp,
       studentId,
       field,
-      String(oldValue).trim(),
-      String(newValue).trim(),
+      formatStr(oldValue),
+      formatStr(newValue),
     ]);
     const colCount = Object.keys(LOG_SHEET.columns).length;
 

@@ -1,6 +1,6 @@
 // server/utils/script-lock.ts
 
-const SCRIPT_LOCK_TIMEOUT_MS = 5 * 1000; // 5 segundos
+const SCRIPT_LOCK_TIMEOUT_MS = 1000 * 5; // 5 segundos
 
 /**
  * Adquire o lock do script antes de rodar `fn`, garantindo que duas

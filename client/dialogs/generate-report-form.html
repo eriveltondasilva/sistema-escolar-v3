@@ -50,7 +50,6 @@
         </select>
       </div>
 
-      <!-- Campo de aluno — apenas no modo "single" -->
       <template x-if="actionType === 'single'">
         <div>
           <label
@@ -103,26 +102,19 @@
 
       <x-error-alert x-transition></x-error-alert>
 
-      <footer class="flex items-center justify-end space-x-2 pt-2">
-        <button
-          type="button"
-          @click="google.script.host.close()"
-          :disabled="isLoading"
-          class="inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none disabled:opacity-50"
+      <x-footers.actions>
+        <x-buttons.secondary :disabled="isLoading"
+          >Cancelar</x-buttons.secondary
         >
-          Cancelar
-        </button>
-        <button
+        <x-buttons.primary
           type="submit"
           :disabled="isLoading || (actionType === 'single' && (isFetchingStudents || noStudents))"
-          class="inline-flex items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800 focus:outline-none disabled:cursor-not-allowed disabled:opacity-70"
         >
           <span x-text="isLoading ? 'Processando...' : 'Confirmar'"></span>
-        </button>
-      </footer>
+        </x-buttons.primary>
+      </x-footers.actions>
     </form>
   </main>
 
-  <!-- Scripts -->
   <script src="./generate-report-form.ts"></script>
 </x-dialog-shell>

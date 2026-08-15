@@ -30,30 +30,21 @@
       </div>
 
       <div class="flex flex-col space-y-2">
-        <a
-          :href="pdfUrl"
-          target="_blank"
-          class="inline-flex w-full items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
-        >
+        <x-links.primary :href="pdfUrl">
           <x-icons.file></x-icons.file>
           Abrir PDF
-        </a>
-        <a
-          :href="pdfFolderUrl"
-          target="_blank"
-          class="inline-flex w-full items-center justify-center gap-2 rounded-md border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-100 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
-        >
+        </x-links.primary>
+        <x-links.secondary :href="pdfFolderUrl">
           <x-icons.folder></x-icons.folder>
           Abrir pasta
-        </a>
+        </x-links.secondary>
       </div>
     </div>
 
-    <footer class="mt-6 border-t border-slate-200 pt-4">
-      <x-close-button></x-close-button>
-    </footer>
+    <x-footers.base>
+      <x-buttons.close></x-buttons.close>
+    </x-footers.base>
   </main>
 
-  <!-- Scripts -->
   <script src="./report-success.ts"></script>
 </x-dialog-shell>

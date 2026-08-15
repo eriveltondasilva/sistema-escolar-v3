@@ -5,6 +5,7 @@ import {
   getClassSpreadsheetFile,
   getSchoolYearFolder,
 } from "#drive/drive-lookup.ts";
+import { formatStr } from "#server/utils/formatters.ts";
 import { renderView } from "#utils/render-view.ts";
 import { withScriptLock } from "#utils/script-lock.ts";
 import {
@@ -245,7 +246,7 @@ export function executeStudentReportGeneration(
   className: string,
   studentId: string,
 ): void {
-  const trimmedId = String(studentId ?? "").trim();
+  const trimmedId = formatStr(studentId);
   if (!trimmedId) throw new Error("Matrícula não pode ser vazia.");
 
   withScriptLock((ui) => {
