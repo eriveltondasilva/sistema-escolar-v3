@@ -5,15 +5,8 @@
     "target": "ESNext",
     "module": "Preserve",
     "moduleDetection": "force",
-    "lib": [
-      "ESNext",
-      "DOM"
-    ],
-    "types": [
-      "bun",
-      "alpinejs",
-      "google-apps-script"
-    ],
+    "lib": ["ESNext", "DOM"],
+    "types": ["bun", "alpinejs", "google-apps-script"],
     // "jsx": "react-jsx",
     // "allowJs": true,
     // # Bundler mode
@@ -37,6 +30,7 @@
   "include": [
     "client/**/*.ts",
     "server/**/*.ts",
-    "scripts/**/*.ts"
+    "scripts/**/*.ts",
+    "server/entry.js"
   ]
 }

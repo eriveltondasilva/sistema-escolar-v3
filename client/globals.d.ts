@@ -10,8 +10,6 @@ declare global {
       run: Record<string, any>;
       host: {
         close(): void;
-        setHeight(height: number): void;
-        setWidth(width: number): void;
       };
     };
   };
