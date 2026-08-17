@@ -15,7 +15,8 @@
     "#utils/*": "./server/utils/*"
   },
   "scripts": {
-    "build": "bun run ./scripts/build.ts",
+    "build": "bun run ./scripts/build.ts --minify",
+    "build:dev": "bun run ./scripts/build.ts",
     "push": "clasp push",
     "deploy": "bun run push",
     "predeploy": "bun run fix && bun run build",
