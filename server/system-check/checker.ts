@@ -26,7 +26,7 @@ function showValidationDialog(issues: Issue[]): void {
     issues,
   };
   const htmlOutput = renderView(DIALOG_NAMES.validationResult, initData);
-  htmlOutput.setWidth(560).setHeight(530);
+  htmlOutput.setWidth(500).setHeight(530);
 
   ui.showModalDialog(htmlOutput, "Diagnóstico do Sistema");
 }

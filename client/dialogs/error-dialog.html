@@ -1,24 +1,30 @@
 <!-- client/dialogs/error-dialog.html -->
 <x-dialog-shell>
-  <main class="flex h-screen items-center justify-center p-4">
-    <div
-      data-init="<?= initData ?>"
-      x-data="initDialog($el)"
-      x-cloak
-      class="w-full max-w-sm rounded-lg border border-red-100 bg-white p-6 text-center shadow-sm"
-    >
+  <main
+    data-init="<?= initData ?>"
+    x-data="initDialog($el)"
+    x-cloak
+    class="flex h-full items-center justify-center"
+  >
+    <div class="w-full max-w-sm space-y-4 text-center">
       <div
-        class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-red-600"
+        class="inline-flex size-14 items-center justify-center rounded-full bg-red-50 text-red-500"
       >
-        <x-icons.triangle-alert></x-icons.triangle-alert>
+        <x-icons.triangle-alert class="size-6"></x-icons.triangle-alert>
       </div>
 
-      <h1 class="mb-2 text-lg font-semibold text-slate-900">
-        Ops! Algo deu errado
-      </h1>
-      <p class="mb-6 text-sm text-slate-600" x-text="errorMessage"></p>
+      <div class="space-y-1.5">
+        <h1 class="text-base font-semibold text-slate-900">
+          Ops! Algo deu errado
+        </h1>
 
-      <x-buttons.close></x-buttons.close>
+        <p class="text-sm text-slate-500" x-text="errorMessage"></p>
+      </div>
+
+      <x-buttons.secondary onclick="google.script.host.close()" class="w-full">
+        <x-icons.close></x-icons.close>
+        Fechar
+      </x-buttons.secondary>
     </div>
   </main>
 

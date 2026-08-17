@@ -31,7 +31,7 @@ function openSelectYearClassDialog(actionType: YearClassSelectionType): void {
         DIALOG_NAMES.errorDialog,
         errorInitData,
       );
-      ui.showModalDialog(errorHtmlOutput, "Erro");
+      ui.showModalDialog(errorHtmlOutput, "Aviso");
       return;
     }
 
@@ -42,7 +42,7 @@ function openSelectYearClassDialog(actionType: YearClassSelectionType): void {
       classes,
     };
     const htmlOutput = renderView(DIALOG_NAMES.generateReportForm, initData);
-    htmlOutput.setWidth(520).setHeight(actionType === "single" ? 320 : 240);
+    htmlOutput.setWidth(400).setHeight(actionType === "single" ? 340 : 280);
 
     const dialogTitle =
       actionType === "single" ?
@@ -55,7 +55,7 @@ function openSelectYearClassDialog(actionType: YearClassSelectionType): void {
       errorMessage: getErrorMsg(error),
     };
     const errorHtmlOutput = renderView(DIALOG_NAMES.errorDialog, errorInitData);
-    ui.showModalDialog(errorHtmlOutput, "Erro");
+    ui.showModalDialog(errorHtmlOutput, "Aviso");
   }
 }
 

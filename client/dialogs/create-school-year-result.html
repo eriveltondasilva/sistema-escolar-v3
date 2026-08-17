@@ -4,7 +4,7 @@
     data-init="<?= initData ?>"
     x-data="initDialog($el)"
     x-cloak
-    class="flex h-full flex-col justify-between p-5"
+    class="flex h-full flex-col justify-between"
   >
     <div class="space-y-4">
       <x-success-header>
@@ -36,7 +36,10 @@
     </div>
 
     <x-footers.base>
-      <x-buttons.close></x-buttons.close>
+      <x-buttons.secondary onclick="google.script.host.close()" class="w-full">
+        <x-icons.close></x-icons.close>
+        Fechar
+      </x-buttons.secondary>
     </x-footers.base>
   </main>
 

@@ -1,0 +1,17 @@
+<!-- client/components/forms/label.html -->
+<script props>
+  module.exports = {
+    required: props.required !== undefined,
+  };
+</script>
+
+<label
+  class="mb-1.5 flex items-center gap-1 text-xs leading-none font-medium tracking-wider text-slate-800 uppercase select-none peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+  attributes
+>
+  <yield></yield>
+
+  <if condition="required">
+    <x-icons.asterisk class="size-3 text-red-500"></x-icons.asterisk>
+  </if>
+</label>

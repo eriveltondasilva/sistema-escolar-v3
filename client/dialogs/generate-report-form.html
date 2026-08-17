@@ -1,6 +1,6 @@
 <!-- client/dialogs/generate-report-form.html -->
 <x-dialog-shell>
-  <main class="bg-white p-5 text-slate-900">
+  <main>
     <form
       data-init="<?= initData ?>"
       x-data="initDialog($el)"
@@ -103,7 +103,9 @@
       <x-error-alert x-transition></x-error-alert>
 
       <x-footers.actions>
-        <x-buttons.secondary :disabled="isLoading"
+        <x-buttons.secondary
+          onclick="google.script.host.close()"
+          :disabled="isLoading"
           >Cancelar</x-buttons.secondary
         >
         <x-buttons.primary

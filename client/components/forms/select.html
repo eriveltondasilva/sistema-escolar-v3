@@ -1,0 +1,13 @@
+<!-- client/components/forms/select.html -->
+<div class="relative w-full has-[select:disabled]:opacity-50">
+  <select
+    class="h-8 w-full min-w-0 appearance-none rounded-lg border border-slate-200 bg-transparent py-1 pr-8 pl-2.5 text-sm transition-colors outline-none select-none focus-visible:border-slate-400 focus-visible:ring-3 focus-visible:ring-slate-400/50 disabled:pointer-events-none disabled:cursor-not-allowed"
+    attributes
+  >
+    <yield></yield>
+  </select>
+
+  <x-icons.chevron-down
+    class="pointer-events-none absolute top-1/2 right-2.5 size-4 -translate-y-1/2 text-slate-400 select-none"
+  ></x-icons.chevron-down>
+</div>

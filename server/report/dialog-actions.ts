@@ -55,7 +55,7 @@ function showClassReportsResult_({
   };
 
   const htmlOutput = renderView(DIALOG_NAMES.classReportResult, initData);
-  htmlOutput.setWidth(440).setHeight(height);
+  htmlOutput.setWidth(400).setHeight(height);
 
   ui.showModalDialog(htmlOutput, "Boletins Gerados");
 }
@@ -171,7 +171,7 @@ function executeStudentReport_({
   };
 
   const htmlOutput = renderView(DIALOG_NAMES.reportSuccess, initData);
-  htmlOutput.setWidth(400).setHeight(370);
+  htmlOutput.setWidth(500).setHeight(380);
 
   ui.showModalDialog(htmlOutput, "Boletim Gerado");
 }

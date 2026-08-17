@@ -64,8 +64,10 @@ function initDialog(el: HTMLElement): InitDialog {
       this.isLoading = true;
 
       try {
-        await runServerAction((server) =>
-          server.submitSchoolYearCreation(this.year.trim(), matriculations),
+        await runServerAction(
+          (server) =>
+            server.submitSchoolYearCreation(this.year.trim(), matriculations),
+          1000 * 60 * 5,
         );
 
         google.script.host.close();

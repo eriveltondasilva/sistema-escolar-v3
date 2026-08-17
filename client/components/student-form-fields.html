@@ -1,86 +1,52 @@
 <!-- client/components/student-form-fields.html -->
 <div>
-  <label
-    for="student-name"
-    class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
-  >
-    Nome completo
-  </label>
-  <input
+  <x-forms.label for="student-name" required>Nome completo</x-forms.label>
+  <x-forms.input
     id="student-name"
     type="text"
     x-model="form.name"
     :disabled="isLoading"
-    class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
     autofocus
   />
 </div>
 
 <div>
-  <label
-    for="student-address"
-    class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
-  >
-    Endereço
-  </label>
-  <input
+  <x-forms.label for="student-address">Endereço</x-forms.label>
+  <x-forms.input
     id="student-address"
     type="text"
     x-model="form.address"
     :disabled="isLoading"
-    class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
   />
 </div>
 
 <div class="grid grid-cols-2 gap-3">
   <div>
-    <label
-      for="student-nationality"
-      class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
-    >
-      Nacionalidade
-    </label>
-    <input
+    <x-forms.label for="student-nationality">Nacionalidade</x-forms.label>
+    <x-forms.input
       id="student-nationality"
       type="text"
       x-model="form.nationality"
       :disabled="isLoading"
-      class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
     />
   </div>
 
   <div>
-    <label
-      for="student-sex"
-      class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
-    >
-      Sexo
-    </label>
-    <select
-      id="student-sex"
-      x-model="form.sex"
-      :disabled="isLoading"
-      class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
-    >
+    <x-forms.label for="student-sex">Sexo</x-forms.label>
+    <x-forms.select id="student-sex" x-model="form.sex" :disabled="isLoading">
       <option value="F">Feminino</option>
       <option value="M">Masculino</option>
-    </select>
+    </x-forms.select>
   </div>
 </div>
 
 <div>
-  <label
-    for="student-birth-date"
-    class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
-  >
-    Data de nascimento
-  </label>
-  <input
+  <x-forms.label for="student-birth-date">Data de nascimento</x-forms.label>
+  <x-forms.input
     id="student-birth-date"
     type="date"
     x-model="form.birthDate"
     :disabled="isLoading"
-    class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
   />
 </div>
 
@@ -88,24 +54,18 @@
      No cadastro, o status é sempre "ativo" e definido pelo servidor. -->
 <template x-if="isEditMode">
   <div>
-    <label
-      for="student-status"
-      class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
-    >
-      Status
-    </label>
-    <select
+    <x-forms.label for="student-status">Status</x-forms.label>
+    <x-forms.select
       id="student-status"
       x-model="form.status"
       :disabled="isLoading"
-      class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
     >
       <option value="ativo">Ativo</option>
       <option value="inativo">Inativo</option>
       <option value="transferido">Transferido</option>
       <option value="formado">Formado</option>
       <option value="evadido">Evadido</option>
-    </select>
+    </x-forms.select>
   </div>
 </template>
 
@@ -118,13 +78,9 @@
 </datalist>
 
 <div>
-  <label
-    class="mb-2 block text-xs font-medium tracking-wider text-slate-500 uppercase"
-  >
-    Responsáveis
-  </label>
+  <x-forms.label>Responsáveis</x-forms.label>
 
-  <div class="space-y-3">
+  <div class="mt-2 space-y-3">
     <template x-for="(guardian, index) in form.guardians" :key="index">
       <div class="space-y-2 rounded-md border border-slate-200 p-3">
         <div class="flex items-center justify-between">
@@ -146,42 +102,39 @@
             class="shrink-0 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-slate-500 transition-colors hover:bg-slate-50 hover:text-red-600 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
           >
             <x-icons.close></x-icons.close>
+            <span class="sr-only">Remover</span>
           </button>
         </div>
 
-        <input
+        <x-forms.input
           type="text"
           x-model="guardian.name"
           :disabled="isLoading"
           placeholder="Nome do responsável"
-          class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
         />
 
         <div class="grid grid-cols-2 gap-2">
-          <input
+          <x-forms.input
             type="text"
             x-model="guardian.relationship"
             list="relationshipList"
             :disabled="isLoading"
             placeholder="Parentesco"
-            class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
           />
 
-          <input
+          <x-forms.input
             type="tel"
             x-model="guardian.phone"
             :disabled="isLoading"
             placeholder="Telefone"
-            class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
           />
         </div>
 
-        <input
+        <x-forms.input
           type="text"
           x-model="guardian.address"
           :disabled="isLoading"
           placeholder="Endereço (se diferente do aluno)"
-          class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
         />
       </div>
     </template>

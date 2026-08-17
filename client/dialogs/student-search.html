@@ -1,10 +1,6 @@
 <!-- client/dialogs/student-search.html -->
 <x-dialog-shell>
-  <main
-    x-data="initDialog"
-    x-cloak
-    class="space-y-4 bg-white p-5 text-slate-900"
-  >
+  <main x-data="initDialog" x-cloak class="space-y-4">
     <div class="flex gap-2">
       <div class="flex-1">
         <label
@@ -200,7 +196,10 @@
     <x-error-alert></x-error-alert>
 
     <x-footers.base>
-      <x-buttons.close></x-buttons.close>
+      <x-buttons.secondary onclick="google.script.host.close()" class="w-full">
+        <x-icons.close></x-icons.close>
+        Fechar
+      </x-buttons.secondary>
     </x-footers.base>
   </main>
 

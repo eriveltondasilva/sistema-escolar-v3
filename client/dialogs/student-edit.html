@@ -1,43 +1,44 @@
 <!-- client/dialogs/student-edit.html -->
 <x-dialog-shell>
-  <main
-    data-init="<?= initData ?>"
-    x-data="initDialog($el)"
-    x-cloak
-    class="space-y-4 bg-white p-5 text-slate-900"
-  >
+  <main data-init="<?= initData ?>" x-data="initDialog($el)" x-cloak>
+    <!-- Loading -->
     <template x-if="isLoadingStudent">
       <div
-        class="flex items-center justify-center gap-2 py-6 text-xs text-slate-400"
+        class="flex items-center justify-center gap-2 py-6 text-xl text-slate-400"
       >
-        <div
-          class="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-slate-500"
-        ></div>
-        Carregando aluno...
+        <x-icons.loader></x-icons.loader>
+        carregando aluno.
       </div>
     </template>
 
+    <!-- Form -->
     <template x-if="!isLoadingStudent">
       <div class="space-y-4">
         <div>
-          <label
-            class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
-          >
-            Matrícula
-          </label>
-          <p
-            class="rounded-md border border-slate-200 bg-slate-100 px-3 py-2 font-mono text-sm text-slate-600"
-            x-text="studentId"
-          ></p>
+          <x-forms.label>Matrícula</x-forms.label>
+          <x-forms.input
+            type="text"
+            x-model="studentId.padStart(4, '0')"
+            readonly
+          />
         </div>
 
+        <!-- Fields -->
         <x-student-form-fields></x-student-form-fields>
 
+        <!-- Actions -->
         <x-footers.actions>
-          <x-buttons.secondary :disabled="isLoading"
-            >Cancelar</x-buttons.secondary
+          <x-buttons.secondary
+            onclick="google.script.host.close()"
+            :disabled="isLoading"
           >
+            <x-icons.close></x-icons.close>
+            Cancelar
+          </x-buttons.secondary>
+
           <x-buttons.primary @click="submit()" :disabled="isLoading">
+            <x-icons.loader x-show="isLoading"></x-icons.loader>
+            <x-icons.save x-show="!isLoading"></x-icons.save>
             <span x-text="isLoading ? loadingLabel : 'Salvar'"></span>
           </x-buttons.primary>
         </x-footers.actions>

@@ -92,7 +92,13 @@
 
     <div class="shrink-0 bg-white p-4">
       <x-footers.base>
-        <x-buttons.close></x-buttons.close>
+        <x-buttons.secondary
+          onclick="google.script.host.close()"
+          class="w-full"
+        >
+          <x-icons.close></x-icons.close>
+          Fechar
+        </x-buttons.secondary>
       </x-footers.base>
     </div>
   </main>
