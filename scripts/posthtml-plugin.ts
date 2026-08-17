@@ -15,6 +15,12 @@ const componentsOptions: PostHTMLComponents = {
   root: join(cwd(), "client"),
   folders: ["components"],
   strict: true,
+  safelistAttributes: [
+    "x-*", // x-model, x-show, x-text, x-if, x-for, x-data, x-bind, x-on, x-ref, x-cloak...
+    "@*", // @click, @change, @input, @submit...
+    ":*", // :disabled, :class, :value...
+    "onclick",
+  ],
 };
 
 const posthtmlOptions: PosthtmlOptions = {
