@@ -3,6 +3,7 @@ import { parseInitData } from "../utils/parse-init-data.ts";
 
 import type { ValidationResultInitData } from "#server/system-check/types.ts";
 import type { Issue, IssueType } from "#server/types.ts";
+import type { AlpineComponent } from "alpinejs";
 
 type FilterOption = "all" | IssueType;
 
@@ -13,7 +14,7 @@ interface InitDialog extends ValidationResultInitData {
   readonly filteredIssues: Issue[];
 }
 
-function InitDialog(el: HTMLElement): InitDialog {
+function InitDialog(el: HTMLElement): AlpineComponent<InitDialog> {
   const initData = parseInitData<ValidationResultInitData>(el);
 
   const counts = initData.issues.reduce(

@@ -17,6 +17,24 @@ const SEX_MAP: Record<string, string> = {
   M: "Masculino",
 };
 
+export type SortOrder = "asc" | "desc";
+
+/**
+ * Compares two strings taking embedded numeric values into account.
+ */
+export function compareStrings(
+  a: string,
+  b: string,
+  order: SortOrder = "asc",
+): number {
+  const comparison = a.localeCompare(b, DEFAULT_LOCALE, {
+    numeric: true,
+    sensitivity: "base",
+  });
+
+  return order === "desc" ? -comparison : comparison;
+}
+
 // -------------------------------------
 
 /** Normalizes any input into a trimmed string safely. */

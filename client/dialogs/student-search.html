@@ -1,200 +1,313 @@
 <!-- client/dialogs/student-search.html -->
 <x-dialog-shell>
-  <main x-data="initDialog" x-cloak class="space-y-4">
+  <main x-data="initDialog" x-cloak class="flex h-full flex-col gap-3">
+    <!-- Search bar -->
     <div class="flex gap-2">
-      <div class="flex-1">
-        <label
-          for="query"
-          class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
-        >
-          Nome ou Matrícula
-        </label>
-        <div class="relative">
-          <input
-            id="query"
-            type="text"
-            x-model="query"
-            @input.debounce.300ms="search()"
-            placeholder="Comece a digitar..."
-            class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 pr-8 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none"
-          />
-          <div
-            x-show="isSearching"
-            class="absolute top-1/2 right-2.5 -translate-y-1/2"
-          >
-            <div
-              class="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-slate-500"
-            ></div>
-          </div>
-        </div>
+      <div class="relative flex-1">
+        <x-forms.input
+          id="query"
+          type="search"
+          x-model="query"
+          @keydown.enter="search()"
+          placeholder="Nome ou matrícula..."
+          :disabled="isSearching"
+          autofocus
+        />
       </div>
 
-      <div class="w-36 shrink-0">
-        <label
-          for="status-filter"
-          class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
-        >
-          Status
-        </label>
-        <select
-          id="status-filter"
-          x-model="status"
-          @change="search()"
-          class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none"
-        >
+      <div class="w-28 shrink-0">
+        <x-forms.select x-model="status" :disabled="isSearching">
           <option value="ativo">Ativo</option>
           <option value="inativo">Inativo</option>
           <option value="transferido">Transferido</option>
           <option value="formado">Formado</option>
           <option value="evadido">Evadido</option>
-        </select>
+        </x-forms.select>
       </div>
+
+      <x-buttons.primary @click="search()" :disabled="isSearching">
+        <template x-if="isSearching">
+          <x-icons.loader></x-icons.loader>
+        </template>
+        <template x-if="!isSearching">
+          <x-icons.search></x-icons.search>
+        </template>
+        <span x-text="isSearching ? 'Buscando...' : 'Buscar'"></span>
+      </x-buttons.primary>
     </div>
 
-    <template
-      x-if="!isSearching && query.trim() && results.length === 0 && !selectedStudent && !isLoadingDetails"
-    >
+    <!-- Truncation warning -->
+    <template x-if="truncated">
       <p
-        class="rounded-md border border-amber-200 bg-amber-50 p-2.5 text-xs font-medium text-amber-700"
+        class="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-700"
       >
-        Nenhum aluno encontrado.
+        Muitos resultados. Refine pelo nome completo ou busque pela matrícula.
       </p>
     </template>
 
-    <template
-      x-if="!selectedStudent && !isLoadingDetails && results.length > 0"
-    >
-      <ul
-        class="max-h-48 divide-y divide-slate-100 overflow-y-auto rounded-md border"
-      >
-        <template x-for="result in results" :key="result.studentId">
-          <li
-            @click="selectStudent(result.studentId)"
-            class="flex cursor-pointer items-center justify-between px-3 py-2.5 transition-colors hover:bg-slate-50"
+    <!-- Error -->
+    <x-error-alert></x-error-alert>
+
+    <!-- Results + Detail -->
+    <div class="flex min-h-0 flex-1 gap-3">
+      <!-- Left: list -->
+      <div class="flex w-56 shrink-0 flex-col">
+        <!-- Empty: no query yet -->
+        <template x-if="!isSearching && results.length === 0 && !query.trim()">
+          <div
+            class="flex flex-col items-center justify-center gap-2 py-8 text-center"
           >
-            <span
-              class="text-sm font-medium text-slate-800"
-              x-text="result.name"
-            ></span>
-            <span
-              class="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-xs text-slate-500"
-              x-text="result.studentId"
-            ></span>
-          </li>
-        </template>
-      </ul>
-    </template>
-
-    <template x-if="isLoadingDetails">
-      <div
-        class="flex items-center justify-center gap-2 py-6 text-xs text-slate-400"
-      >
-        <div
-          class="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-slate-500"
-        ></div>
-        Carregando aluno...
-      </div>
-    </template>
-
-    <template x-if="selectedStudent">
-      <div class="space-y-3">
-        <button
-          type="button"
-          @click="clearSelection()"
-          class="flex items-center justify-center gap-2 text-xs font-semibold text-slate-400 hover:text-slate-700 focus:outline-none"
-        >
-          <x-icons.arrow-left></x-icons.arrow-left>
-          Voltar à busca
-        </button>
-
-        <div
-          class="space-y-3 rounded-md border border-slate-200 bg-slate-50 p-4"
-        >
-          <div>
-            <p
-              class="leading-tight font-semibold text-slate-900"
-              x-text="selectedStudent.student.name"
-            ></p>
-            <p
-              class="mt-0.5 font-mono text-xs text-slate-400"
-              x-text="selectedStudent.student.studentId"
-            ></p>
-          </div>
-
-          <div class="h-px bg-slate-200"></div>
-
-          <dl class="grid grid-cols-2 gap-x-4 gap-y-2.5 text-xs">
-            <div>
-              <dt class="text-slate-400">Nascimento</dt>
-              <dd
-                class="font-medium text-slate-700"
-                x-text="selectedStudent.student.birthDate || '—'"
-              ></dd>
-            </div>
-            <div>
-              <dt class="text-slate-400">Endereço</dt>
-              <dd
-                class="font-medium text-slate-700"
-                x-text="selectedStudent.student.address || '—'"
-              ></dd>
-            </div>
-            <div class="col-span-2">
-              <dt class="text-slate-400">Responsáveis</dt>
-              <dd
-                class="font-medium text-slate-700"
-                x-text="selectedStudent.guardianNamesFormatted"
-              ></dd>
-            </div>
-          </dl>
-        </div>
-
-        <div>
-          <p
-            class="mb-1.5 text-xs font-medium tracking-wider text-slate-400 uppercase"
-          >
-            Boletins
-          </p>
-
-          <template x-if="selectedStudent.pdfHistory.length === 0">
-            <p class="text-xs text-slate-400 italic">
-              Nenhum boletim encontrado.
+            <x-icons.users class="size-8 text-slate-200"></x-icons.users>
+            <p class="text-xs text-slate-400">
+              Digite um nome ou matrícula e clique em Buscar.
             </p>
-          </template>
+          </div>
+        </template>
 
+        <!-- Empty: query returned nothing -->
+        <template x-if="!isSearching && results.length === 0 && query.trim()">
+          <div
+            class="flex flex-col items-center justify-center gap-2 py-8 text-center"
+          >
+            <x-icons.search class="size-8 text-slate-200"></x-icons.search>
+            <p class="text-xs text-slate-400">Nenhum aluno encontrado.</p>
+          </div>
+        </template>
+
+        <!-- Skeleton while searching -->
+        <template x-if="isSearching">
           <ul class="space-y-1">
-            <template
-              x-for="entry in selectedStudent.pdfHistory"
-              :key="entry.pdfUrl"
-            >
-              <li>
-                <a
-                  :href="entry.pdfUrl"
-                  target="_blank"
-                  class="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-800 focus:underline focus:outline-none"
-                >
-                  <x-icons.file></x-icons.file>
-                  <span x-text="entry.yearLabel"></span>
-                  <span class="text-slate-300">·</span>
-                  <span x-text="entry.className"></span>
-                </a>
+            <template x-for="i in [1,2,3,4,5]" :key="i">
+              <li class="flex items-center gap-2.5 rounded-lg px-2.5 py-2">
+                <div
+                  class="size-8 shrink-0 animate-pulse rounded-full bg-slate-100"
+                ></div>
+                <div class="flex-1 space-y-1.5">
+                  <div
+                    class="h-2.5 w-3/4 animate-pulse rounded bg-slate-100"
+                  ></div>
+                  <div
+                    class="h-2 w-1/2 animate-pulse rounded bg-slate-100"
+                  ></div>
+                </div>
               </li>
             </template>
           </ul>
-        </div>
+        </template>
 
-        <x-buttons.primary
-          x-on:click="editStudent()"
-          :disabled="isOpeningEdit"
-          class="w-full gap-2"
-        >
-          <x-icons.square-pen></x-icons.square-pen>
-          <span x-text="isOpeningEdit ? 'Abrindo...' : 'Editar aluno'"></span>
-        </x-buttons.primary>
+        <!-- Result items -->
+        <template x-if="!isSearching && results.length > 0">
+          <ul class="space-y-0.5 overflow-y-auto">
+            <template x-for="result in results" :key="result.studentId">
+              <li
+                @click="selectStudent(result.studentId)"
+                @keydown.enter="selectStudent(result.studentId)"
+                :class="selectedStudentId === result.studentId
+                  ? 'bg-slate-100 text-slate-900'
+                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-800'"
+                class="group flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 transition-colors focus:outline-none"
+                tabindex="0"
+              >
+                <!-- Avatar -->
+                <div
+                  :class="selectedStudentId === result.studentId
+                    ? 'bg-slate-900 text-white'
+                    : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200'"
+                  class="flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold uppercase transition-colors"
+                  x-text="result.name.charAt(0)"
+                ></div>
+
+                <!-- Name + ID -->
+                <div class="min-w-0 flex-1">
+                  <p
+                    class="truncate text-sm leading-tight font-medium"
+                    x-text="result.name"
+                  ></p>
+                  <p
+                    class="font-mono text-xs text-slate-400"
+                    x-text="result.studentId.padStart(4, '0')"
+                  ></p>
+                </div>
+
+                <!-- Selected indicator -->
+                <template x-if="selectedStudentId === result.studentId">
+                  <x-icons.chevron-right
+                    class="size-3.5 shrink-0 text-slate-400"
+                  ></x-icons.chevron-right>
+                </template>
+              </li>
+            </template>
+          </ul>
+        </template>
       </div>
-    </template>
 
-    <x-error-alert></x-error-alert>
+      <!-- Divider -->
+      <div class="w-px shrink-0 bg-slate-100"></div>
 
+      <!-- Right: detail panel -->
+      <div class="flex min-w-0 flex-1 flex-col">
+        <!-- No selection -->
+        <template x-if="!selectedStudentId && !isLoadingDetails">
+          <div
+            class="flex flex-col items-center justify-center gap-2 py-8 text-center"
+          >
+            <x-icons.square-pen
+              class="size-8 text-slate-200"
+            ></x-icons.square-pen>
+            <p class="text-xs text-slate-400">
+              Selecione um aluno para ver os detalhes.
+            </p>
+          </div>
+        </template>
+
+        <!-- Skeleton detail -->
+        <template x-if="isLoadingDetails">
+          <div class="space-y-4">
+            <div class="flex items-center gap-3">
+              <div
+                class="size-10 animate-pulse rounded-full bg-slate-100"
+              ></div>
+              <div class="flex-1 space-y-2">
+                <div class="h-3 w-2/3 animate-pulse rounded bg-slate-100"></div>
+                <div class="h-2 w-1/3 animate-pulse rounded bg-slate-100"></div>
+              </div>
+            </div>
+            <div class="space-y-2">
+              <div class="h-2 w-full animate-pulse rounded bg-slate-100"></div>
+              <div class="h-2 w-5/6 animate-pulse rounded bg-slate-100"></div>
+              <div class="h-2 w-4/6 animate-pulse rounded bg-slate-100"></div>
+            </div>
+          </div>
+        </template>
+
+        <!-- Detail content -->
+        <template x-if="selectedStudent && !isLoadingDetails">
+          <div class="flex h-full flex-col gap-4">
+            <!-- Header -->
+            <div class="flex items-start gap-3">
+              <div
+                class="flex size-10 shrink-0 items-center justify-center rounded-full bg-slate-900 text-sm font-semibold text-white uppercase"
+              >
+                <span x-text="selectedStudent.student.name.charAt(0)"></span>
+              </div>
+              <div class="min-w-0">
+                <p
+                  class="gap-1.5 truncate text-xs leading-tight font-semibold text-slate-400"
+                  x-text="selectedStudent.student.name"
+                >
+                  Matrícula:
+                  <span
+                    class="font-mono"
+                    x-text="selectedStudent.student.studentId.padStart(4, '0')"
+                  ></span>
+                </p>
+              </div>
+            </div>
+
+            <div class="h-px bg-slate-200"></div>
+
+            <!-- Data fields -->
+            <dl class="grid grid-cols-2 gap-x-4 gap-y-3 text-xs">
+              <div>
+                <dt
+                  class="mb-0.5 font-medium tracking-wider text-slate-400 uppercase"
+                >
+                  Nascimento
+                </dt>
+                <dd
+                  class="text-slate-700"
+                  x-text="selectedStudent.student.birthDate || '—'"
+                ></dd>
+              </div>
+              <div>
+                <dt
+                  class="mb-0.5 font-medium tracking-wider text-slate-400 uppercase"
+                >
+                  Sexo
+                </dt>
+                <dd
+                  class="text-slate-700"
+                  x-text="selectedStudent.student.sex || '—'"
+                ></dd>
+              </div>
+              <div class="col-span-2">
+                <dt
+                  class="mb-0.5 font-medium tracking-wider text-slate-400 uppercase"
+                >
+                  Endereço
+                </dt>
+                <dd
+                  class="text-slate-700"
+                  x-text="selectedStudent.student.address || '—'"
+                ></dd>
+              </div>
+              <div class="col-span-2">
+                <dt
+                  class="mb-0.5 font-medium tracking-wider text-slate-400 uppercase"
+                >
+                  Responsáveis
+                </dt>
+                <dd
+                  class="text-slate-700"
+                  x-text="selectedStudent.guardianNamesFormatted"
+                ></dd>
+              </div>
+            </dl>
+
+            <div class="h-px bg-slate-100"></div>
+
+            <!-- PDF history -->
+            <div class="min-h-0 flex-1">
+              <p
+                class="mb-2 text-xs font-medium tracking-wider text-slate-400 uppercase"
+              >
+                Boletins
+              </p>
+
+              <template x-if="selectedStudent.pdfHistory.length === 0">
+                <p class="text-xs text-slate-400 italic">
+                  Nenhum boletim encontrado.
+                </p>
+              </template>
+
+              <ul class="space-y-1">
+                <template
+                  x-for="entry in selectedStudent.pdfHistory"
+                  :key="entry.pdfUrl"
+                >
+                  <li>
+                    <a
+                      :href="entry.pdfUrl"
+                      target="_blank"
+                      class="inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-800 focus:underline focus:outline-none"
+                    >
+                      <x-icons.file class="size-3 shrink-0"></x-icons.file>
+                      <span x-text="entry.schoolYearLabel"></span>
+                      <span class="text-slate-300">·</span>
+                      <span x-text="entry.className"></span>
+                    </a>
+                  </li>
+                </template>
+              </ul>
+            </div>
+
+            <!-- Edit action -->
+            <x-buttons.primary
+              @click="editStudent()"
+              :disabled="isOpeningEdit"
+              class="w-full"
+            >
+              <x-icons.square-pen></x-icons.square-pen>
+              <span
+                x-text="isOpeningEdit ? 'Abrindo...' : 'Editar aluno'"
+              ></span>
+            </x-buttons.primary>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <!-- Footer -->
     <x-footers.base>
       <x-buttons.secondary onclick="google.script.host.close()" class="w-full">
         <x-icons.close></x-icons.close>
@@ -203,5 +316,6 @@
     </x-footers.base>
   </main>
 
+  <!-- Script -->
   <script src="./student-search.ts"></script>
 </x-dialog-shell>

@@ -9,7 +9,7 @@ export function openStudentSearchDialog(): void {
   const ui = SpreadsheetApp.getUi();
 
   const htmlOutput = renderView(DIALOG_NAMES.studentSearch);
-  htmlOutput.setWidth(500).setHeight(400);
+  htmlOutput.setWidth(600).setHeight(500);
 
   ui.showModalDialog(htmlOutput, "Buscar Aluno");
 }
@@ -18,7 +18,7 @@ export function openStudentCreationDialog(): void {
   const ui = SpreadsheetApp.getUi();
 
   const htmlOutput = renderView(DIALOG_NAMES.studentCreate);
-  htmlOutput.setWidth(500).setHeight(700);
+  htmlOutput.setWidth(520).setHeight(700);
 
   ui.showModalDialog(htmlOutput, "Cadastrar Aluno");
 }

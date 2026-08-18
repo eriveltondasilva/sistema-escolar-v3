@@ -5,6 +5,7 @@ import { runServerAction } from "../utils/run-server-action.ts";
 
 import type { GenerateReportFormInitData } from "#server/report/types.ts";
 import type { StudentSummary } from "#server/types.ts";
+import type { AlpineComponent } from "alpinejs";
 
 interface InitDialog extends GenerateReportFormInitData {
   schoolYear: string;
@@ -21,7 +22,7 @@ interface InitDialog extends GenerateReportFormInitData {
   submit(): Promise<void>;
 }
 
-function initDialog(el: HTMLElement): InitDialog {
+function initDialog(el: HTMLElement): AlpineComponent<InitDialog> {
   const payload = parseInitData<GenerateReportFormInitData>(el);
 
   return {

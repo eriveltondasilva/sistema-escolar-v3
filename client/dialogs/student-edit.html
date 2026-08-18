@@ -18,13 +18,15 @@
           <x-forms.label>Matrícula</x-forms.label>
           <x-forms.input
             type="text"
-            x-model="studentId.padStart(4, '0')"
+            :value="studentId.padStart(4, '0')"
             readonly
           />
         </div>
 
         <!-- Fields -->
         <x-student-form-fields></x-student-form-fields>
+
+        <x-error-alert></x-error-alert>
 
         <!-- Actions -->
         <x-footers.actions>

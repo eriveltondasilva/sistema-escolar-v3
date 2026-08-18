@@ -1,12 +1,13 @@
 // client/utils/run-server-action.ts
 
+import type { StudentSearchResult } from "#server/roster/data-access.ts";
 import type { StudentSearchDetails } from "#server/roster/dialog-actions.ts";
 import type {
   CreateStudentPayload,
   StudentFormPayload,
 } from "#server/roster/types.ts";
 import type { ClassMatriculationInput } from "#server/school-year/types.ts";
-import type { StudentStatus, StudentSummary } from "#server/types.ts";
+import type { StudentStatus } from "#server/types.ts";
 
 /** Funções expostas pelo server via google.script.run (ver server/main.ts). */
 export interface GasServerFunctions {
@@ -14,7 +15,7 @@ export interface GasServerFunctions {
   getStudentsDataForClass(
     schoolYearLabel: string,
     className: string,
-  ): StudentSummary[];
+  ): import("#server/types.ts").StudentSummary[];
   executeClassReportsGeneration(
     schoolYearLabel: string,
     className: string,
@@ -32,7 +33,7 @@ export interface GasServerFunctions {
   getStudentSearchResults(
     query: string,
     status: StudentStatus,
-  ): StudentSummary[];
+  ): StudentSearchResult;
   getStudentDetailsForSearch(studentId: string): StudentSearchDetails;
   getStudentForEditForm(studentId: string): StudentFormPayload;
   submitStudentRegistration(payload: CreateStudentPayload): string;

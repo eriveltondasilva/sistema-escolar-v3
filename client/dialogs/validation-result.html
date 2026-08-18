@@ -6,6 +6,7 @@
     x-cloak
     class="flex h-full flex-col"
   >
+    <!-- No Issues -->
     <template x-if="issues.length === 0">
       <div
         class="flex flex-1 flex-col items-center justify-center space-y-4 p-6 text-center"
@@ -23,6 +24,7 @@
       </div>
     </template>
 
+    <!-- Issues -->
     <template x-if="issues.length > 0">
       <div class="flex h-full flex-col">
         <div class="shrink-0 border-b border-slate-200 bg-white p-4">
@@ -90,18 +92,15 @@
       </div>
     </template>
 
-    <div class="shrink-0 bg-white p-4">
-      <x-footers.base>
-        <x-buttons.secondary
-          onclick="google.script.host.close()"
-          class="w-full"
-        >
-          <x-icons.close></x-icons.close>
-          Fechar
-        </x-buttons.secondary>
-      </x-footers.base>
-    </div>
+    <!-- Footer -->
+    <x-footers.base>
+      <x-buttons.secondary onclick="google.script.host.close()" class="w-full">
+        <x-icons.close></x-icons.close>
+        Fechar
+      </x-buttons.secondary>
+    </x-footers.base>
   </main>
 
+  <!-- Script -->
   <script src="./validation-result.ts"></script>
 </x-dialog-shell>

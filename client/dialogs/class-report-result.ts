@@ -4,6 +4,7 @@ import { parseInitData } from "../utils/parse-init-data.ts";
 import { runServerAction } from "../utils/run-server-action.ts";
 
 import type { ClassReportResultInitData } from "#server/report/types.ts";
+import type { AlpineComponent } from "alpinejs";
 
 interface InitDialog extends ClassReportResultInitData {
   isLoading: boolean;
@@ -13,7 +14,7 @@ interface InitDialog extends ClassReportResultInitData {
   cancelGeneration(): Promise<void>;
 }
 
-function initDialog(el: HTMLElement): InitDialog {
+function initDialog(el: HTMLElement): AlpineComponent<InitDialog> {
   const initData = parseInitData<ClassReportResultInitData>(el);
 
   return {

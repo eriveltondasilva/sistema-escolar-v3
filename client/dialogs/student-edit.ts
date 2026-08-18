@@ -9,6 +9,7 @@ import type {
   StudentFormPayload,
 } from "#server/roster/types.ts";
 import type { GuardianData } from "#server/types.ts";
+import type { AlpineComponent } from "alpinejs";
 
 function emptyGuardian(): GuardianData {
   return {
@@ -51,12 +52,12 @@ interface InitDialog {
   submit(): Promise<void>;
 }
 
-function initDialog(el: HTMLElement): InitDialog {
+function initDialog(el: HTMLElement): AlpineComponent<InitDialog> {
   const { studentId } = parseInitData<StudentEditInitData>(el);
 
   return {
     studentId,
-    isLoadingStudent: false,
+    isLoadingStudent: true,
     isEditMode: true,
     isSaving: false,
     error: "",

@@ -80,7 +80,7 @@ async function buildClient(): Promise<void> {
 
   const entrypointNames = entrypoints.map((p) => rel(p)).join(", ");
   console.log(
-    `\n📦 Client — ${entrypoints.length} dialog(s):\n${entrypointNames}\n`,
+    `\n📦 Client - ${entrypoints.length} dialog(s):\n${entrypointNames}\n`,
   );
 
   const start = Date.now();
@@ -108,7 +108,7 @@ async function buildServer(): Promise<void> {
   await assertFileExists(SERVER_ENTRY);
   await assertFileExists(serverEntryJs);
 
-  console.log(`\n📦 Server — ${rel(SERVER_ENTRY)}`);
+  console.log(`\n📦 Server - ${rel(SERVER_ENTRY)}`);
 
   const start = Date.now();
   const codeName = "bundle.js";

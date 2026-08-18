@@ -1,7 +1,6 @@
 // server/school-year/matriculation.ts
-import { DEFAULT_LOCALE } from "#config/constants.ts";
 import { SUMMARY_SHEET, VALID_CLASSES } from "#report/constants.ts";
-import { formatStr } from "#server/utils/formatters.ts";
+import { compareStrings, formatStr } from "#server/utils/formatters.ts";
 
 import type { Issue, StudentData } from "../types.ts";
 import type { ClassMatriculationInput } from "./types.ts";
@@ -94,10 +93,7 @@ export function insertMatriculationsIntoSummary({
   registeredStudentsMap,
   studentIds,
 }: MatriculationData): void {
-  const summarySheet = classSpreadsheet.getSheetByName(SUMMARY_SHEET.name);
-  if (!summarySheet) {
-    throw new Error(`A aba "${SUMMARY_SHEET.name}" não existe nesta turma.`);
-  }
+  if (studentIds.length === 0) return;
 
   const rows: [string, string][] = [];
 
@@ -107,9 +103,14 @@ export function insertMatriculationsIntoSummary({
     if (student) rows.push([trimmedId, student.name]);
   }
 
-  rows.sort((a, b) => a[1].localeCompare(b[1], DEFAULT_LOCALE));
-
   if (rows.length === 0) return;
+
+  rows.sort((a, b) => compareStrings(a[1], b[1]));
+
+  const summarySheet = classSpreadsheet.getSheetByName(SUMMARY_SHEET.name);
+  if (!summarySheet) {
+    throw new Error(`A aba "${SUMMARY_SHEET.name}" não existe nesta turma.`);
+  }
 
   summarySheet
     .getRange(SUMMARY_SHEET.startRow, 1, rows.length, 2)

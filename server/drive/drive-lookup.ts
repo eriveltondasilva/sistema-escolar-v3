@@ -3,7 +3,7 @@ import {
   GoogleMimeType,
   SCHOOL_YEAR_LABEL_PREFIX,
 } from "#server/config/constants.ts";
-import { padStudentId } from "#server/utils/formatters.ts";
+import { compareStrings, padStudentId } from "#server/utils/formatters.ts";
 
 import type { AssessmentType } from "../types.ts";
 
@@ -27,7 +27,7 @@ export function listSchoolYears(schoolYearsFolderId: string): string[] {
     if (match) schoolYearLabels.push(match[0]!);
   }
 
-  return schoolYearLabels.toSorted((a, b) => Number(b) - Number(a));
+  return schoolYearLabels.toSorted((a, b) => compareStrings(a, b, "desc"));
 }
 
 /**

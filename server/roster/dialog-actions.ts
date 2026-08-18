@@ -1,6 +1,11 @@
 // server/roster/dialog-actions.ts
 import { loadConfig } from "#config/app-config.ts";
-import { formatGuardianNames, formatStr } from "#utils/formatters.ts";
+import {
+  formatDate,
+  formatGuardianNames,
+  formatSex,
+  formatStr,
+} from "#utils/formatters.ts";
 import { withScriptLock } from "#utils/script-lock.ts";
 import {
   createStudentRecord,
@@ -10,7 +15,8 @@ import {
 } from "./data-access.ts";
 import { findStudentPdfHistory } from "./pdf-history.ts";
 
-import type { GuardianData, StudentStatus, StudentSummary } from "../types.ts";
+import type { GuardianData, StudentStatus } from "../types.ts";
+import type { StudentSearchResult } from "./data-access.ts";
 import type { CreateStudentPayload, StudentFormPayload } from "./types.ts";
 
 function validateStudentPayload(payload: {
@@ -36,7 +42,7 @@ function validateStudentPayload(payload: {
 export function getStudentSearchResults(
   query: string,
   status?: StudentStatus,
-): StudentSummary[] {
+): StudentSearchResult {
   const { enrollmentSpreadsheetId } = loadConfig();
   const registrationSheet = SpreadsheetApp.openById(enrollmentSpreadsheetId);
 
@@ -64,7 +70,12 @@ export function getStudentDetailsForSearch(
   }
 
   return {
-    student,
+    student: {
+      ...student,
+      sex: formatSex(student.sex),
+      birthDate: formatDate(student.birthDate),
+      enrollmentDate: formatDate(student.enrollmentDate),
+    },
     guardianNamesFormatted: formatGuardianNames(
       student.guardians.map((guardian) => guardian.name),
     ),
@@ -84,7 +95,7 @@ export function getStudentForEditForm(studentId: string): StudentFormPayload {
     throw new Error(`Matrícula ${trimmedId} não encontrada.`);
   }
 
-  return student;
+  return { ...student, birthDate: formatDate(student.birthDate, "yyyy-MM-dd") };
 }
 
 // -------------------------------------

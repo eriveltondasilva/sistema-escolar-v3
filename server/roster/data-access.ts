@@ -1,7 +1,7 @@
 // server/roster/data-access.ts
 import { DEFAULT_LOCALE } from "#config/constants.ts";
 import { GUARDIANS_SHEET, STUDENTS_SHEET } from "#report/constants.ts";
-import { formatDate, formatStr } from "#utils/formatters.ts";
+import { formatDate, formatStr, parseDate } from "#utils/formatters.ts";
 import { diffStudentFields, logStudentChanges } from "./change-log.ts";
 
 import type { GuardianData, StudentStatus, StudentSummary } from "../types.ts";
@@ -9,6 +9,13 @@ import type { CreateStudentPayload, StudentFormPayload } from "./types.ts";
 
 const STUDENT_COL_COUNT = Object.keys(STUDENTS_SHEET.columns).length;
 const GUARDIAN_COL_COUNT = Object.keys(GUARDIANS_SHEET.columns).length;
+
+const SEARCH_MAX_RESULTS = 20;
+
+export interface StudentSearchResult {
+  students: StudentSummary[];
+  truncated: boolean;
+}
 
 function generateNextStudentId(
   registrationSheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
@@ -40,17 +47,6 @@ function generateNextStudentId(
   }, 0);
 
   return String(maxId + 1);
-}
-
-/** Formata uma data para "yyyy-MM-dd", o formato que <input type="date"> espera. */
-function toIsoDateString(date: unknown): string {
-  if (!date || !(date instanceof Date)) return "";
-
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
 }
 
 /** Monta um GuardianData completo a partir de uma linha da aba "Responsáveis". */
@@ -110,7 +106,6 @@ function replaceGuardians(
   guardians: GuardianData[],
 ): void {
   const guardiansSheet = registrationSheet.getSheetByName(GUARDIANS_SHEET.name);
-
   if (!guardiansSheet) {
     throw new Error(
       `Cadastro Escolar: a aba "${GUARDIANS_SHEET.name}" não existe.`,
@@ -183,18 +178,19 @@ export function searchStudents(
   registrationSheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
   query: string,
   status?: StudentStatus,
-): StudentSummary[] {
+): StudentSearchResult {
   const studentsSheet = registrationSheet.getSheetByName(STUDENTS_SHEET.name);
-  if (!studentsSheet) return [];
+  if (!studentsSheet) return { students: [], truncated: false };
 
   const trimmedQuery = query.trim();
-  if (!trimmedQuery) return [];
+  if (!trimmedQuery) return { students: [], truncated: false };
 
   const normalizedQuery = trimmedQuery.toLocaleLowerCase(DEFAULT_LOCALE);
   const normalizedStatus = status?.trim().toLowerCase() ?? "";
 
   const lastRow = studentsSheet.getLastRow();
-  if (lastRow < STUDENTS_SHEET.startRow) return [];
+  if (lastRow < STUDENTS_SHEET.startRow)
+    return { students: [], truncated: false };
 
   const rows = studentsSheet
     .getRange(
@@ -205,7 +201,8 @@ export function searchStudents(
     )
     .getValues();
 
-  const results: StudentSummary[] = [];
+  const students: StudentSummary[] = [];
+  let truncated = false;
 
   for (const row of rows) {
     const studentId = formatStr(row[STUDENTS_SHEET.columns.id]);
@@ -217,14 +214,22 @@ export function searchStudents(
     if (normalizedStatus && statusRow !== normalizedStatus) continue;
 
     const name = formatStr(row[STUDENTS_SHEET.columns.name]);
-    const matchesQuery =
-      studentId === trimmedQuery ||
-      name.toLocaleLowerCase(DEFAULT_LOCALE).includes(normalizedQuery);
 
-    if (matchesQuery) results.push({ studentId, name });
+    // Busca por matrícula exata: retorna imediatamente, sem limite.
+    if (studentId === trimmedQuery) {
+      return { students: [{ studentId, name }], truncated: false };
+    }
+
+    if (name.toLocaleLowerCase(DEFAULT_LOCALE).includes(normalizedQuery)) {
+      if (students.length >= SEARCH_MAX_RESULTS) {
+        truncated = true;
+        break;
+      }
+      students.push({ studentId, name });
+    }
   }
 
-  return results;
+  return { students, truncated };
 }
 
 export function getStudentForEdit(
@@ -266,7 +271,7 @@ export function getStudentForEdit(
     name: formatStr(row[col.name]),
     address: formatStr(row[col.address]),
     nationality: formatStr(row[col.nationality]),
-    birthDate: toIsoDateString(row[col.birthDate]),
+    birthDate: formatDate(row[col.birthDate]),
     enrollmentDate: formatDate(row[col.enrollmentDate]),
     sex: formatStr(row[col.sex]),
     status: formatStr(row[col.status]) as StudentStatus,
@@ -287,8 +292,6 @@ export function createStudentRecord(
   }
 
   const studentId = generateNextStudentId(registrationSheet);
-  const birthDate =
-    input.birthDate.trim() ? formatDate(input.birthDate.trim()) : "";
 
   const col = STUDENTS_SHEET.columns;
   const row: Record<number, unknown> = {
@@ -296,7 +299,8 @@ export function createStudentRecord(
     [col.name]: input.name.trim(),
     [col.address]: input.address.trim(),
     [col.nationality]: input.nationality.trim(),
-    [col.birthDate]: birthDate,
+    [col.birthDate]:
+      input.birthDate.trim() ? parseDate(input.birthDate.trim()) : "",
     [col.enrollmentDate]: new Date(),
     [col.sex]: input.sex.trim(),
     [col.status]: "ativo",
@@ -350,13 +354,13 @@ export function updateStudentRecord(
     name: formatStr(currentRow[col.name]),
     address: formatStr(currentRow[col.address]),
     nationality: formatStr(currentRow[col.nationality]),
-    birthDate: toIsoDateString(currentRow[col.birthDate]),
+    birthDate: formatDate(currentRow[col.birthDate]),
     sex: formatStr(currentRow[col.sex]),
     status: formatStr(currentRow[col.status]) as StudentStatus,
   };
 
   const birthDate =
-    input.birthDate.trim() ? formatDate(new Date(input.birthDate)) : "";
+    input.birthDate.trim() ? parseDate(input.birthDate.trim()) : "";
 
   studentsSheet
     .getRange(match.getRow(), col.name + 1, 1, 4)
@@ -371,7 +375,7 @@ export function updateStudentRecord(
     name: input.name,
     address: input.address,
     nationality: input.nationality,
-    birthDate: input.birthDate,
+    birthDate: formatDate(birthDate),
     sex: input.sex,
     status: input.status,
   });

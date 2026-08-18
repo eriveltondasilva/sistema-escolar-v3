@@ -8,61 +8,51 @@
       @submit.prevent="submit()"
       class="space-y-4"
     >
+      <!-- School Year -->
       <div>
-        <label
-          for="schoolYear"
-          class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
-        >
-          Ano Letivo
-        </label>
-        <select
+        <x-forms.label for="schoolYear">Ano Letivo</x-forms.label>
+        <x-forms.select
           id="schoolYear"
           x-model="schoolYear"
           :disabled="isLoading"
           @change="actionType === 'single' && fetchStudents()"
-          class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
+          autofocus
         >
-          <option value="" disabled selected>Selecione ano letivo</option>
+          <option value="" disabled selected>Selecione Ano Letivo</option>
           <template x-for="year in schoolYearLabels" :key="year">
             <option :value="year" x-text="year"></option>
           </template>
-        </select>
+        </x-forms.select>
       </div>
 
+      <!-- Class -->
       <div>
-        <label
-          for="className"
-          class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
-        >
-          Turma
-        </label>
-        <select
+        <x-forms.label for="className">Turma</x-forms.label>
+        <x-forms.select
           id="className"
           x-model="className"
           :disabled="isLoading"
           @change="actionType === 'single' && fetchStudents()"
-          class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
         >
-          <option value="" disabled selected>Selecione turma</option>
+          <option value="" disabled selected>Selecione Turma</option>
           <template x-for="cls in classes" :key="cls">
             <option :value="cls" x-text="cls"></option>
           </template>
-        </select>
+        </x-forms.select>
       </div>
 
+      <!-- Student -->
       <template x-if="actionType === 'single'">
         <div>
-          <label
-            for="studentSearch"
-            class="mb-1 flex items-center text-xs font-medium tracking-wider text-slate-500 uppercase"
-          >
+          <x-forms.label for="studentSearch">
             Aluno (Nome ou Matrícula)
             <span
               x-show="isFetchingStudents"
               class="ml-2 inline-block h-3 w-3 animate-spin rounded-full border-2 border-slate-300 border-t-slate-600"
             ></span>
-          </label>
+          </x-forms.label>
 
+          <!-- No Students -->
           <template
             x-if="!isFetchingStudents && availableStudents.length === 0"
           >
@@ -73,17 +63,18 @@
             </p>
           </template>
 
+          <!-- Available Students -->
           <template x-if="availableStudents.length > 0">
             <div>
-              <input
+              <x-forms.input
                 id="studentSearch"
                 type="text"
                 x-model="studentSearch"
                 list="studentsList"
                 :disabled="isLoading || isFetchingStudents"
                 placeholder="Comece a digitar o nome do estudante..."
-                class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
               />
+
               <datalist id="studentsList">
                 <template
                   x-for="student in availableStudents"
@@ -100,23 +91,30 @@
         </div>
       </template>
 
-      <x-error-alert x-transition></x-error-alert>
+      <x-error-alert></x-error-alert>
 
+      <!-- Actions -->
       <x-footers.actions>
         <x-buttons.secondary
           onclick="google.script.host.close()"
           :disabled="isLoading"
-          >Cancelar</x-buttons.secondary
         >
+          <x-icons.close></x-icons.close>
+          Cancelar
+        </x-buttons.secondary>
+
         <x-buttons.primary
           type="submit"
           :disabled="isLoading || (actionType === 'single' && (isFetchingStudents || noStudents))"
         >
-          <span x-text="isLoading ? 'Processando...' : 'Confirmar'"></span>
+          <x-icons.loader x-show="isLoading"></x-icons.loader>
+          <x-icons.check x-show="!isLoading"></x-icons.check>
+          <span x-text="isLoading ? 'Gerando...' : 'Confirmar'"></span>
         </x-buttons.primary>
       </x-footers.actions>
     </form>
   </main>
 
+  <!-- Script -->
   <script src="./generate-report-form.ts"></script>
 </x-dialog-shell>

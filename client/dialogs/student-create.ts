@@ -1,10 +1,12 @@
 // client/dialogs/student-create.ts
+
 import { getErrorMsg } from "#server/utils/error.ts";
 import { runServerAction } from "../utils/run-server-action.ts";
 import { validateStudentForm } from "../utils/validate";
 
 import type { CreateStudentPayload } from "#server/roster/types.ts";
 import type { GuardianData } from "#server/types.ts";
+import type { AlpineComponent } from "alpinejs";
 
 function emptyGuardian(): GuardianData {
   return {
@@ -42,7 +44,7 @@ interface InitDialog {
   submit(): Promise<void>;
 }
 
-function initDialog(): InitDialog {
+function initDialog(): AlpineComponent<InitDialog> {
   return {
     lastStudentId: "",
     isEditMode: false,
@@ -106,6 +108,12 @@ function initDialog(): InitDialog {
 
         this.lastStudentId = newStudentId;
         this.form = emptyForm();
+
+        this.$nextTick(() => {
+          // this.$el.scrollTo({ top: 0, behavior: 'smooth' });
+          // Se a rolagem for na janela principal e não na tag <main>, use:
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
       } catch (error: unknown) {
         this.error = getErrorMsg(error);
       } finally {

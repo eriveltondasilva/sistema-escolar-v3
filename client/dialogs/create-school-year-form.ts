@@ -5,6 +5,7 @@ import { runServerAction } from "../utils/run-server-action.ts";
 
 import type { CreateSchoolYearFormInitData } from "#server/school-year/types.ts";
 import type { MatriculationInput } from "../types.ts";
+import type { AlpineComponent } from "alpinejs";
 
 interface InitDialog extends CreateSchoolYearFormInitData {
   year: string;
@@ -28,7 +29,7 @@ function isValidYear(value: string): boolean {
   return /^\d{4}$/.test(value.trim());
 }
 
-function initDialog(el: HTMLElement): InitDialog {
+function initDialog(el: HTMLElement): AlpineComponent<InitDialog> {
   const { classNames } = parseInitData<CreateSchoolYearFormInitData>(el);
 
   return {

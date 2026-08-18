@@ -42,7 +42,7 @@ function openSelectYearClassDialog(actionType: YearClassSelectionType): void {
       classes,
     };
     const htmlOutput = renderView(DIALOG_NAMES.generateReportForm, initData);
-    htmlOutput.setWidth(400).setHeight(actionType === "single" ? 340 : 280);
+    htmlOutput.setWidth(400).setHeight(actionType === "single" ? 360 : 300);
 
     const dialogTitle =
       actionType === "single" ?
