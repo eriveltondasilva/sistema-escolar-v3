@@ -5,6 +5,7 @@ import {
   formatGuardianNames,
   formatSex,
   formatStr,
+  parseDate,
 } from "#utils/formatters.ts";
 import { withScriptLock } from "#utils/script-lock.ts";
 import {
@@ -73,8 +74,6 @@ export function getStudentDetailsForSearch(
     student: {
       ...student,
       sex: formatSex(student.sex),
-      birthDate: formatDate(student.birthDate),
-      enrollmentDate: formatDate(student.enrollmentDate),
     },
     guardianNamesFormatted: formatGuardianNames(
       student.guardians.map((guardian) => guardian.name),
@@ -95,7 +94,10 @@ export function getStudentForEditForm(studentId: string): StudentFormPayload {
     throw new Error(`Matrícula ${trimmedId} não encontrada.`);
   }
 
-  return { ...student, birthDate: formatDate(student.birthDate, "yyyy-MM-dd") };
+  return {
+    ...student,
+    birthDate: formatDate(parseDate(student.birthDate), "yyyy-MM-dd"),
+  };
 }
 
 // -------------------------------------

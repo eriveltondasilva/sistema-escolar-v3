@@ -1,100 +1,103 @@
 <!-- client/dialogs/generate-report-form.html -->
 <x-dialog-shell>
-  <main>
+  <main class="flex h-full flex-col">
     <form
       data-init="<?= initData ?>"
       x-data="initDialog($el)"
       x-cloak
       @submit.prevent="submit()"
-      class="space-y-4"
+      class="flex h-full flex-col gap-4"
     >
-      <!-- School Year -->
-      <div>
-        <x-forms.label for="schoolYear">Ano Letivo</x-forms.label>
-        <x-forms.select
-          id="schoolYear"
-          x-model="schoolYear"
-          :disabled="isLoading"
-          @change="actionType === 'single' && fetchStudents()"
-          autofocus
-        >
-          <option value="" disabled selected>Selecione Ano Letivo</option>
-          <template x-for="year in schoolYearLabels" :key="year">
-            <option :value="year" x-text="year"></option>
-          </template>
-        </x-forms.select>
-      </div>
-
-      <!-- Class -->
-      <div>
-        <x-forms.label for="className">Turma</x-forms.label>
-        <x-forms.select
-          id="className"
-          x-model="className"
-          :disabled="isLoading"
-          @change="actionType === 'single' && fetchStudents()"
-        >
-          <option value="" disabled selected>Selecione Turma</option>
-          <template x-for="cls in classes" :key="cls">
-            <option :value="cls" x-text="cls"></option>
-          </template>
-        </x-forms.select>
-      </div>
-
-      <!-- Student -->
-      <template x-if="actionType === 'single'">
+      <!-- Fields -->
+      <div class="flex flex-1 flex-col gap-4">
+        <!-- School Year -->
         <div>
-          <x-forms.label for="studentSearch">
-            Aluno (Nome ou Matrícula)
-            <span
-              x-show="isFetchingStudents"
-              class="ml-2 inline-block h-3 w-3 animate-spin rounded-full border-2 border-slate-300 border-t-slate-600"
-            ></span>
-          </x-forms.label>
-
-          <!-- No Students -->
-          <template
-            x-if="!isFetchingStudents && availableStudents.length === 0"
+          <x-forms.label for="schoolYear">Ano Letivo</x-forms.label>
+          <x-forms.select
+            id="schoolYear"
+            x-model="schoolYear"
+            :disabled="isLoading"
+            @change="actionType === 'single' && fetchStudents()"
+            autofocus
           >
-            <p
-              class="rounded-md border border-amber-200 bg-amber-50 p-2.5 text-xs font-medium text-amber-700"
-            >
-              Nenhum aluno cadastrado nesta turma.
-            </p>
-          </template>
-
-          <!-- Available Students -->
-          <template x-if="availableStudents.length > 0">
-            <div>
-              <x-forms.input
-                id="studentSearch"
-                type="text"
-                x-model="studentSearch"
-                list="studentsList"
-                :disabled="isLoading || isFetchingStudents"
-                placeholder="Comece a digitar o nome do estudante..."
-              />
-
-              <datalist id="studentsList">
-                <template
-                  x-for="student in availableStudents"
-                  :key="student.studentId"
-                >
-                  <option
-                    :value="student.studentId"
-                    x-text="student.name"
-                  ></option>
-                </template>
-              </datalist>
-            </div>
-          </template>
+            <option value="" disabled selected>Selecione Ano Letivo</option>
+            <template x-for="year in schoolYearLabels" :key="year">
+              <option :value="year" x-text="year"></option>
+            </template>
+          </x-forms.select>
         </div>
-      </template>
 
-      <x-error-alert></x-error-alert>
+        <!-- Class -->
+        <div>
+          <x-forms.label for="className">Turma</x-forms.label>
+          <x-forms.select
+            id="className"
+            x-model="className"
+            :disabled="isLoading"
+            @change="actionType === 'single' && fetchStudents()"
+          >
+            <option value="" disabled selected>Selecione Turma</option>
+            <template x-for="cls in classes" :key="cls">
+              <option :value="cls" x-text="cls"></option>
+            </template>
+          </x-forms.select>
+        </div>
+
+        <!-- Student -->
+        <template x-if="actionType === 'single'">
+          <div>
+            <x-forms.label for="studentSearch">
+              Aluno (Nome ou Matrícula)
+              <span
+                x-show="isFetchingStudents"
+                class="ml-2 inline-block h-3 w-3 animate-spin rounded-full border-2 border-slate-300 border-t-slate-600"
+              ></span>
+            </x-forms.label>
+
+            <!-- No Students -->
+            <template
+              x-if="!isFetchingStudents && availableStudents.length === 0"
+            >
+              <p
+                class="rounded-md border border-amber-200 bg-amber-50 p-2.5 text-xs font-medium text-amber-700"
+              >
+                Nenhum aluno cadastrado nesta turma.
+              </p>
+            </template>
+
+            <!-- Available Students -->
+            <template x-if="availableStudents.length > 0">
+              <div>
+                <x-forms.input
+                  id="studentSearch"
+                  type="text"
+                  x-model="studentSearch"
+                  list="studentsList"
+                  :disabled="isLoading || isFetchingStudents"
+                  placeholder="Comece a digitar o nome do estudante..."
+                />
+
+                <datalist id="studentsList">
+                  <template
+                    x-for="student in availableStudents"
+                    :key="student.studentId"
+                  >
+                    <option
+                      :value="student.studentId"
+                      :label="student.name"
+                    ></option>
+                  </template>
+                </datalist>
+              </div>
+            </template>
+          </div>
+        </template>
+
+        <x-error-alert></x-error-alert>
+      </div>
 
       <!-- Actions -->
-      <x-footers.actions>
+      <x-footers.actions class="shrink-0">
         <x-buttons.secondary
           onclick="google.script.host.close()"
           :disabled="isLoading"
