@@ -190,17 +190,16 @@
               >
                 <span x-text="selectedStudent.student.name.charAt(0)"></span>
               </div>
-              <div class="min-w-0">
+              <div class="min-w-0 gap-1.5 text-xs text-slate-400">
                 <p
-                  class="gap-1.5 truncate text-xs leading-tight font-semibold text-slate-400"
+                  class="truncate leading-tight font-semibold"
                   x-text="selectedStudent.student.name"
-                >
-                  Matrícula:
-                  <span
-                    class="font-mono"
-                    x-text="selectedStudent.student.studentId.padStart(4, '0')"
-                  ></span>
-                </p>
+                ></p>
+                Matrícula:
+                <span
+                  class="font-mono"
+                  x-text="selectedStudent.student.studentId.padStart(4, '0')"
+                ></span>
               </div>
             </div>
 
