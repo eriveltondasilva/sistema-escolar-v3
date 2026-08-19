@@ -102,6 +102,18 @@ export function getGradeColumns(assessmentType: AssessmentType) {
 /** Turmas únicas, não insira duas vezes o mesmo className. */
 export const VALID_CLASSES: ValidClass[] = [
   {
+    name: "4º Ano",
+    stage: "Ensino Fundamental I",
+    shift: "Matutino",
+    assessmentType: "concept",
+  },
+  {
+    name: "5º Ano",
+    stage: "Ensino Fundamental I",
+    shift: "Matutino",
+    assessmentType: "concept",
+  },
+  {
     name: "6º Ano",
     stage: "Ensino Fundamental II",
     shift: "Vespertino",
