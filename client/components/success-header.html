@@ -1,10 +1,13 @@
 <!-- client/components/success-header.html -->
-<header
-  class="flex items-center justify-center space-x-3 rounded-md border border-emerald-200 bg-emerald-50 p-3 text-emerald-600"
+<div
+  class="flex items-start justify-center gap-3 rounded-md border border-emerald-200 bg-emerald-50 p-3"
+  attributes
 >
-  <x-icons.check class="size-5"></x-icons.check>
+  <x-icons.circle-check-big
+    class="mt-0.5 size-5 shrink-0 text-emerald-600"
+  ></x-icons.circle-check-big>
 
-  <div class="text-sm">
+  <div class="text-sm leading-snug text-emerald-800">
     <yield></yield>
   </div>
-</header>
+</div>

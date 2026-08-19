@@ -1,90 +1,95 @@
 <!-- client/dialogs/create-school-year-form.html -->
 <x-dialog-shell>
-  <main>
+  <main class="flex h-full flex-col">
     <form
       data-init="<?= initData ?>"
       x-data="initDialog($el)"
       x-cloak
       @submit.prevent="submit()"
-      class="space-y-4"
+      class="flex h-full flex-col gap-4"
     >
-      <div>
-        <x-forms.label for="year" required>Ano Letivo</x-forms.label>
-        <x-forms.input
-          id="year"
-          type="number"
-          x-model="year"
-          :disabled="isLoading"
-          placeholder="Ex: 2026"
-          max="2100"
-          min="2000"
-          autofocus
-        />
-      </div>
-
-      <div class="space-y-2">
-        <x-forms.label>
-          Matrículas por turma
-          <span class="ml-1 font-normal text-slate-400 normal-case">
-            (opcional)
-          </span>
-        </x-forms.label>
-
-        <template x-for="className in classNames" :key="className">
-          <div class="overflow-hidden rounded-md border border-slate-200">
-            <button
-              type="button"
-              @click="expanded[className] = !expanded[className]"
+      <!-- Fields -->
+      <div class="flex-1 overflow-y-auto">
+        <div class="flex flex-col gap-4">
+          <div>
+            <x-forms.label for="year" required>Ano Letivo</x-forms.label>
+            <x-forms.input
+              id="year"
+              type="number"
+              x-model="year"
               :disabled="isLoading"
-              class="flex w-full items-center justify-between bg-white px-3 py-2.5 text-left transition-colors hover:bg-slate-50 disabled:opacity-50"
-            >
-              <span
-                class="text-sm font-medium text-slate-700"
-                x-text="className"
-              ></span>
-              <div class="flex items-center gap-2">
-                <span
-                  x-show="matriculationCount(className) > 0"
-                  x-text="`${matriculationCount(className)} aluno(s)`"
-                  class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500"
-                ></span>
-                <x-icons.chevron-down
-                  :class="expanded[className] ? 'rotate-180' : ''"
-                  class="size-3.5 text-slate-400 transition-transform"
-                ></x-icons.chevron-down>
-              </div>
-            </button>
-
-            <div
-              x-show="expanded[className]"
-              x-transition
-              class="border-t border-slate-200 p-3"
-            >
-              <textarea
-                x-model="matriculationsByClass[className]"
-                :disabled="isLoading"
-                rows="3"
-                placeholder="0001&#10;0002&#10;0003"
-                class="w-full resize-y rounded-md border border-slate-200 bg-white px-3 py-2 font-mono text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
-              ></textarea>
-              <p class="mt-1.5 text-xs text-slate-400">
-                Uma matrícula por linha.
-              </p>
-            </div>
+              placeholder="Ex: 2026"
+              max="2100"
+              min="2000"
+              autofocus
+            />
           </div>
-        </template>
+
+          <div class="space-y-2">
+            <x-forms.label>
+              Matrículas por turma
+              <span class="ml-1 font-normal text-slate-400 normal-case">
+                (opcional)
+              </span>
+            </x-forms.label>
+
+            <template x-for="className in classNames" :key="className">
+              <div class="overflow-hidden rounded-md border border-slate-200">
+                <button
+                  type="button"
+                  @click="expanded[className] = !expanded[className]"
+                  :disabled="isLoading"
+                  class="flex w-full items-center justify-between bg-white px-3 py-2.5 text-left transition-colors hover:bg-slate-50 disabled:opacity-50"
+                >
+                  <span
+                    class="text-sm font-medium text-slate-700"
+                    x-text="className"
+                  ></span>
+                  <div class="flex items-center gap-2">
+                    <span
+                      x-show="matriculationCount(className) > 0"
+                      x-text="`${matriculationCount(className)} aluno(s)`"
+                      class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500"
+                    ></span>
+                    <x-icons.chevron-down
+                      :class="expanded[className] ? 'rotate-180' : ''"
+                      class="size-3.5 text-slate-400 transition-transform"
+                    ></x-icons.chevron-down>
+                  </div>
+                </button>
+
+                <div
+                  x-show="expanded[className]"
+                  x-transition
+                  class="border-t border-slate-200 p-3"
+                >
+                  <textarea
+                    x-model="matriculationsByClass[className]"
+                    :disabled="isLoading"
+                    rows="3"
+                    placeholder="0001&#10;0002&#10;0003"
+                    class="w-full resize-y rounded-md border border-slate-200 bg-white px-3 py-2 font-mono text-sm shadow-sm transition-all focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:opacity-50"
+                  ></textarea>
+                  <p class="mt-1.5 text-xs text-slate-400">
+                    Uma matrícula por linha.
+                  </p>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <p class="text-xs text-slate-500">
+            Matrículas são opcionais — você pode criar o ano letivo agora e
+            adicionar alunos depois. Se informadas, todas são validadas antes de
+            qualquer alteração (tudo ou nada).
+          </p>
+
+          <x-error-alert></x-error-alert>
+        </div>
       </div>
-
-      <p class="text-xs text-slate-500">
-        Matrículas são opcionais — você pode criar o ano letivo agora e
-        adicionar alunos depois. Se informadas, todas são validadas antes de
-        qualquer alteração (tudo ou nada).
-      </p>
-
-      <x-error-alert></x-error-alert>
 
       <!-- Actions -->
-      <x-footers.actions>
+      <x-footers.actions class="shrink-0">
         <x-buttons.secondary
           onclick="google.script.host.close()"
           :disabled="isLoading"

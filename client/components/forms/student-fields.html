@@ -6,17 +6,18 @@
     type="text"
     x-model="form.name"
     :disabled="isLoading"
+    placeholder="Insira o nome completo do aluno..."
     autofocus
   />
 </div>
 
 <div>
   <x-forms.label for="student-address">Endereço</x-forms.label>
-  <x-forms.input
+  <x-forms.textarea
     id="student-address"
-    type="text"
     x-model="form.address"
     :disabled="isLoading"
+    placeholder="Rua, número, bairro..."
   />
 </div>
 
@@ -41,7 +42,7 @@
 </div>
 
 <div>
-  <x-forms.label for="student-birth-date">Data de nascimento</x-forms.label>
+  <x-forms.label for="student-birth-date">Data de Nascimento</x-forms.label>
   <x-forms.input
     id="student-birth-date"
     type="date"
@@ -77,14 +78,17 @@
   <option value="Outro"></option>
 </datalist>
 
+<x-separator></x-separator>
+
 <div>
   <x-forms.label>Responsáveis</x-forms.label>
 
   <div class="mt-2 space-y-3">
     <template x-for="(guardian, index) in form.guardians" :key="index">
-      <div class="space-y-2 rounded-md border border-slate-200 p-3">
+      <div class="space-y-3 rounded-md border border-slate-200 p-4">
+        <!-- Header -->
         <div class="flex items-center justify-between">
-          <label class="flex items-center gap-1.5 text-xs text-slate-600">
+          <label class="flex items-center gap-1.5 text-sm text-slate-600">
             <input
               type="radio"
               name="primaryGuardian"
@@ -92,7 +96,7 @@
               @change="setPrimaryGuardian(index)"
               :disabled="isLoading"
             />
-            Responsável principal
+            Responsável Principal
           </label>
 
           <button
@@ -101,41 +105,62 @@
             :disabled="isLoading || form.guardians.length <= 1"
             class="shrink-0 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-slate-500 transition-colors hover:bg-slate-50 hover:text-red-600 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
           >
-            <x-icons.close></x-icons.close>
+            <x-icons.close class="size-4"></x-icons.close>
             <span class="sr-only">Remover</span>
           </button>
         </div>
 
-        <x-forms.input
-          type="text"
-          x-model="guardian.name"
-          :disabled="isLoading"
-          placeholder="Nome do responsável"
-        />
-
-        <div class="grid grid-cols-2 gap-2">
+        <div>
+          <x-forms.label for="guardian-name" required>
+            Nome do Responsável
+          </x-forms.label>
           <x-forms.input
             type="text"
-            x-model="guardian.relationship"
-            list="relationshipList"
+            id="guardian-name"
+            x-model="guardian.name"
             :disabled="isLoading"
-            placeholder="Parentesco"
-          />
-
-          <x-forms.input
-            type="tel"
-            x-model="guardian.phone"
-            :disabled="isLoading"
-            placeholder="Telefone"
+            placeholder="Insira o nome completo do responsável..."
           />
         </div>
 
-        <x-forms.input
-          type="text"
-          x-model="guardian.address"
-          :disabled="isLoading"
-          placeholder="Endereço (se diferente do aluno)"
-        />
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <x-forms.label for="guardian-relationship" required>
+              Parentesco
+            </x-forms.label>
+            <x-forms.input
+              type="text"
+              id="guardian-relationship"
+              x-model="guardian.relationship"
+              list="relationshipList"
+              :disabled="isLoading"
+              placeholder="Insira o parentesco..."
+            />
+          </div>
+
+          <div>
+            <x-forms.label for="guardian-phone">Telefone</x-forms.label>
+            <x-forms.input
+              type="tel"
+              id="guardian-phone"
+              x-model="guardian.phone"
+              :disabled="isLoading"
+              placeholder="Insira o telefone..."
+            />
+          </div>
+        </div>
+
+        <div>
+          <x-forms.label for="guardian-address">
+            Endereço (se diferente do aluno)
+          </x-forms.label>
+          <x-forms.textarea
+            id="guardian-address"
+            x-model="guardian.address"
+            :disabled="isLoading"
+            placeholder="Rua, número, bairro..."
+          />
+        </div>
       </div>
     </template>
   </div>

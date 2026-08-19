@@ -1,11 +1,16 @@
 <!-- client/dialogs/student-create.html -->
 <x-dialog-shell>
-  <main x-data="initDialog" x-cloak class="space-y-4">
+  <form
+    x-data="initDialog"
+    x-cloak
+    @submit.prevent="submit()"
+    class="flex h-full flex-col gap-4"
+  >
     <!-- Last student -->
     <div
       x-show="lastStudentId"
       x-transition
-      class="flex items-center justify-between rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs"
+      class="flex shrink-0 items-center justify-between rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs"
     >
       <span class="text-emerald-700">
         Aluno cadastrado -
@@ -35,12 +40,16 @@
     </div>
 
     <!-- Fields -->
-    <x-student-form-fields></x-student-form-fields>
+    <div data-scroll class="flex-1 overflow-y-auto">
+      <div class="flex flex-col gap-4">
+        <x-forms.student-fields></x-forms.student-fields>
 
-    <x-error-alert></x-error-alert>
+        <x-error-alert></x-error-alert>
+      </div>
+    </div>
 
     <!-- Actions -->
-    <x-footers.actions>
+    <x-footers.actions class="shrink-0">
       <x-buttons.secondary
         onclick="google.script.host.close()"
         :disabled="isLoading"
@@ -49,13 +58,14 @@
         Cancelar
       </x-buttons.secondary>
 
-      <x-buttons.primary @click="submit()" :disabled="isLoading">
+      <x-buttons.primary type="submit" :disabled="isLoading">
         <x-icons.loader x-show="isLoading"></x-icons.loader>
         <x-icons.save x-show="!isLoading"></x-icons.save>
         <span x-text="isLoading ? 'Salvando...' : 'Cadastrar'"></span>
       </x-buttons.primary>
     </x-footers.actions>
-  </main>
+  </form>
 
+  <!-- Scripts -->
   <script src="./student-create.ts"></script>
 </x-dialog-shell>

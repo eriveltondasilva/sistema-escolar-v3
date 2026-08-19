@@ -6,9 +6,9 @@
     x-cloak
     class="flex h-full flex-col justify-between"
   >
-    <div class="space-y-5">
+    <div class="space-y-5 pb-2">
       <x-success-header>
-        <h1 class="text-lg font-semibold tracking-tight text-emerald-900">
+        <h1 class="font-semibold tracking-tight text-emerald-900">
           Boletim gerado com sucesso!
         </h1>
       </x-success-header>
@@ -18,7 +18,10 @@
       >
         <p>
           <span class="font-medium text-slate-500">Matrícula:</span>
-          <span class="font-medium text-slate-900" x-text="studentId"></span>
+          <span
+            class="font-mono font-medium text-slate-900"
+            x-text="studentId.padStart(4, '0')"
+          ></span>
         </p>
         <p>
           <span class="font-medium text-slate-500">Turma:</span>

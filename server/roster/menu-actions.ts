@@ -31,7 +31,7 @@ export function openStudentEditDialog(studentId: string): void {
 
   const initData: StudentEditInitData = { studentId: trimmedId };
   const htmlOutput = renderView(DIALOG_NAMES.studentEdit, initData);
-  htmlOutput.setWidth(500).setHeight(700);
+  htmlOutput.setWidth(500).setHeight(600);
 
   ui.showModalDialog(htmlOutput, "Editar Aluno");
 }

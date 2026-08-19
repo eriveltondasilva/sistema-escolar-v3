@@ -12,7 +12,7 @@ export function openCreateSchoolYearFormDialog(): void {
     classNames: VALID_CLASSES.map((validClass) => validClass.name),
   };
   const htmlOutput = renderView(DIALOG_NAMES.createSchoolYearForm, initData);
-  htmlOutput.setWidth(500).setHeight(400);
+  htmlOutput.setWidth(500).setHeight(600);
 
   ui.showModalDialog(htmlOutput, "Criar Ano Letivo");
 }

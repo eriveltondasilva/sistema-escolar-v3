@@ -1,19 +1,34 @@
 <!-- client/dialogs/student-edit.html -->
 <x-dialog-shell>
-  <main data-init="<?= initData ?>" x-data="initDialog($el)" x-cloak>
-    <!-- Loading -->
+  <form
+    data-init="<?= initData ?>"
+    x-data="initDialog($el)"
+    x-cloak
+    @submit.prevent="submit()"
+    class="flex h-full flex-col gap-4"
+  >
+    <!-- Skeleton -->
     <template x-if="isLoadingStudent">
-      <div
-        class="flex items-center justify-center gap-2 py-6 text-xl text-slate-400"
-      >
-        <x-icons.loader></x-icons.loader>
-        carregando aluno.
+      <div class="flex flex-1 flex-col gap-4">
+        <!-- Fields skeleton -->
+        <template x-for="i in [1,2,3,4,5]" :key="i">
+          <div class="space-y-1.5">
+            <div class="h-4 w-32 animate-pulse rounded bg-slate-100"></div>
+            <div class="h-8 w-full animate-pulse rounded-md bg-slate-100"></div>
+          </div>
+        </template>
+        <!-- Guardian skeleton -->
+        <div class="space-y-1.5">
+          <div class="h-4 w-32 animate-pulse rounded bg-slate-100"></div>
+          <div class="h-8 w-full animate-pulse rounded-md bg-slate-100"></div>
+          <div class="h-8 w-full animate-pulse rounded-md bg-slate-100"></div>
+        </div>
       </div>
     </template>
 
     <!-- Form -->
     <template x-if="!isLoadingStudent">
-      <div class="space-y-4">
+      <div class="flex flex-1 flex-col gap-4">
         <div>
           <x-forms.label>Matrícula</x-forms.label>
           <x-forms.input
@@ -24,29 +39,30 @@
         </div>
 
         <!-- Fields -->
-        <x-student-form-fields></x-student-form-fields>
+        <x-forms.student-fields></x-forms.student-fields>
 
         <x-error-alert></x-error-alert>
-
-        <!-- Actions -->
-        <x-footers.actions>
-          <x-buttons.secondary
-            onclick="google.script.host.close()"
-            :disabled="isLoading"
-          >
-            <x-icons.close></x-icons.close>
-            Cancelar
-          </x-buttons.secondary>
-
-          <x-buttons.primary @click="submit()" :disabled="isLoading">
-            <x-icons.loader x-show="isLoading"></x-icons.loader>
-            <x-icons.save x-show="!isLoading"></x-icons.save>
-            <span x-text="isLoading ? loadingLabel : 'Salvar'"></span>
-          </x-buttons.primary>
-        </x-footers.actions>
       </div>
     </template>
-  </main>
 
+    <!-- Actions: sempre visível, nunca se move -->
+    <x-footers.actions class="shrink-0">
+      <x-buttons.secondary
+        onclick="google.script.host.close()"
+        :disabled="isSaving"
+      >
+        <x-icons.close></x-icons.close>
+        Cancelar
+      </x-buttons.secondary>
+
+      <x-buttons.primary type="submit" :disabled="isLoadingStudent || isSaving">
+        <x-icons.loader x-show="isSaving"></x-icons.loader>
+        <x-icons.save x-show="!isSaving"></x-icons.save>
+        <span x-text="isSaving ? 'Salvando...' : 'Salvar'"></span>
+      </x-buttons.primary>
+    </x-footers.actions>
+  </form>
+
+  <!-- Scripts -->
   <script src="./student-edit.ts"></script>
 </x-dialog-shell>

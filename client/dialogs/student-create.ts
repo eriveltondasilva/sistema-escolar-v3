@@ -2,7 +2,7 @@
 
 import { getErrorMsg } from "#server/utils/error.ts";
 import { runServerAction } from "../utils/run-server-action.ts";
-import { validateStudentForm } from "../utils/validate";
+import { validateStudentForm } from "../utils/validate.ts";
 
 import type { CreateStudentPayload } from "#server/roster/types.ts";
 import type { GuardianData } from "#server/types.ts";
@@ -110,9 +110,9 @@ function initDialog(): AlpineComponent<InitDialog> {
         this.form = emptyForm();
 
         this.$nextTick(() => {
-          // this.$el.scrollTo({ top: 0, behavior: 'smooth' });
-          // Se a rolagem for na janela principal e não na tag <main>, use:
-          window.scrollTo({ top: 0, behavior: "smooth" });
+          this.$el
+            .querySelector("[data-scroll]")
+            ?.scrollTo({ top: 0, behavior: "smooth" });
         });
       } catch (error: unknown) {
         this.error = getErrorMsg(error);

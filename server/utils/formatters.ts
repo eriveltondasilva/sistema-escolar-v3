@@ -95,6 +95,23 @@ export function formatDate(date: unknown, format = "dd/MM/yyyy"): string {
   return Utilities.formatDate(date, DEFAULT_TIMEZONE, format);
 }
 
+const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
+  timeZone: DEFAULT_TIMEZONE,
+  dateStyle: "long",
+});
+
+/**
+ * Formats a valid Date object to a localized long string.
+ * Example output: "12 de abril de 1995"
+ */
+export function formatLongDate(date: unknown): string {
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
+    return "Invalid date";
+  }
+
+  return dateFormatter.format(date);
+}
+
 /** Parses various date formats into a valid Date object using GAS Utilities. */
 export function parseDate(input: unknown): Date {
   if (input instanceof Date) {

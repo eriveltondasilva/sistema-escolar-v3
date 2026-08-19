@@ -10,13 +10,13 @@ import type { AlpineComponent } from "alpinejs";
 interface InitDialog extends GenerateReportFormInitData {
   schoolYear: string;
   className: string;
-  studentSearch: string;
+  selectedStudentId: string;
   availableStudents: StudentSummary[];
   isLoading: boolean;
   isFetchingStudents: boolean;
   error: string;
   readonly noStudents: boolean;
-  // Funções
+  // # métodos
   init(): Promise<void>;
   fetchStudents(): Promise<void>;
   submit(): Promise<void>;
@@ -29,7 +29,7 @@ function initDialog(el: HTMLElement): AlpineComponent<InitDialog> {
     ...payload,
     schoolYear: payload.schoolYearLabels[0] ?? "",
     className: payload.classes[0] ?? "",
-    studentSearch: "",
+    selectedStudentId: "",
     availableStudents: [],
     isLoading: false,
     isFetchingStudents: false,
@@ -48,7 +48,7 @@ function initDialog(el: HTMLElement): AlpineComponent<InitDialog> {
     async fetchStudents() {
       this.isFetchingStudents = true;
       this.availableStudents = [];
-      this.studentSearch = "";
+      this.selectedStudentId = "";
       this.error = "";
 
       try {
@@ -69,10 +69,8 @@ function initDialog(el: HTMLElement): AlpineComponent<InitDialog> {
 
       try {
         if (this.actionType === "single") {
-          const selectedId = this.studentSearch.trim();
-
-          if (!selectedId) {
-            this.error = "Selecione ou digite uma matrícula válida.";
+          if (!this.selectedStudentId) {
+            this.error = "Selecione um aluno.";
             this.isLoading = false;
             return;
           }
@@ -81,15 +79,17 @@ function initDialog(el: HTMLElement): AlpineComponent<InitDialog> {
             server.executeStudentReportGeneration(
               this.schoolYear,
               this.className,
-              selectedId,
+              this.selectedStudentId,
             ),
           );
         } else {
-          await runServerAction((server) =>
-            server.executeClassReportsGeneration(
-              this.schoolYear,
-              this.className,
-            ),
+          await runServerAction(
+            (server) =>
+              server.executeClassReportsGeneration(
+                this.schoolYear,
+                this.className,
+              ),
+            1000 * 60 * 2,
           );
         }
 

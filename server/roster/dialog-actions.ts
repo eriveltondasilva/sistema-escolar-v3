@@ -3,6 +3,7 @@ import { loadConfig } from "#config/app-config.ts";
 import {
   formatDate,
   formatGuardianNames,
+  formatLongDate,
   formatSex,
   formatStr,
   parseDate,
@@ -73,6 +74,7 @@ export function getStudentDetailsForSearch(
   return {
     student: {
       ...student,
+      birthDate: formatLongDate(parseDate(student.birthDate)),
       sex: formatSex(student.sex),
     },
     guardianNamesFormatted: formatGuardianNames(

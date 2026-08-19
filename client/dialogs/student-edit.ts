@@ -40,11 +40,10 @@ interface InitDialog {
   isEditMode: true;
   isLoadingStudent: boolean;
   isSaving: boolean;
+  readonly isLoading: boolean;
   error: string;
   form: StudentFormPayload;
-  readonly isLoading: boolean;
-  readonly loadingLabel: string;
-  // Funções
+  // métodos
   init(): Promise<void>;
   addGuardian(): void;
   removeGuardian(index: number): void;
@@ -57,24 +56,16 @@ function initDialog(el: HTMLElement): AlpineComponent<InitDialog> {
 
   return {
     studentId,
-    isLoadingStudent: true,
     isEditMode: true,
+    isLoadingStudent: true,
     isSaving: false,
-    error: "",
-    form: emptyForm(),
-
     get isLoading() {
       return this.isLoadingStudent || this.isSaving;
     },
-
-    get loadingLabel() {
-      return this.isLoadingStudent ? "Carregando..." : "Salvando...";
-    },
+    error: "",
+    form: emptyForm(),
 
     async init() {
-      this.isLoadingStudent = true;
-      this.error = "";
-
       try {
         const student = await runServerAction<StudentFormPayload>((server) =>
           server.getStudentForEditForm(this.studentId),
@@ -83,7 +74,7 @@ function initDialog(el: HTMLElement): AlpineComponent<InitDialog> {
         this.form = student;
 
         if (this.form.guardians.length === 0) {
-          this.form.guardians.push({ ...emptyGuardian(), isPrimary: true });
+          this.form.guardians = [{ ...emptyGuardian(), isPrimary: true }];
         }
       } catch (error: unknown) {
         this.error = "Erro ao carregar aluno: " + getErrorMsg(error);
@@ -93,24 +84,27 @@ function initDialog(el: HTMLElement): AlpineComponent<InitDialog> {
     },
 
     addGuardian() {
-      this.form.guardians.push(emptyGuardian());
+      this.form.guardians = [...this.form.guardians, emptyGuardian()];
     },
 
     removeGuardian(index: number) {
       if (this.form.guardians.length <= 1) return;
 
       const wasPrimary = this.form.guardians[index]?.isPrimary;
-      this.form.guardians.splice(index, 1);
+      const updated = this.form.guardians.filter((_, i) => i !== index);
 
-      if (wasPrimary && this.form.guardians.length > 0) {
-        this.form.guardians[0]!.isPrimary = true;
+      if (wasPrimary && updated.length > 0) {
+        updated[0]!.isPrimary = true;
       }
+
+      this.form.guardians = updated;
     },
 
     setPrimaryGuardian(index: number) {
-      this.form.guardians.forEach((guardian, i) => {
-        guardian.isPrimary = i === index;
-      });
+      this.form.guardians = this.form.guardians.map((guardian, i) => ({
+        ...guardian,
+        isPrimary: i === index,
+      }));
     },
 
     async submit() {
@@ -132,6 +126,7 @@ function initDialog(el: HTMLElement): AlpineComponent<InitDialog> {
         google.script.host.close();
       } catch (error: unknown) {
         this.error = getErrorMsg(error);
+      } finally {
         this.isSaving = false;
       }
     },

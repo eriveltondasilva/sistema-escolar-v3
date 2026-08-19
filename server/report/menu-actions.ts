@@ -12,6 +12,15 @@ import type {
   YearClassSelectionType,
 } from "./types.ts";
 
+function showErrorDialog(
+  ui: GoogleAppsScript.Base.Ui,
+  errorMessage: string,
+): void {
+  const initData: ErrorDialogInitData = { errorMessage };
+  const errorHtmlOutput = renderView(DIALOG_NAMES.errorDialog, initData);
+  ui.showModalDialog(errorHtmlOutput, "Aviso");
+}
+
 /**
  * Abre o diálogo unificado de seleção de Ano Letivo e Turma.
  */
@@ -23,15 +32,11 @@ function openSelectYearClassDialog(actionType: YearClassSelectionType): void {
     const schoolYearLabels = listSchoolYears(schoolYearsFolderId);
 
     if (schoolYearLabels.length === 0) {
-      const errorInitData: ErrorDialogInitData = {
-        errorMessage:
-          "Nenhum ano letivo encontrado dentro da pasta 'Anos Letivos'.",
-      };
-      const errorHtmlOutput = renderView(
-        DIALOG_NAMES.errorDialog,
-        errorInitData,
+      showErrorDialog(
+        ui,
+        "Nenhum ano letivo encontrado dentro da pasta 'Anos Letivos'.",
       );
-      ui.showModalDialog(errorHtmlOutput, "Aviso");
+
       return;
     }
 
@@ -42,7 +47,7 @@ function openSelectYearClassDialog(actionType: YearClassSelectionType): void {
       classes,
     };
     const htmlOutput = renderView(DIALOG_NAMES.generateReportForm, initData);
-    htmlOutput.setWidth(400).setHeight(actionType === "single" ? 360 : 300);
+    htmlOutput.setWidth(400).setHeight(actionType === "single" ? 300 : 260);
 
     const dialogTitle =
       actionType === "single" ?
@@ -51,11 +56,7 @@ function openSelectYearClassDialog(actionType: YearClassSelectionType): void {
 
     ui.showModalDialog(htmlOutput, dialogTitle);
   } catch (error) {
-    const errorInitData: ErrorDialogInitData = {
-      errorMessage: getErrorMsg(error),
-    };
-    const errorHtmlOutput = renderView(DIALOG_NAMES.errorDialog, errorInitData);
-    ui.showModalDialog(errorHtmlOutput, "Aviso");
+    showErrorDialog(ui, getErrorMsg(error));
   }
 }
 

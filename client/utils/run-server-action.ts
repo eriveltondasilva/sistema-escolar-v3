@@ -63,15 +63,21 @@ export function runServerAction<TReturn = void, TServer = GasServerFunctions>(
     action(runner as unknown as TServer);
   });
 
+  let timeoutId: ReturnType<typeof setTimeout>;
+
   const timeoutPromise = new Promise<never>((_, reject) => {
-    setTimeout(() => {
+    timeoutId = setTimeout(() => {
       reject(
         new Error(
-          `A requisição excedeu o tempo limite de ${timeoutMs / 1000} segundos.`,
+          `A requisição excedeu o tempo limite de ${timeoutMs / 1000} segundos.\n` +
+            "A operação pode ainda estar em andamento no servidor - " +
+            "feche este painel e aguarde antes de tentar novamente.",
         ),
       );
     }, timeoutMs);
   });
 
-  return Promise.race([serverActionPromise, timeoutPromise]);
+  return Promise.race([serverActionPromise, timeoutPromise]).finally(() => {
+    clearTimeout(timeoutId);
+  });
 }

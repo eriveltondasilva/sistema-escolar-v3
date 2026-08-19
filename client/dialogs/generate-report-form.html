@@ -46,8 +46,8 @@
         <!-- Student -->
         <template x-if="actionType === 'single'">
           <div>
-            <x-forms.label for="studentSearch">
-              Aluno (Nome ou Matrícula)
+            <x-forms.label for="studentId">
+              Aluno
               <span
                 x-show="isFetchingStudents"
                 class="ml-2 inline-block h-3 w-3 animate-spin rounded-full border-2 border-slate-300 border-t-slate-600"
@@ -67,28 +67,22 @@
 
             <!-- Available Students -->
             <template x-if="availableStudents.length > 0">
-              <div>
-                <x-forms.input
-                  id="studentSearch"
-                  type="text"
-                  x-model="studentSearch"
-                  list="studentsList"
-                  :disabled="isLoading || isFetchingStudents"
-                  placeholder="Comece a digitar o nome do estudante..."
-                />
-
-                <datalist id="studentsList">
-                  <template
-                    x-for="student in availableStudents"
-                    :key="student.studentId"
-                  >
-                    <option
-                      :value="student.studentId"
-                      :label="student.name"
-                    ></option>
-                  </template>
-                </datalist>
-              </div>
+              <x-forms.select
+                id="studentId"
+                x-model="selectedStudentId"
+                :disabled="isLoading || isFetchingStudents"
+              >
+                <option value="" disabled selected>Selecione o aluno</option>
+                <template
+                  x-for="student in availableStudents"
+                  :key="student.studentId"
+                >
+                  <option
+                    :value="student.studentId"
+                    x-text="student.name + ' - mat. ' + student.studentId.padStart(4, '0')"
+                  ></option>
+                </template>
+              </x-forms.select>
             </template>
           </div>
         </template>
