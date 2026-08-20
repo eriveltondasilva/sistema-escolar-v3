@@ -9,7 +9,10 @@ interface ConfigSheet {
   keys: Record<string, keyof AppConfig>;
 }
 
-/** Aba "Configuração": onde o script lê as chaves/valores de configuração. */
+/**
+ * Aba "Configuração" da planilha "Painel de Controle":
+ * onde o script lê as chaves/valores de configuração.
+ */
 const CONFIG_SHEET = {
   name: "Configuração",
   startRow: 3,

@@ -13,7 +13,8 @@ const SCHOOL_YEAR_REGEX = new RegExp(
 );
 
 /**
- * Retorna uma lista decrescente de anos letivos cadastrados na pasta "Anos Letivos".
+ * Retorna uma lista decrescente de anos letivos cadastrados da pasta "Anos Letivos".
+ * @example ["Ano Letivo - 2026", "Ano Letivo - 2025"]
  */
 export function listSchoolYears(schoolYearsFolderId: string): string[] {
   const rootFolder = DriveApp.getFolderById(schoolYearsFolderId);

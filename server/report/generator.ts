@@ -132,8 +132,6 @@ export function generateReportForStudent({
   const date = new Date();
 
   try {
-    // Cria o arquivo vazio na tempFolder para obter o ID antes de gerar o
-    // PDF, permitindo que o QR code aponte para a URL final do arquivo.
     const emptyBlob = Utilities.newBlob(
       [],
       GoogleMimeType.PDF,

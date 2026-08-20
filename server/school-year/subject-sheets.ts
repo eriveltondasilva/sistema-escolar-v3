@@ -77,7 +77,6 @@ export function createSubjectSheets(
       .copyTo(classSpreadsheet)
       .setName(subject.code);
 
-    // Preenche os campos de {{subject_name}} e {{subject_code}}
     subjectSheet
       .createTextFinder("{{subject_name}}")
       .matchEntireCell(false)

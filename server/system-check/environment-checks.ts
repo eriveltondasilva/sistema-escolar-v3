@@ -5,7 +5,6 @@ import {
   getReportTemplateFile,
 } from "#drive/drive-lookup.ts";
 import { VALID_CLASSES } from "#report/constants.ts";
-import { getScriptProp } from "#utils/script-properties.ts";
 import { toIssue } from "./issue-helper.ts";
 
 import type { AppConfig, Issue } from "../types.ts";
@@ -108,33 +107,4 @@ export function checkTempFolder(config: AppConfig): Issue[] {
   } catch (error) {
     return [toIssue({ label: "Pasta temporária", error })];
   }
-}
-
-/**
- * Confere as Script Properties usadas fora da aba "Configuração"
- * (Extensões > Apps Script > Configurações do Projeto > Propriedades do
- * script). Ausência delas não quebra o cadastro nem a geração de boletim
- * em si, mas afeta o QR code do boletim (WEB_APP_ID) e a validação do
- * link público do boletim (REPORT_LINK_SECRET) — falhas que, sem essa
- * checagem, só aparecem de forma silenciosa ou genérica em produção.
- */
-export function checkScriptProperties(): Issue[] {
-  const checks: Array<[label: string, getter: () => string]> = [
-    [
-      "Link do boletim (REPORT_LINK_SECRET)",
-      () => getScriptProp("REPORT_LINK_SECRET"),
-    ],
-  ];
-
-  const issues: Issue[] = [];
-
-  for (const [label, getter] of checks) {
-    try {
-      getter();
-    } catch (error) {
-      issues.push(toIssue({ label, error }));
-    }
-  }
-
-  return issues;
 }

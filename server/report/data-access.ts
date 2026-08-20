@@ -375,7 +375,7 @@ export function getGradesForStudent({
 }: GetGradesForStudent): Record<string, SubjectGrades | null> {
   const result: Record<string, SubjectGrades | null> = {};
   const gradeColumns = getGradeColumns(context.assessmentType).columns;
-  const gradeEntries = Object.entries(gradeColumns); // calculado uma vez
+  const gradeEntries = Object.entries(gradeColumns);
 
   for (const subject of foundSubjects) {
     const rowValues = context.gradesBySubject.get(subject.name)?.get(studentId);

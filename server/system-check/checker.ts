@@ -6,7 +6,6 @@ import {
   checkConfig,
   checkPdfsFolder,
   checkReportTemplates,
-  checkScriptProperties,
   checkTempFolder,
 } from "./environment-checks.ts";
 import {
@@ -47,7 +46,6 @@ export function checkSystem(): void {
   issues.push(...checkClassTemplates(config));
   issues.push(...checkPdfsFolder(config));
   issues.push(...checkTempFolder(config));
-  issues.push(...checkScriptProperties());
 
   const { registeredStudentsMap, issues: registrationIssues } =
     checkRegistration(config);

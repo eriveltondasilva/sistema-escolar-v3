@@ -15,10 +15,7 @@ import { generateReportForStudent } from "./generator.ts";
 import type { AppConfig } from "../types.ts";
 import type { ClassReportJob } from "./types.ts";
 
-const MAX_RUNTIME_MS = 1000 * 60 * 5; // 5 minutos
-
-/** Reserva tempo para persistir o cursor antes do limite da execução. */
-const SAFE_RUNTIME_MS = MAX_RUNTIME_MS - 1000 * 30;
+const MAX_RUNTIME_MS = 1000 * 60 * 5; // 5 min
 
 export interface ClassReportsGenerationResult {
   successCount: number;
@@ -91,7 +88,7 @@ function processClassReportJob(
   const startTime = Date.now();
 
   for (let index = job.nextStudentIndex; index < job.students.length; index++) {
-    if (Date.now() - startTime >= SAFE_RUNTIME_MS) {
+    if (Date.now() - startTime >= MAX_RUNTIME_MS) {
       return makeGenerationResult(job, context.pdfFolder.getUrl(), true);
     }
 
