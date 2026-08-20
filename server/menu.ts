@@ -12,7 +12,7 @@ export function onOpen(): void {
     .addItem("Gerar boletins da turma", "generateClassReports")
     .addSeparator()
     //
-    .addItem("Criar ano letivo", "openCreateSchoolYearDialog")
+    .addItem("Criar ano letivo", "openCreateSchoolYearFormDialog")
     .addItem("Verificar sistema", "checkSystem")
     //
     .addToUi();
