@@ -17,6 +17,8 @@ export interface StudentSearchResult {
   truncated: boolean;
 }
 
+type ColTypes = keyof typeof STUDENTS_SHEET.columns;
+
 function generateNextStudentId(
   registrationSheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
 ): string {
@@ -271,10 +273,10 @@ export function getStudentForEdit(
     name: formatStr(row[col.name]),
     address: formatStr(row[col.address]),
     nationality: formatStr(row[col.nationality]),
-    birthDate: formatDate(row[col.birthDate]),
-    enrollmentDate: formatDate(row[col.enrollmentDate]),
+    birthDate: formatDate(row[col.birthDate], "yyyy-MM-dd"),
     sex: formatStr(row[col.sex]),
     status: formatStr(row[col.status]) as StudentStatus,
+    enrollmentDate: formatDate(row[col.enrollmentDate], "dd/MM/yyyy HH:mm"),
     guardians: loadStudentGuardians(registrationSheet, studentId),
   };
 }
@@ -293,18 +295,16 @@ export function createStudentRecord(
 
   const studentId = generateNextStudentId(registrationSheet);
 
-  const col = STUDENTS_SHEET.columns;
-  const row: Record<number, unknown> = {
-    [col.id]: studentId.trim(),
-    [col.name]: input.name.trim(),
-    [col.address]: input.address.trim(),
-    [col.nationality]: input.nationality.trim(),
-    [col.birthDate]:
-      input.birthDate.trim() ? parseDate(input.birthDate.trim()) : "",
-    [col.enrollmentDate]: new Date(),
-    [col.sex]: input.sex.trim(),
-    [col.status]: "ativo",
-  };
+  const row = {
+    id: studentId.trim(),
+    name: input.name.trim(),
+    address: input.address.trim(),
+    nationality: input.nationality.trim(),
+    birthDate: input.birthDate.trim() ? parseDate(input.birthDate.trim()) : "",
+    sex: input.sex.trim(),
+    status: "ativo",
+    enrollmentDate: new Date(),
+  } as const satisfies Record<ColTypes, unknown>;
 
   studentsSheet.appendRow(Object.values(row));
   replaceGuardians(registrationSheet, studentId, input.guardians);
@@ -354,7 +354,7 @@ export function updateStudentRecord(
     name: formatStr(currentRow[col.name]),
     address: formatStr(currentRow[col.address]),
     nationality: formatStr(currentRow[col.nationality]),
-    birthDate: formatDate(currentRow[col.birthDate]),
+    birthDate: formatDate(currentRow[col.birthDate], "dd/MM/yyyy"),
     sex: formatStr(currentRow[col.sex]),
     status: formatStr(currentRow[col.status]) as StudentStatus,
   };
@@ -362,12 +362,19 @@ export function updateStudentRecord(
   const birthDate =
     input.birthDate.trim() ? parseDate(input.birthDate.trim()) : "";
 
+  type FilteredColTypes = Exclude<ColTypes, "id" | "enrollmentDate">;
+  const row = {
+    name: input.name.trim(),
+    address: input.address.trim(),
+    nationality: input.nationality.trim(),
+    birthDate,
+    sex: input.sex.trim(),
+    status: input.status,
+  } as const satisfies Record<FilteredColTypes, unknown>;
+
   studentsSheet
-    .getRange(match.getRow(), col.name + 1, 1, 4)
-    .setValues([[input.name, input.address, input.nationality, birthDate]]);
-  studentsSheet
-    .getRange(match.getRow(), col.sex + 1, 1, 2)
-    .setValues([[input.sex, input.status]]);
+    .getRange(match.getRow(), col.name + 1, 1, 6)
+    .setValues([Object.values(row)]);
 
   replaceGuardians(registrationSheet, studentId, input.guardians);
 
@@ -375,7 +382,7 @@ export function updateStudentRecord(
     name: input.name,
     address: input.address,
     nationality: input.nationality,
-    birthDate: formatDate(birthDate),
+    birthDate: formatDate(birthDate, "dd/MM/yyyy"),
     sex: input.sex,
     status: input.status,
   });

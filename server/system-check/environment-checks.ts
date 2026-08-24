@@ -1,5 +1,5 @@
 // server/system-check/environment-checks.ts
-import { loadConfig } from "#config/app-config.ts";
+import { CONFIG_SHEET, loadConfig } from "#config/app-config.ts";
 import {
   getClassTemplateFile,
   getReportTemplateFile,
@@ -29,7 +29,7 @@ export function checkConfig(): ConfigCheckResult {
         toIssue({
           label: "Configuração",
           error,
-          url: SpreadsheetApp.getActiveSpreadsheet().getUrl(),
+          url: SpreadsheetApp.openById(CONFIG_SHEET.id).getUrl(),
         }),
       ],
     };

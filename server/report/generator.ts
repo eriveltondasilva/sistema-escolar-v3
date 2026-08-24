@@ -180,7 +180,7 @@ export function generateReportForStudent({
     replacePlaceholder({
       body,
       key: "data_emissao",
-      value: formatDate(date),
+      value: formatDate(date, "dd/MM/yyyy"),
     });
     replacePlaceholder({
       body,

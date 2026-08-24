@@ -1,7 +1,6 @@
 // server/roster/dialog-actions.ts
 import { loadConfig } from "#config/app-config.ts";
 import {
-  formatDate,
   formatGuardianNames,
   formatLongDate,
   formatSex,
@@ -96,10 +95,7 @@ export function getStudentForEditForm(studentId: string): StudentFormPayload {
     throw new Error(`Matrícula ${trimmedId} não encontrada.`);
   }
 
-  return {
-    ...student,
-    birthDate: formatDate(parseDate(student.birthDate), "yyyy-MM-dd"),
-  };
+  return student;
 }
 
 // -------------------------------------

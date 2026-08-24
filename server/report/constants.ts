@@ -20,9 +20,9 @@ export const STUDENTS_SHEET = {
     address: 2, // C - Endereço
     nationality: 3, // D - Nacionalidade
     birthDate: 4, // E - Data de Nascimento
-    enrollmentDate: 5, // F - Data de Matrícula
-    sex: 6, // G - Sexo
-    status: 7, // H - Status
+    sex: 5, // F - Sexo
+    status: 6, // G - Status
+    enrollmentDate: 7, // H - Data de Matrícula
   },
 } as const satisfies SheetSchema;
 

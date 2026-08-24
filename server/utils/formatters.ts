@@ -87,7 +87,7 @@ export function formatSex(sex: unknown): string {
 }
 
 /** Formats a valid Date object to the desired pattern using GAS Utilities. */
-export function formatDate(date: unknown, format = "dd/MM/yyyy"): string {
+export function formatDate(date: unknown, format: string): string {
   if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
     return "Invalid date";
   }
@@ -120,19 +120,9 @@ export function parseDate(input: unknown): Date {
 
   const cleanInput = formatStr(input);
 
-  if (!cleanInput) {
-    return new Date(NaN);
-  }
-
-  // Se for o formato da Planilha (DD/MM/YYYY)
-  if (/^\d{2}\/\d{2}\/\d{4}$/.test(cleanInput)) {
-    return Utilities.parseDate(cleanInput, DEFAULT_TIMEZONE, "dd/MM/yyyy");
-  }
-
-  // Se for o formato do HTML Modal (YYYY-MM-DD)
   if (/^\d{4}-\d{2}-\d{2}$/.test(cleanInput)) {
     return Utilities.parseDate(cleanInput, DEFAULT_TIMEZONE, "yyyy-MM-dd");
   }
 
-  return new Date(cleanInput);
+  return new Date(NaN);
 }

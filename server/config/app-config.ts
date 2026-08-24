@@ -4,6 +4,7 @@ import { formatStr } from "#server/utils/formatters.ts";
 import type { AppConfig } from "../types.ts";
 
 interface ConfigSheet {
+  id: string;
   name: string;
   startRow: number;
   keys: Record<string, keyof AppConfig>;
@@ -13,7 +14,8 @@ interface ConfigSheet {
  * Aba "Configuração" da planilha "Painel de Controle":
  * onde o script lê as chaves/valores de configuração.
  */
-const CONFIG_SHEET = {
+export const CONFIG_SHEET = {
+  id: "1iGtCD4JQu1cE_YR7PNWhh_C7VdzC1wse9fHHAAxrsdQ",
   name: "Configuração",
   startRow: 3,
   keys: {
@@ -39,7 +41,7 @@ let cachedConfig: AppConfig | undefined;
 export function loadConfig(): AppConfig {
   if (cachedConfig) return cachedConfig;
 
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = SpreadsheetApp.openById(CONFIG_SHEET.id);
   const sheet = ss.getSheetByName(CONFIG_SHEET.name);
 
   if (!sheet) {

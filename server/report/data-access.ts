@@ -101,8 +101,11 @@ function mapStudentRow(row: ReadonlyArray<unknown>): StudentData {
     name: formatStr(row[col.name]),
     address: formatStr(row[col.address]),
     nationality: formatStr(row[col.nationality]),
-    birthDate: formatDate(formatStr(row[col.birthDate])),
-    enrollmentDate: formatDate(formatStr(row[col.enrollmentDate])),
+    birthDate: formatDate(formatStr(row[col.birthDate]), "yyyy-MM-dd"),
+    enrollmentDate: formatDate(
+      formatStr(row[col.enrollmentDate]),
+      "yyyy-MM-dd",
+    ),
     sex: formatStr(row[col.sex]),
     status: formatStr(row[col.status]) as StudentStatus,
   };

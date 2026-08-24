@@ -258,7 +258,7 @@
                   class="truncate font-sans text-sm leading-tight font-semibold text-slate-900"
                   x-text="selectedStudent.student.name"
                 ></p>
-                Matrícula:
+                matrícula:
                 <span
                   class=""
                   x-text="selectedStudent.student.studentId.padStart(4, '0')"
@@ -281,6 +281,7 @@
                   x-text="selectedStudent.student.birthDate || '—'"
                 ></dd>
               </div>
+
               <div>
                 <dt
                   class="mb-0.5 font-medium tracking-wider text-slate-400 uppercase"
@@ -292,7 +293,20 @@
                   x-text="selectedStudent.student.sex || '—'"
                 ></dd>
               </div>
-              <div class="col-span-2">
+
+              <div>
+                <dt
+                  class="mb-0.5 font-medium tracking-wider text-slate-400 uppercase"
+                >
+                  Matrícula em
+                </dt>
+                <dd
+                  class="text-slate-700"
+                  x-text="selectedStudent.student.enrollmentDate || '—'"
+                ></dd>
+              </div>
+
+              <div>
                 <dt
                   class="mb-0.5 font-medium tracking-wider text-slate-400 uppercase"
                 >
@@ -303,6 +317,7 @@
                   x-text="selectedStudent.student.address || '—'"
                 ></dd>
               </div>
+
               <div class="col-span-2">
                 <dt
                   class="mb-0.5 font-medium tracking-wider text-slate-400 uppercase"
